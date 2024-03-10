@@ -34,9 +34,10 @@ class FVHomeAppBar extends StatelessWidget {
       ),
       actions: [
         FVCartCounterIcon(
-          onPressed: () {},
-          iconColor: FVColors.white,
-        ),
+            onPressed: () {},
+            iconColor: FVColors.white,
+            counterBgColor: FVColors.black,
+            counterTextColor: FVColors.white),
       ],
     );
   }

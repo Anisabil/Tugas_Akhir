@@ -3,10 +3,12 @@ import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:fvapp/common/widgets/products/cart/cart_menu_icon.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
+import 'package:fvapp/features/studio/screens/brand/all_brands.dart';
 import 'package:fvapp/features/studio/screens/rent/widgets/category_tab.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
+import 'package:get/get.dart';
 
 import '../../../../common/widgets/appbar/tabbar.dart';
 import '../../../../common/widgets/layouts/grid_layout.dart';
@@ -63,9 +65,9 @@ class RentScreen extends StatelessWidget {
                       // Featured Brands
                       FVSectionHeading(
                         title: 'Paket Unggulan',
-                        onPressed: () {},
+                        onPressed: () => Get.to(() => const AllBrandsScreen()),
                       ),
-                      const SizedBox(height: FVSizes.spaceBtwItems / 1.5),
+                      const SizedBox(height: FVSizes.spaceBtwItems / 2),
 
                       FVGridLayout(
                         itemCount: 4,

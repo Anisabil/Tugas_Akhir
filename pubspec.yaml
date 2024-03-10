@@ -34,6 +34,9 @@ dependencies:
   carousel_slider: ^4.2.1
   flutter_rating_bar: ^4.0.1
 
+  # Firebase
+  firebase_core: ^2.23.0
+
   #------------------- PACKAGE END --------------------#
 
 dev_dependencies:
@@ -65,6 +68,7 @@ flutter:
     - assets/icons/
     - assets/icons/categories/
     - assets/icons/brands/
+    - assets/icons/payment_methods/
 
   
   fonts:

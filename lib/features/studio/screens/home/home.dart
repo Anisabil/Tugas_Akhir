@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:fvapp/common/widgets/layouts/grid_layout.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
+import 'package:fvapp/features/studio/screens/all_products/all_products.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/home_appbar.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/home_categories.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/promo_slide.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
+import 'package:get/get.dart';
 
 import '../../../../common/widgets/custom_shapes/containers/primary_header_container.dart';
 import '../../../../common/widgets/products/product_cards/product_card_vertical.dart';
@@ -64,17 +66,17 @@ class HomeScreen extends StatelessWidget {
                   const FVPromoSlide(
                     // Promo Slider
                     banners: [
-                      FVImages.banner1,
-                      FVImages.banner2,
-                      FVImages.banner3
+                      FVImages.banner01,
+                      FVImages.banner02,
+                      FVImages.banner03
                     ],
                   ),
                   const SizedBox(height: FVSizes.spaceBtwSection),
 
                   //Heading
                   FVSectionHeading(
-                    title: 'Produk Populer',
-                    onPressed: () {},
+                    title: 'Paket Populer',
+                    onPressed: () => Get.to(() => const AllProducts()),
                   ),
                   const SizedBox(height: FVSizes.spaceBtwItems),
 

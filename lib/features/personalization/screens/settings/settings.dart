@@ -3,6 +3,7 @@ import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
 import 'package:fvapp/features/personalization/screens/profile/profile.dart';
+import 'package:fvapp/features/studio/screens/order/order.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:get/get.dart';
@@ -10,6 +11,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/list_tiles/settings_menu_tile.dart';
 import '../../../../common/widgets/list_tiles/user_profile_tile.dart';
+import '../address/address.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -57,20 +59,22 @@ class SettingsScreen extends StatelessWidget {
                     height: FVSizes.spaceBtwItems,
                   ),
 
-                  const FVSettingsMenuTile(
+                  FVSettingsMenuTile(
                     icon: Iconsax.safe_home,
                     title: 'Bandung',
                     subTitle: 'Atur alamat',
+                    onTap: () => Get.to(() => const UserAddressScreen()),
                   ),
                   const FVSettingsMenuTile(
                     icon: Iconsax.bag,
                     title: 'Keranjangku',
                     subTitle: 'Tambahkan, hapus paket dan pindah ke checkout',
                   ),
-                  const FVSettingsMenuTile(
+                  FVSettingsMenuTile(
                     icon: Iconsax.bag_tick,
                     title: 'Pesananku',
                     subTitle: 'Pesanan sedang di proses dan selesai',
+                    onTap: () => Get.to(() => const OrderScreen()),
                   ),
                   const FVSettingsMenuTile(
                     icon: Iconsax.bank,

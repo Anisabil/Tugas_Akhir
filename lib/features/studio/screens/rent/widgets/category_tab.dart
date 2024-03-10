@@ -33,7 +33,7 @@ class FVCategoryTab extends StatelessWidget {
 
               // Products
               FVSectionHeading(
-                title: 'Yang mungkin Anda ingin',
+                title: 'Pilihan Lain',
                 onPressed: () {},
               ),
               const SizedBox(

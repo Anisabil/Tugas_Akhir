@@ -1,4 +1,6 @@
 class FVPricingCalculator {
+
+  // Calculate Price
   static double calculateTotalPrice(double productPrice, String location) {
     double taxRate = getTaxRateForLocation(location);
     double taxAmount = productPrice * taxRate;
@@ -9,11 +11,13 @@ class FVPricingCalculator {
     return totalPrice;
   }
 
+  // Calculate Shipping Cost
   static String calculateShippingCost(double productPrice, String location) {
     double shippingCost = getShippingCost(location);
     return shippingCost.toStringAsFixed(2);
   }
 
+  // Calculate Tax
   static String calculateTax(double productPrice, String location) {
     double taxRate = getTaxRateForLocation(location);
     double taxAmount = productPrice * taxRate;

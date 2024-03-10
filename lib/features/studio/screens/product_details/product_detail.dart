@@ -17,30 +17,30 @@ class ProductDetail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: FVBottomAddToCart(),
+      bottomNavigationBar: const FVBottomAddToCart(),
       body: SingleChildScrollView(
         child: Column(
           children: [
             // 1 - Product image slider
-            FVProductImageSlider(),
+            const FVProductImageSlider(),
 
             // 2 - Product details
             Padding(
-              padding: EdgeInsets.only(
+              padding: const EdgeInsets.only(
                   right: FVSizes.defaultSpace,
                   left: FVSizes.defaultSpace,
                   bottom: FVSizes.defaultSpace),
               child: Column(
                 children: [
                   // Rating and share
-                  FVRatingAndShare(),
+                  const FVRatingAndShare(),
 
                   // Price, title, stock, and brand
-                  FVProductMetaData(),
+                  const FVProductMetaData(),
                   const SizedBox(height: FVSizes.spaceBtwSection / 2),
 
                   // Attributes
-                  FVProductAttributes(),
+                  const FVProductAttributes(),
                   const SizedBox(height: FVSizes.spaceBtwSection / 2),
 
                   // Checkout button
@@ -48,7 +48,7 @@ class ProductDetail extends StatelessWidget {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {},
-                      child: Text('Tahap Selanjutnya'),
+                      child: const Text('Tahap Selanjutnya'),
                     ),
                   ),
                   const SizedBox(height: FVSizes.spaceBtwSection / 2),

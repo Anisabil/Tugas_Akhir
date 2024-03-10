@@ -80,18 +80,15 @@ class FVProductCardVertical extends StatelessWidget {
             const SizedBox(height: FVSizes.spaceBtwItems / 2),
 
             // Details
-            const Padding(
-              padding: EdgeInsets.only(left: FVSizes.sm),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  FVProductTitleText(title: 'Wedding Package', smallSize: true),
-                  SizedBox(height: FVSizes.spaceBtwItems / 2),
-                  FVBrandTitleWithVerifiedIcon(
-                    title: 'Wedding',
-                  ),
-                ],
-              ),
+            const Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FVProductTitleText(title: 'Wedding Package', smallSize: true),
+                SizedBox(height: FVSizes.spaceBtwItems / 2),
+                FVBrandTitleWithVerifiedIcon(
+                  title: 'Wedding',
+                ),
+              ],
             ),
 
             const Spacer(),
@@ -101,7 +98,7 @@ class FVProductCardVertical extends StatelessWidget {
               children: [
                 // Price
                 const Padding(
-                  padding: EdgeInsets.only(left: FVSizes.sm),
+                  padding: EdgeInsets.only(left: FVSizes.md),
                   child: FVProductPriceText(
                     price: '1.500',
                   ),

@@ -37,13 +37,11 @@ class FVBrandTitleWithVerifiedIcon extends StatelessWidget {
             brandTextSize: brandTextSize,
           ),
         ),
-        const SizedBox(
-          width: FVSizes.xs,
-        ),
+        const SizedBox(width: FVSizes.xs),
         Icon(
           Iconsax.verify5,
           color: iconColor,
-          size: FVSizes.iconXs,
+          size: FVSizes.iconSs,
         ),
       ],
     );

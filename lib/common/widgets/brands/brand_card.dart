@@ -25,7 +25,7 @@ class FVBrandCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: FVRoundedContainer(
-        padding: const EdgeInsets.all(FVSizes.sm),
+        padding: const EdgeInsets.all(2.0),
         showBorder: showBorder,
         backgroundColor: Colors.transparent,
         child: Row(
@@ -35,21 +35,20 @@ class FVBrandCard extends StatelessWidget {
             Flexible(
               child: FVCircularImage(
                 isNetworkImage: false,
-                image: FVImages.iconPreWedding,
+                image: FVImages.iconWedding,
                 backgroundColor: Colors.transparent,
                 overlayColor: isDark ? FVColors.white : FVColors.black,
               ),
             ),
-            const SizedBox(width: FVSizes.spaceBtwItems / 2),
+            const SizedBox(width: FVSizes.spaceBtwItems / 4),
 
             // Text
-            Expanded(
-              child: Column(
+            Column(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const FVBrandTitleWithVerifiedIcon(
-                      title: 'Wedding', brandTextSize: TextSizes.large),
+                      title: 'Wedding', brandTextSize: TextSizes.medium),
                   Text(
                     '500 rent',
                     overflow: TextOverflow.ellipsis,
@@ -57,7 +56,6 @@ class FVBrandCard extends StatelessWidget {
                   )
                 ],
               ),
-            )
           ],
         ),
       ),

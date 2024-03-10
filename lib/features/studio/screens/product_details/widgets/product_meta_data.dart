@@ -41,7 +41,7 @@ class FVProductMetaData extends StatelessWidget {
 
             // Price
             Text(
-              'Rp 2.5jt',
+              '2500K',
               style: Theme.of(context)
                   .textTheme
                   .titleSmall!
@@ -49,7 +49,7 @@ class FVProductMetaData extends StatelessWidget {
             ),
             const SizedBox(width: FVSizes.spaceBtwItems),
             const FVProductPriceText(
-              price: '2jt',
+              price: '2000',
               isLarge: true,
             ),
           ],

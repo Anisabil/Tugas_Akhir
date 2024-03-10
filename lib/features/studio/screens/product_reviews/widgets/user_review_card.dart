@@ -68,7 +68,7 @@ class UserReviewCard extends StatelessWidget {
         FVRoundedContainer(
           backgroundColor: dark ? FVColors.darkerGrey : FVColors.grey,
           child: Padding(
-            padding: EdgeInsets.all(FVSizes.md),
+            padding: const EdgeInsets.all(FVSizes.md),
             child: Column(
               children: [
                 Row(

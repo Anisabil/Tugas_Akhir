@@ -1,0 +1,90 @@
+{
+  "project_info": {
+    "project_number": "958277585930",
+    "project_id": "fvapplication-3bf28",
+    "storage_bucket": "fvapplication-3bf28.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958277585930:android:31e191a066e25cb98da3f3",
+        "android_client_info": {
+          "package_name": "com.anisaputriani.fvapp.fvapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958277585930-ac5on0jf5t4rbn1r10du8paovhr4ors7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.anisaputriani.fvapp.fvapp",
+            "certificate_hash": "93b9d5440b817c594650b822b3bfc2ab1feee623"
+          }
+        },
+        {
+          "client_id": "958277585930-jov71g3ailfnnv6qef3oe8jd7g722qfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp9nY-XAfmzluUVj8iCcUsvE9UhTMb7f0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958277585930-jov71g3ailfnnv6qef3oe8jd7g722qfm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "958277585930-alm0tt9ko9g3k0173m0r12mrqq2j2duu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fvapp.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:958277585930:android:047a1b5d0f768e6a8da3f3",
+        "android_client_info": {
+          "package_name": "com.example.fvapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "958277585930-jov71g3ailfnnv6qef3oe8jd7g722qfm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAp9nY-XAfmzluUVj8iCcUsvE9UhTMb7f0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "958277585930-jov71g3ailfnnv6qef3oe8jd7g722qfm.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "958277585930-alm0tt9ko9g3k0173m0r12mrqq2j2duu.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fvapp.RunnerTests"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -38,9 +38,9 @@ class FVImages {
       "assets/icons/categories/icons8-invitation-65.png";
 
   // Banner
-  static const String banner1 = "assets/images/banners/wedding-banner.png";
-  static const String banner2 = "assets/images/banners/allin-package.png";
-  static const String banner3 = "assets/images/banners/product-package.png";
+  static const String banner01 = "assets/images/banners/new-wedding-package.png";
+  static const String banner02 = "assets/images/banners/new-all-in-package.png";
+  static const String banner03 = "assets/images/banners/new-product-package.png";
 
   // Profile
   static const String user = "assets/images/user/user_photo.png";
@@ -50,9 +50,14 @@ class FVImages {
   static const String contoh1 = "assets/images/products/contoh1.png";
   static const String contoh2 = "assets/images/products/contoh2.png";
   static const String contoh3 = "assets/images/products/contoh3.jpg";
+  static const String contoh4 = "assets/images/products/contoh4.png";
 
   // Reviews
   static const String reviews1 = "assets/images/reviews/reviews_user1.png";
   static const String reviews2 = "assets/images/reviews/reviews_user2.png";
   static const String reviews3 = "assets/images/reviews/reviews_user3.png";
+
+  // Payment Methods
+  static const String paypal = "assets/icons/payment_methods/paypal.png";
+
 }

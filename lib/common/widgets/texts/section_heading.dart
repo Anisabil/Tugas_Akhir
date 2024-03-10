@@ -7,7 +7,7 @@ class FVSectionHeading extends StatelessWidget {
     this.onPressed,
     this.showActionButton = true,
     required this.title,
-    this.buttonTitle = 'Semua Tampilan',
+    this.buttonTitle = 'Lihat Semua',
   });
 
   final Color? textColor;
