@@ -1,3 +1,6 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../common/widgets/appbar/appbar.dart';
@@ -10,8 +13,17 @@ class FVHomeAppBar extends StatelessWidget {
     super.key,
   });
 
+  final String name = "";
   @override
   Widget build(BuildContext context) {
+    final _auth = FirebaseAuth.instance;
+    final FirebaseDatabase database = FirebaseDatabase.instance;
+    final firebaseApp = Firebase.app();
+    final ref = FirebaseDatabase.instance.ref();
+    Future<String> way() async {
+      final sn = await ref.child('User/${_auth.currentUser!.uid}').get();
+      return sn.child("Username").value.toString();
+    }
     return FVAppBar(
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -24,7 +36,7 @@ class FVHomeAppBar extends StatelessWidget {
                 .apply(color: FVColors.grey),
           ),
           Text(
-            FVText.homeAppbarSubTitle,
+            "${way()}",
             style: Theme.of(context)
                 .textTheme
                 .headlineSmall!

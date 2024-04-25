@@ -18,6 +18,7 @@ dependencies:
   intl: ^0.18.1
   logger: ^2.0.1
   url_launcher: ^6.1.12
+  connectivity_plus: ^5.0.1
   flutter_native_splash: ^2.3.2
   smooth_page_indicator: ^1.1.0
   
@@ -36,6 +37,10 @@ dependencies:
 
   # Firebase
   firebase_core: ^2.23.0
+  firebase_auth: ^4.14.0
+  cloud_firestore: ^4.13.1
+  google_sign_in: ^6.1.6
+  firebase_database: ^10.5.3
 
   #------------------- PACKAGE END --------------------#
 
@@ -44,7 +49,6 @@ dev_dependencies:
     sdk: flutter
   font_awesome_flutter: ^10.2.1
   table_calendar: ^3.0.8
-  lottie: ^2.0.0
   dio: ^4.0.6
   rating_dialog: ^2.0.4
   shared_preferences: ^2.0.15
@@ -66,6 +70,7 @@ flutter:
     - assets/images/reviews/
     - assets/logos/
     - assets/icons/
+    - assets/icons/admin_icons/
     - assets/icons/categories/
     - assets/icons/brands/
     - assets/icons/payment_methods/

@@ -20,6 +20,12 @@ class FVImages {
       "assets/images/animations/fv_success.gif";
   static const String emailIlustration =
       "assets/images/animations/fv_email.gif";
+  static const String loadingIlustration =
+      "assets/images/animations/loadingIlustration.gif";
+  static const String processDataIlustration =
+      "assets/images/animations/processDataIlustration.gif";
+  static const String redirectEmailIlustration =
+      "assets/images/animations/redirectEmailIlustration.gif";
 
   // Categories
   static const String iconWedding =
@@ -59,5 +65,10 @@ class FVImages {
 
   // Payment Methods
   static const String paypal = "assets/icons/payment_methods/paypal.png";
+
+  // ADMIN
+  static const String iconCategory = "assets/icons/admin_icons/icons8-categories-64.png";
+  static const String iconPacket = "assets/icons/admin_icons/icons8-photo-editor-50.png";
+  static const String iconRent = "assets/icons/admin_icons/icons8-professional-photographer-50.png";
 
 }

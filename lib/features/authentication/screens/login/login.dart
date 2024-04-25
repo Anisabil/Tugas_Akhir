@@ -24,7 +24,7 @@ class LoginScreen extends StatelessWidget {
           child: Column(
             children: [
               // logo
-              FVLoginHeader(dark: dark),
+              const FVLoginHeader(),
 
               // Form
               const FVLoginForm(),

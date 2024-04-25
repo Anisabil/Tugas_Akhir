@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/screens/home_admin.dart';
 import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
+import 'package:fvapp/data/repositories/authentication/authentication_repository.dart';
 import 'package:fvapp/features/personalization/screens/profile/profile.dart';
 import 'package:fvapp/features/studio/screens/order/order.dart';
 import 'package:fvapp/utils/constants/colors.dart';
@@ -11,6 +13,7 @@ import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/list_tiles/settings_menu_tile.dart';
 import '../../../../common/widgets/list_tiles/user_profile_tile.dart';
+import '../../../../utils/constants/text_strings.dart';
 import '../address/address.dart';
 
 class SettingsScreen extends StatelessWidget {
@@ -18,6 +21,8 @@ class SettingsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(AuthenticationRepository());
+
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -105,7 +110,8 @@ class SettingsScreen extends StatelessWidget {
                   const FVSettingsMenuTile(
                       icon: Iconsax.document_upload,
                       title: 'Memuat Data',
-                      subTitle: 'Unggah data ke cloud firebase Anda'),
+                      subTitle: 'Unggah data ke cloud firebase Anda',
+                  ),
 
                   FVSettingsMenuTile(
                     icon: Iconsax.location,
@@ -124,6 +130,16 @@ class SettingsScreen extends StatelessWidget {
                     title: 'Kualitas Gambar HD',
                     subTitle: 'Mengatur kualitas gambar untuk dilihat',
                     trailing: Switch(value: true, onChanged: (value) {}),
+                  ),
+                  const SizedBox(height: FVSizes.spaceBtwSection),
+
+                  // Button Logout
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton(
+                      onPressed: () => controller.logout(),
+                      child: const Text(FVText.logout),
+                    ),
                   ),
                 ],
               ),

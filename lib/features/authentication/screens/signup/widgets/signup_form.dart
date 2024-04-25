@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/features/authentication/screens/signup/verify_email.dart';
+import 'package:fvapp/features/authentication/controllers/signup/signup_controller.dart';
 import 'package:fvapp/features/authentication/screens/signup/widgets/terms_conditions_checkbox.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/constants/text_strings.dart';
+import '../../../../../utils/validators/validation.dart';
 
 class FVSignupForm extends StatelessWidget {
   const FVSignupForm({
@@ -14,13 +15,18 @@ class FVSignupForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(SignupController());
     return Form(
+      key: controller.signupFormKey,
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
                 child: TextFormField(
+                  controller: controller.firstName,
+                  validator: (value) =>
+                      FVValidator.validateEmptyText('Nama depan', value),
                   expands: false,
                   decoration: const InputDecoration(
                     labelText: FVText.firstName,
@@ -31,6 +37,9 @@ class FVSignupForm extends StatelessWidget {
               const SizedBox(width: FVSizes.spaceBtwInputFields),
               Expanded(
                 child: TextFormField(
+                  controller: controller.lastName,
+                  validator: (value) =>
+                      FVValidator.validateEmptyText('Nama belakang', value),
                   expands: false,
                   decoration: const InputDecoration(
                     labelText: FVText.lastName,
@@ -44,6 +53,9 @@ class FVSignupForm extends StatelessWidget {
 
           // Username
           TextFormField(
+            controller: controller.username,
+            validator: (value) =>
+                FVValidator.validateEmptyText('Nama pengguna', value),
             expands: false,
             decoration: const InputDecoration(
               labelText: FVText.username,
@@ -54,6 +66,8 @@ class FVSignupForm extends StatelessWidget {
 
           // Email
           TextFormField(
+            controller: controller.email,
+            validator: (value) => FVValidator.validateEmail(value),
             decoration: const InputDecoration(
               labelText: FVText.email,
               prefixIcon: Icon(Iconsax.direct),
@@ -63,6 +77,8 @@ class FVSignupForm extends StatelessWidget {
 
           // Phone number
           TextFormField(
+            controller: controller.phoneNumber,
+            validator: (value) => FVValidator.validatePhoneNumber(value),
             decoration: const InputDecoration(
               labelText: FVText.phoneNo,
               prefixIcon: Icon(Iconsax.call),
@@ -71,12 +87,19 @@ class FVSignupForm extends StatelessWidget {
           const SizedBox(height: FVSizes.spaceBtwInputFields),
 
           // Password
-          TextFormField(
-            obscureText: true,
-            decoration: const InputDecoration(
-              labelText: FVText.password,
-              prefixIcon: Icon(Iconsax.password_check),
-              suffixIcon: Icon(Iconsax.eye_slash),
+          Obx(
+            () => TextFormField(
+              validator: (value) => FVValidator.validatePassword(value),
+              controller: controller.password,
+              obscureText: controller.hidePassword.value,
+              decoration: InputDecoration(
+                labelText: FVText.password,
+                prefixIcon: const Icon(Iconsax.password_check),
+                suffixIcon: IconButton(
+                  onPressed: () => controller.hidePassword.value = !controller.hidePassword.value,
+                  icon: Icon(controller.hidePassword.value ? Iconsax.eye_slash : Iconsax.eye),
+                ),
+              ),
             ),
           ),
           const SizedBox(height: FVSizes.spaceBtwInputFields),
@@ -89,7 +112,7 @@ class FVSignupForm extends StatelessWidget {
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: () => Get.to(() => const VerifyEmailScreen()),
+              onPressed: () => controller.signup(),
               child: const Text(FVText.createAccount),
             ),
           )
