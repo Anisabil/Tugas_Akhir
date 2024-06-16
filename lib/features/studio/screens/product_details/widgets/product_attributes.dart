@@ -9,7 +9,9 @@ import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
 
 class FVProductAttributes extends StatelessWidget {
-  const FVProductAttributes({super.key});
+  final double price;
+
+  const FVProductAttributes({super.key, required this.price});
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +29,7 @@ class FVProductAttributes extends StatelessWidget {
               Row(
                 children: [
                   const FVSectionHeading(
-                    title: 'Variasi',
+                    title: 'Memo',
                     showActionButton: false,
                   ),
                   const SizedBox(
@@ -40,21 +42,8 @@ class FVProductAttributes extends StatelessWidget {
                         children: [
                           const FVProductTitleText(
                               title: 'Harga : ', smallSize: true),
-
-                          // Actual Price
-                          Text(
-                            'Rp 2.5jt',
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleSmall!
-                                .apply(decoration: TextDecoration.lineThrough),
-                          ),
-                          const SizedBox(
-                            width: FVSizes.spaceBtwItems,
-                          ),
-
                           // Sale Price
-                          const FVProductPriceText(price: '2jt')
+                          FVProductPriceText(price: price)
                         ],
                       ),
 
@@ -62,11 +51,11 @@ class FVProductAttributes extends StatelessWidget {
                       Row(
                         children: [
                           const FVProductTitleText(
-                            title: 'Keterangan : ',
+                            title: 'Tema : ',
                             smallSize: true,
                           ),
                           Text(
-                            'Tersedia',
+                            'Indor & Outdor',
                             style: Theme.of(context).textTheme.titleMedium,
                           )
                         ],
@@ -79,7 +68,7 @@ class FVProductAttributes extends StatelessWidget {
               // Variation Decoration
               const FVProductTitleText(
                 title:
-                    'Ini deskripsi variasi, dapat diisi maksimal hingga 4 baris',
+                    'Sebelum sewa, harap mengikuti prosedur sewa aplikasi kami.',
                 smallSize: true,
                 maxLines: 4,
               )
@@ -87,29 +76,6 @@ class FVProductAttributes extends StatelessWidget {
           ),
         ),
         const SizedBox(height: FVSizes.spaceBtwItems),
-
-        // Attributes
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const FVSectionHeading(
-              title: 'Gaya',
-              showActionButton: false,
-            ),
-            const SizedBox(height: FVSizes.spaceBtwItems / 2),
-            Wrap(
-              spacing: 8,
-              children: [
-                FVChoiceChip(
-                    text: 'Teal', selected: true, onSelected: (value) {}),
-                FVChoiceChip(
-                    text: 'White', selected: false, onSelected: (value) {}),
-                FVChoiceChip(
-                    text: 'White', selected: false, onSelected: (value) {}),
-              ],
-            )
-          ],
-        ),
       ],
     );
   }

@@ -28,9 +28,6 @@ class RentScreen extends StatelessWidget {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           actions: [
-            FVCartCounterIcon(
-              onPressed: () {},
-            )
           ],
         ),
         body: NestedScrollView(
@@ -103,7 +100,7 @@ class RentScreen extends StatelessWidget {
               ),
             ];
           },
-          body: const TabBarView(
+          body: TabBarView(
             children: [
               FVCategoryTab(),
               FVCategoryTab(),

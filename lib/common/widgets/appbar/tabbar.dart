@@ -22,9 +22,9 @@ class FVTabBar extends StatelessWidget implements PreferredSizeWidget {
       child: TabBar(
         tabs: tabs,
         isScrollable: true,
-        indicatorColor: FVColors.teal,
+        indicatorColor: FVColors.gold,
         unselectedLabelColor: FVColors.darkGrey,
-        labelColor: dark ? FVColors.white : FVColors.teal,
+        labelColor: dark ? FVColors.white : FVColors.gold,
       ),
     );
   }

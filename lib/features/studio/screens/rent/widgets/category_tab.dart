@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/package_controller.dart';
 import 'package:fvapp/common/widgets/layouts/grid_layout.dart';
 import 'package:fvapp/common/widgets/products/product_cards/product_card_vertical.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
+import 'package:get/get.dart';
 
 import '../../../../../common/widgets/brands/brand_show_case.dart';
 import '../../../../../utils/constants/image_strings.dart';
 import '../../../../../utils/constants/sizes.dart';
 
 class FVCategoryTab extends StatelessWidget {
-  const FVCategoryTab({super.key});
+  FVCategoryTab({super.key});
+
+  final PackageController _packageController = Get.put(PackageController());
+
 
   @override
   Widget build(BuildContext context) {
@@ -40,10 +45,16 @@ class FVCategoryTab extends StatelessWidget {
                 height: FVSizes.spaceBtwItems,
               ),
 
-              FVGridLayout(
-                itemCount: 4,
-                itemBuilder: (_, index) => const FVProductCardVertical(),
-              ),
+              Obx(
+                    () => _packageController.packages.isEmpty
+                        ? const CircularProgressIndicator()
+                        : FVGridLayout(
+                            itemCount: _packageController.packages.length,
+                            itemBuilder: (_, index) => FVProductCardVertical(
+                              package: _packageController.packages[index],
+                            ),
+                          ),
+                  ),
               const SizedBox(
                 height: FVSizes.spaceBtwSection,
               ),

@@ -1,12 +1,12 @@
 class FVText {
   // on Boarding Title
-  static const String onBoardingTitle1 = "Selamat Datang di FV Application";
+  static const String onBoardingTitle1 = "Selamat Datang di Kang Ramdani Visual Story";
   static const String onBoardingTitle2 = "Memperindah Momen Bersama Kami";
-  static const String onBoardingTitle3 = "Mulai Pecarian Fotografi Anda";
+  static const String onBoardingTitle3 = "Mulai Pencarian Fotografi Anda";
 
   // on Boarding Sub Title
   static const String onBoardingSubTitle1 =
-      "Temukan Fotografer Terbaik untuk Momen Spesial Anda";
+      "Temukan Layanan Terbaik untuk Momen Spesial Anda";
   static const String onBoardingSubTitle2 =
       "Jelajahi Beragam Layanan Fotografi untuk Setiap Kebutuhan Anda";
   static const String onBoardingSubTitle3 =
@@ -50,6 +50,9 @@ class FVText {
   static const String confirmEmailSubTitle =
       "Selamat, akun Anda telah terisi. Verifikasi email anda untuk pengalaman dalam menjelajahi dunia pemotretan";
   static const String fvContinue = "Lanjutkan";
+  static const String fvInvoice = "Invoice";
+  static const String fvCall = "Hubungi";
+  static const String fvBiodata = "Isi Biodata";
   static const String submit = "Kirim";
   static const String emailNotReceivedMessage =
       "Tidak mendapatkan email? periksa sampah Anda atau kirim ulang";
@@ -57,7 +60,7 @@ class FVText {
       "Akun anda berhasil ditambahkan!";
   static const String yourAccountCreatedSubTitle =
       "Selamat datang di ruang fotografi Anda : Akun anda telah dibuat, rasakan nikmatnya mencari fotografer yang sesuai keinginan";
-  static const String logout = "Logout";
+  static const String logout = "Keluar";
 
   // Home
   static const String homeAppbarTitle = "Hari yang baik untuk memotret";

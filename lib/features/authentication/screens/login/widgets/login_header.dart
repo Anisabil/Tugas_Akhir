@@ -20,7 +20,7 @@ class FVLoginHeader extends StatelessWidget {
         Image(
           height: 150,
           image: AssetImage(
-              dark ? FVImages.lightAppLogo : FVImages.darkAppLogo),
+              dark ? FVImages.mylogo : FVImages.mylogo),
         ),
         Text(
           FVText.loginTitle,

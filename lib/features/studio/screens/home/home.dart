@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/package_controller.dart';
+import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:fvapp/common/widgets/layouts/grid_layout.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
@@ -15,7 +17,11 @@ import '../../../../common/widgets/custom_shapes/containers/primary_header_conta
 import '../../../../common/widgets/products/product_cards/product_card_vertical.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+  final Package package;
+
+  HomeScreen({required this.package});
+
+  final PackageController _packageController = Get.find(); // Gunakan Get.find() untuk mengambil instance PackageController
 
   @override
   Widget build(BuildContext context) {
@@ -23,33 +29,33 @@ class HomeScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            const FVPrimaryHeaderContainer(
+            FVPrimaryHeaderContainer(
               child: Column(
                 children: [
                   FVHomeAppBar(),
                   SizedBox(height: FVSizes.spaceBtwSection),
 
-                  // Seacrhbar
+                  // Search bar
                   FVSearchContainer(
                     text: 'Cari Paket',
                   ),
                   SizedBox(height: FVSizes.spaceBtwSection),
 
-                  //Categories
+                  // Categories
                   Padding(
                     padding: EdgeInsets.only(left: FVSizes.defaultSpace),
                     child: Column(
                       children: [
                         // Heading
                         FVSectionHeading(
-                          title: 'Kategori Terpopuler',
+                          title: 'Kategori',
                           showActionButton: false,
                           textColor: FVColors.white,
                         ),
                         SizedBox(height: FVSizes.spaceBtwItems),
 
                         // Categories
-                        FVHomeCategories()
+                        FVHomeCategories(package: package),
                       ],
                     ),
                   ),
@@ -68,22 +74,29 @@ class HomeScreen extends StatelessWidget {
                     banners: [
                       FVImages.banner01,
                       FVImages.banner02,
-                      FVImages.banner03
+                      FVImages.banner03,
                     ],
                   ),
                   const SizedBox(height: FVSizes.spaceBtwSection),
 
-                  //Heading
+                  // Heading
                   FVSectionHeading(
-                    title: 'Paket Populer',
-                    onPressed: () => Get.to(() => const AllProducts()),
+                    title: 'Paket Tersedia',
+                    onPressed: () => Get.to(() => AllProducts()),
                   ),
                   const SizedBox(height: FVSizes.spaceBtwItems),
 
                   // Popular Products
-                  FVGridLayout(
-                    itemCount: 4,
-                    itemBuilder: (_, index) => const FVProductCardVertical(),
+                  Obx(
+                    () => _packageController.packages.isEmpty
+                        ? const CircularProgressIndicator()
+                        : FVGridLayout(
+                            itemCount: _packageController.packages.length,
+                            itemBuilder: (_, index) =>
+                                FVProductCardVertical(
+                              package: _packageController.packages[index],
+                            ),
+                          ),
                   ),
                 ],
               ),

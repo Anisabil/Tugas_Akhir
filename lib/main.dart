@@ -1,30 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:fvapp/admin/controllers/event_controller.dart';
+import 'package:fvapp/features/personalization/controllers/user_controller.dart';
+import 'package:fvapp/features/studio/screens/checkout/temporary_data/temporary_controller.dart';
+import 'package:fvapp/features/studio/screens/event/controller/event_controller.dart';
+import 'package:fvapp/navigation_controller.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 import 'app.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'data/repositories/authentication/authentication_repository.dart';
 import 'firebase_options.dart';
+import 'admin/controllers/category_controller.dart';
+import 'admin/controllers/package_controller.dart';
 
 Future<void> main() async {
-  // Todo: Add Widgets Binding
-  final WidgetsBinding widgetsBinding =
-      WidgetsFlutterBinding.ensureInitialized();
+  // Widgets Binding
+  final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
 
   // GetX local storage
   await GetStorage.init();
 
-  // Todo: Await Native Splash
+  // Await Native Splash
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Todo : Initialize Firebase
-  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform)
-      .then(
-    (FirebaseApp value) => Get.put(AuthenticationRepository()),
-  );
+  // Initialize Firebase
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  // Put Authentication Repository
+  Get.put(AuthenticationRepository());
+
+  // Initialize controllers here
+  Get.put(UserController());
+  Get.put(CategoryController());
+  Get.put(PackageController());
+  Get.put(EventController());
+  Get.put(EventFormController());
+  Get.put(NavigationController());
 
   runApp(const App());
 }

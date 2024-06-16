@@ -22,7 +22,7 @@ class FVSettingsMenuTile extends StatelessWidget {
       leading: Icon(
         icon,
         size: 28,
-        color: FVColors.teal,
+        color: FVColors.gold,
       ),
       title: Text(
         title,

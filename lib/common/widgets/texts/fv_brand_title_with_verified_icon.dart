@@ -12,7 +12,7 @@ class FVBrandTitleWithVerifiedIcon extends StatelessWidget {
     required this.title,
     this.maxLines = 1,
     this.textColor,
-    this.iconColor = FVColors.teal,
+    this.iconColor = FVColors.gold,
     this.textAlign = TextAlign.center,
     this.brandTextSize = TextSizes.small,
   });

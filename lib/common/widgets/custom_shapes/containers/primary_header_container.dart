@@ -16,7 +16,7 @@ class FVPrimaryHeaderContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     return FVCurvedEdgeWidget(
       child: Container(
-        color: FVColors.teal,
+        color: FVColors.gold,
         child: Stack(
           children: [
             Positioned(

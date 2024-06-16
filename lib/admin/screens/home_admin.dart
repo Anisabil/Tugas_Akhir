@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/screens/home/home_body.dart';
 import 'package:fvapp/admin/screens/packages/packages.dart';
+import 'package:fvapp/admin/screens/profile/profile_admin.dart';
+import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
+import 'package:fvapp/admin/screens/rent_order/widgets/rent_detail.dart';
+import 'package:fvapp/common/widgets/appbar/appbar.dart';
+import 'package:get/get.dart';
 
 import '../../common/widgets/appbar/tabbar.dart';
-import '../../features/studio/screens/rent/widgets/category_tab.dart';
 import '../../utils/constants/colors.dart';
 import '../../utils/constants/image_strings.dart';
 import '../../utils/constants/sizes.dart';
@@ -18,8 +21,25 @@ class HomeAdmin extends StatelessWidget {
     final dark = FVHelperFunctions.isDarkMode(context);
 
     return DefaultTabController(
-      length: 5,
+      length: 4,
       child: Scaffold(
+        appBar: FVAppBar(
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Image(
+                height: 50,
+                image: AssetImage(
+                  dark ? FVImages.mylogo : FVImages.mylogo,
+                ),
+              ),
+              Text(
+                'Halo Admin',
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+            ],
+          ),
+        ),
         body: NestedScrollView(
           headerSliverBuilder: (_, innerBoxIsScrolled) {
             return [
@@ -45,8 +65,8 @@ class HomeAdmin extends StatelessWidget {
                             height: 400,
                             image: AssetImage(
                               dark
-                                  ? FVImages.lightAppLogo
-                                  : FVImages.darkAppLogo,
+                                  ? FVImages.mylogo
+                                  : FVImages.mylogo,
                             ),
                           ),
                         ],
@@ -58,9 +78,6 @@ class HomeAdmin extends StatelessWidget {
                 // Tabs
                 bottom: const FVTabBar(
                   tabs: [
-                    Tab(
-                      child: Text('Beranda'),
-                    ),
                     Tab(
                       child: Text('Kategori'),
                     ),
@@ -78,13 +95,12 @@ class HomeAdmin extends StatelessWidget {
               ),
             ];
           },
-          body: const TabBarView(
+          body: TabBarView(
             children: [
-              HomeBody(),
               SettingCategories(),
-              Packages(),
-              HomeBody(),
-              HomeBody(),
+              SettingPackages(),
+              RentalList(),
+              const ProfileAdmin(),
             ],
           ),
         ),

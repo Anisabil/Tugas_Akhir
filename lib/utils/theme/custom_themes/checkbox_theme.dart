@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/utils/constants/colors.dart';
 
 class FVCheckboxTheme {
   FVCheckboxTheme._();
@@ -14,7 +15,7 @@ class FVCheckboxTheme {
     }),
     fillColor: MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return const Color.fromARGB(255, 1, 129, 158);
+        return FVColors.gold;
       } else {
         return Colors.transparent;
       }
@@ -32,7 +33,7 @@ class FVCheckboxTheme {
     }),
     fillColor: MaterialStateProperty.resolveWith((states) {
       if (states.contains(MaterialState.selected)) {
-        return const Color.fromARGB(255, 1, 129, 158);
+        return FVColors.gold;
       } else {
         return Colors.transparent;
       }

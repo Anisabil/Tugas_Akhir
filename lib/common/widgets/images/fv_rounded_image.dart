@@ -4,7 +4,7 @@ import '../../../utils/constants/sizes.dart';
 
 class FVRoundedImage extends StatelessWidget {
   const FVRoundedImage({
-    super.key,
+    Key? key,
     this.width,
     this.height,
     required this.imageUrl,
@@ -16,14 +16,14 @@ class FVRoundedImage extends StatelessWidget {
     this.isNetworkImage = false,
     this.onPressed,
     this.borderRadius = FVSizes.md,
-  });
+  }) : super(key: key);
 
   final double? width, height;
   final String imageUrl;
   final bool applyImageRadius;
   final BoxBorder? border;
   final Color? backgroundColor;
-  final BoxFit? fit;
+  final BoxFit fit;
   final EdgeInsetsGeometry? padding;
   final bool isNetworkImage;
   final VoidCallback? onPressed;
@@ -43,15 +43,21 @@ class FVRoundedImage extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: ClipRRect(
-          borderRadius: applyImageRadius
-              ? BorderRadius.circular(borderRadius)
-              : BorderRadius.zero,
-          child: Image(
-            fit: fit,
-            image: isNetworkImage
-                ? NetworkImage(imageUrl)
-                : AssetImage(imageUrl) as ImageProvider,
-          ),
+          borderRadius: BorderRadius.circular(
+              applyImageRadius ? borderRadius : 0.0),
+          child: isNetworkImage
+              ? Image.network(
+                  imageUrl,
+                  width: width,
+                  height: height,
+                  fit: fit,
+                )
+              : Image.asset(
+                  imageUrl,
+                  width: width,
+                  height: height,
+                  fit: fit,
+                ),
         ),
       ),
     );

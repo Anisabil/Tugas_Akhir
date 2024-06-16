@@ -8,16 +8,17 @@ class FVColors {
   static const Color teal = Color.fromARGB(255, 1, 129, 158);
   static const Color secondary = Color(0xFFFFE24B);
   static const Color accent = Color(0xFFb0c7ff);
+  static const Color gold = Color(0xFF906126);
 
   // Gradient Colors
-  static const Gradient linerGradient =
-      LinearGradient(begin: Alignment(0.0, 0.0),
+  static const Gradient linerGradient = LinearGradient(
+      begin: Alignment(0.0, 0.0),
       end: Alignment(0.707, -0.707),
       colors: [
-      Color(0xffff9a9e),
-      Color(0xfffad0c4),
-      Color(0xffff9a9e),
-  ]);
+        Color(0xffff9a9e),
+        Color(0xfffad0c4),
+        Color(0xffff9a9e),
+      ]);
 
   // Text Colors
   static const Color textPrimary = Color(0xFF333333);
@@ -37,10 +38,12 @@ class FVColors {
   static const Color buttonPrimary = Color(0xFF4b68ff);
   static const Color buttonSecondary = Color(0xFF6C757D);
   static const Color buttonDisabled = Color(0xFFC4C4C4);
+  static const Color buttonCream = Color.fromARGB(255, 162, 119, 67);
 
   // Border Colors
   static const Color borderPrimary = Color(0xFFD9D9D9);
   static const Color borderSecondary = Color(0xFFE6E6E6);
+  static const Color borderGold = Color(0xFF906126);
 
   // Error and Validation Colors
   static const Color error = Color(0xFFD32F2F);

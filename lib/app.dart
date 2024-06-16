@@ -17,7 +17,7 @@ class App extends StatelessWidget {
       darkTheme: FVAppTheme.darkTheme,
       initialBinding: GeneralBindings(),
       home: const Scaffold(
-        backgroundColor: FVColors.teal,
+        backgroundColor: FVColors.gold,
         body: Center(
           child: CircularProgressIndicator(
             color: Colors.white,

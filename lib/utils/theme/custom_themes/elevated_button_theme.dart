@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../constants/colors.dart';
+
 class FVElevatedButtonTheme {
   FVElevatedButtonTheme._();
 
@@ -7,10 +9,10 @@ class FVElevatedButtonTheme {
     style: ElevatedButton.styleFrom(
       elevation: 0,
       foregroundColor: Colors.white,
-      backgroundColor: const Color.fromARGB(255, 1, 129, 158),
+      backgroundColor: FVColors.gold,
       disabledForegroundColor: Colors.grey,
       disabledBackgroundColor: Colors.grey,
-      side: const BorderSide(color: Color.fromARGB(255, 1, 129, 158)),
+      side: const BorderSide(color: FVColors.gold),
       padding: const EdgeInsets.symmetric(vertical: 18),
       textStyle: const TextStyle(
         fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),
@@ -22,10 +24,10 @@ class FVElevatedButtonTheme {
     style: ElevatedButton.styleFrom(
       elevation: 0,
       foregroundColor: Colors.white,
-      backgroundColor: const Color.fromARGB(255, 1, 129, 158),
+      backgroundColor: FVColors.gold,
       disabledForegroundColor: Colors.grey,
       disabledBackgroundColor: Colors.grey,
-      side: const BorderSide(color: Color.fromARGB(255, 1, 129, 158)),
+      side: const BorderSide(color: FVColors.gold),
       padding: const EdgeInsets.symmetric(vertical: 18),
       textStyle: const TextStyle(
         fontSize: 16, color: Colors.white, fontWeight: FontWeight.w600),

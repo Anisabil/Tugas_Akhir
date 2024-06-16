@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/common/styles/spacing_styles.dart';
+import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
+import 'package:fvapp/features/studio/screens/invoice/invoice.dart';
+import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../utils/constants/sizes.dart';
 import '../../../utils/constants/text_strings.dart';
@@ -45,14 +49,17 @@ class SuccessScreen extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: FVSizes.spaceBtwSection),
-
-              // Buttons
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                    onPressed: onPressed, child: const Text(FVText.fvContinue)),
-              ),
             ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(FVSizes.defaultSpace),
+        child: SizedBox(
+          width: double.infinity,
+          child: OutlinedButton(
+            onPressed: onPressed,
+            child: const Text(FVText.fvContinue),
           ),
         ),
       ),

@@ -42,7 +42,7 @@ class FVPromoSlide extends StatelessWidget {
                     height: 4,
                     margin: const EdgeInsets.only(right: 10),
                     backgroundColor: controller.carouselCurrentIndex.value == i
-                        ? FVColors.teal
+                        ? FVColors.gold
                         : FVColors.grey,
                   ),
               ],

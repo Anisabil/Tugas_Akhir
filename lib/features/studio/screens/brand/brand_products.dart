@@ -9,7 +9,7 @@ class BrandProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       appBar: FVAppBar(title: Text('Wedding')),
       body: SingleChildScrollView(
         child: Padding(

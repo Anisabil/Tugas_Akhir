@@ -1,9 +1,11 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/popups/full_screen_loader.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../../../../data/repositories/authentication/authentication_repository.dart';
 import '../../../../utils/helpers/network_manager.dart';
@@ -21,10 +23,8 @@ class LoginController extends GetxController {
 
   @override
   void onInit() {
-    if (email == null) {
       email.text = localStorage.read('REMEMBER_ME_EMAIL');
       password.text = localStorage.read('REMEMBER_ME_PASSWORD');
-    }
     super.onInit();
   }
 
@@ -84,21 +84,35 @@ class LoginController extends GetxController {
       }
 
       // Google Authentication
-      final userCredentials =
-          await AuthenticationRepository.instance.signInWithGoogle();
+      final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
+      if (googleUser == null) {
+        // User membatalkan sign-in
+        FVFullScreenLoader.stopLoading();
+        return;
+      }
 
-      // Save user record
-      await userController.saveUserRecord(userCredentials);
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in ke Firebase dengan credential
+      final UserCredential userCredential = await FirebaseAuth.instance.signInWithCredential(credential);
+
+      // Simpan rekaman pengguna
+      await userController.saveUserRecord(userCredential);
 
       // Remove loader
       FVFullScreenLoader.stopLoading();
 
-      // Redirect
+      // Redirect atau lakukan tindakan yang diperlukan setelah login berhasil
       AuthenticationRepository.instance.screenRedirect();
     } catch (e) {
       // Remove loader
       FVFullScreenLoader.stopLoading();
-      FVLoaders.errorSnackBar(title: 'Cepat!', message: e.toString());
+      FVLoaders.errorSnackBar(title: 'Error', message: 'Gagal masuk. Silakan coba lagi.');
     }
   }
 }

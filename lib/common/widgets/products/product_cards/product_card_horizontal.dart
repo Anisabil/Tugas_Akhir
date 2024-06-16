@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:fvapp/common/widgets/images/fv_rounded_image.dart';
 import 'package:fvapp/common/widgets/texts/fv_brand_title_with_verified_icon.dart';
@@ -13,10 +14,19 @@ import '../../../../utils/constants/sizes.dart';
 import '../../icons/fv_circular_icon.dart';
 
 class FVProductCardHorizontal extends StatelessWidget {
-  const FVProductCardHorizontal({super.key});
+  final Package package;
+
+  const FVProductCardHorizontal({super.key, required this.package,});
 
   @override
   Widget build(BuildContext context) {
+    String? imageUrl;
+    if (package.imageUrls != null && package.imageUrls.isNotEmpty) {
+      imageUrl = package.imageUrls.first;
+    } else {
+      imageUrl = null; // No image available
+    }
+
     final dark = FVHelperFunctions.isDarkMode(context);
 
     return Container(
@@ -36,40 +46,12 @@ class FVProductCardHorizontal extends StatelessWidget {
             child: Stack(
               children: [
                 // Thumbnail Image
-                const SizedBox(
+                SizedBox(
                   height: 120,
                   width: 120,
-                  child: FVRoundedImage(
-                      imageUrl: FVImages.contoh3, applyImageRadius: true),
+                  child: FVRoundedImage(imageUrl: package.imageUrls.first),
                 ),
 
-                // Sale Tag
-                Positioned(
-                  top: 12,
-                  child: FVRoundedContainer(
-                    radius: FVSizes.sm,
-                    backgroundColor: FVColors.secondary.withOpacity(0.8),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: FVSizes.sm, vertical: FVSizes.xs),
-                    child: Text(
-                      '25%',
-                      style: Theme.of(context)
-                          .textTheme
-                          .labelLarge!
-                          .apply(color: FVColors.black),
-                    ),
-                  ),
-                ),
-
-                // Favorite Icon Button
-                const Positioned(
-                  top: 0,
-                  right: 0,
-                  child: FVCircularIcon(
-                    icon: Iconsax.heart5,
-                    color: Colors.red,
-                  ),
-                ),
               ],
             ),
           ),
@@ -84,35 +66,17 @@ class FVProductCardHorizontal extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const FVProductTitleText(
-                          title: 'Basic Package', smallSize: true),
+                      FVProductTitleText(
+                          title: package.name, smallSize: true),
                       const SizedBox(height: FVSizes.spaceBtwItems / 2),
-                      const FVBrandTitleWithVerifiedIcon(title: 'Wedding'),
+                      FVBrandTitleWithVerifiedIcon(title: package.categoryId),
                       const SizedBox(height: FVSizes.spaceBtwItems + 6.6),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           // Pricing
-                          const FVProductPriceText(price: '1000'),
+                          FVProductPriceText(price: package.price),
 
-                          // Add to Card
-                          Container(
-                            decoration: const BoxDecoration(
-                              color: FVColors.dark,
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(FVSizes.cardRadiusMd),
-                                bottomRight:
-                                    Radius.circular(FVSizes.productImageRadius),
-                              ),
-                            ),
-                            child: const SizedBox(
-                              width: FVSizes.iconLg * 1.2,
-                              height: FVSizes.iconLg * 1.2,
-                              child: Center(
-                                child: Icon(Iconsax.add, color: FVColors.white),
-                              ),
-                            ),
-                          )
                         ],
                       )
                     ],

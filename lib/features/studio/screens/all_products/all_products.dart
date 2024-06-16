@@ -9,14 +9,14 @@ class AllProducts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      appBar: FVAppBar(
-        title: Text('Paket Populer'),
+    return Scaffold(
+      appBar: const FVAppBar(
+        title: Text('Paket Tersedia'),
         showBackArrow: true,
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.all(FVSizes.defaultSpace),
+          padding: const EdgeInsets.all(FVSizes.defaultSpace),
           child: FVSortableProducts(),
         ),
       ),

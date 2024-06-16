@@ -1,7 +1,7 @@
 class FVImages {
   // App Logos
-  static const String darkAppLogo = "assets/logos/logo-black.png";
-  static const String lightAppLogo = "assets/logos/logo-white.png";
+  static const String mylogo = "assets/logos/mylogo.png";
+  static const String mylogoblack = "asset/logos/mylogoblack.png";
 
   // Social logos
   static const String google = "assets/logos/google.png";

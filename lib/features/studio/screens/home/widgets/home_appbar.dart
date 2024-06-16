@@ -1,7 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:fvapp/features/personalization/controllers/user_controller.dart';
+import 'package:fvapp/utils/constants/shimmer.dart';
+import 'package:get/get.dart';
 
 import '../../../../../common/widgets/appbar/appbar.dart';
 import '../../../../../common/widgets/products/cart/cart_menu_icon.dart';
@@ -10,20 +10,13 @@ import '../../../../../utils/constants/text_strings.dart';
 
 class FVHomeAppBar extends StatelessWidget {
   const FVHomeAppBar({
-    super.key,
-  });
+    Key? key,
+  }) : super(key: key);
 
-  final String name = "";
   @override
   Widget build(BuildContext context) {
-    final _auth = FirebaseAuth.instance;
-    final FirebaseDatabase database = FirebaseDatabase.instance;
-    final firebaseApp = Firebase.app();
-    final ref = FirebaseDatabase.instance.ref();
-    Future<String> way() async {
-      final sn = await ref.child('User/${_auth.currentUser!.uid}').get();
-      return sn.child("Username").value.toString();
-    }
+    final UserController userController = Get.find();
+
     return FVAppBar(
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -35,22 +28,30 @@ class FVHomeAppBar extends StatelessWidget {
                 .labelMedium!
                 .apply(color: FVColors.grey),
           ),
-          Text(
-            "${way()}",
-            style: Theme.of(context)
-                .textTheme
-                .headlineSmall!
-                .apply(color: FVColors.white),
-          ),
+          Obx(() {
+            if (userController.profileLoading.value) {
+              // Display a shimmer loader while user profile is being loaded
+              return const FVShimmerEffect(width: 80, height: 15);
+            } else {
+            return Text(
+              userController.user.value.fullName ??
+                  '', // Mengambil userName dari observable user
+              style: Theme.of(context)
+                  .textTheme
+                  .headlineSmall!
+                  .apply(color: FVColors.white),
+            );
+            }
+          }),
         ],
       ),
-      actions: [
-        FVCartCounterIcon(
-            onPressed: () {},
-            iconColor: FVColors.white,
-            counterBgColor: FVColors.black,
-            counterTextColor: FVColors.white),
-      ],
+      // actions: [
+      //   FVCartCounterIcon(
+      //       onPressed: () {},
+      //       iconColor: FVColors.white,
+      //       counterBgColor: FVColors.black,
+      //       counterTextColor: FVColors.white),
+      // ],
     );
   }
 }

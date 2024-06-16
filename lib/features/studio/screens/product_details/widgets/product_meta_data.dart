@@ -12,7 +12,15 @@ import '../../../../../utils/constants/sizes.dart';
 import '../../../../../utils/helpers/helper_function.dart';
 
 class FVProductMetaData extends StatelessWidget {
-  const FVProductMetaData({super.key});
+  final String packageName;
+  final double price;
+  final String categoryId;
+
+  const FVProductMetaData(
+      {super.key,
+      required this.packageName,
+      required this.price,
+      required this.categoryId});
 
   @override
   Widget build(BuildContext context) {
@@ -23,33 +31,8 @@ class FVProductMetaData extends StatelessWidget {
         // Price and sale price
         Row(
           children: [
-            // Sale tag
-            FVRoundedContainer(
-              radius: FVSizes.sm,
-              backgroundColor: FVColors.secondary.withOpacity(0.8),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: FVSizes.sm, vertical: FVSizes.xs),
-              child: Text(
-                '25%',
-                style: Theme.of(context)
-                    .textTheme
-                    .labelLarge!
-                    .apply(color: FVColors.black),
-              ),
-            ),
-            const SizedBox(width: FVSizes.spaceBtwItems),
-
-            // Price
-            Text(
-              '2500K',
-              style: Theme.of(context)
-                  .textTheme
-                  .titleSmall!
-                  .apply(decoration: TextDecoration.lineThrough),
-            ),
-            const SizedBox(width: FVSizes.spaceBtwItems),
-            const FVProductPriceText(
-              price: '2000',
+            FVProductPriceText(
+              price: price,
               isLarge: true,
             ),
           ],
@@ -57,17 +40,7 @@ class FVProductMetaData extends StatelessWidget {
         const SizedBox(height: FVSizes.spaceBtwItems / 1.5),
 
         // Title
-        const FVProductTitleText(title: 'Engagement'),
-        const SizedBox(height: FVSizes.spaceBtwItems / 1.5),
-
-        // Stock status
-        Row(
-          children: [
-            const FVProductTitleText(title: 'Status'),
-            const SizedBox(width: FVSizes.spaceBtwItems),
-            Text('Tersedia', style: Theme.of(context).textTheme.titleMedium),
-          ],
-        ),
+        FVProductTitleText(title: packageName),
         const SizedBox(height: FVSizes.spaceBtwItems / 1.5),
 
         // Brand
@@ -79,9 +52,8 @@ class FVProductMetaData extends StatelessWidget {
               height: 32,
               overlayColor: darkMode ? FVColors.white : FVColors.black,
             ),
-            const FVBrandTitleWithVerifiedIcon(
-              title: ' Engagement',
-              brandTextSize: TextSizes.medium,
+            FVBrandTitleWithVerifiedIcon(
+              brandTextSize: TextSizes.medium, title: categoryId,
             ),
           ],
         )

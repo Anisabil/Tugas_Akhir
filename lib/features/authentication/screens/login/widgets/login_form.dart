@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/screens/home_admin.dart';
 import 'package:fvapp/features/authentication/controllers/login/login_controller.dart';
 import 'package:fvapp/features/authentication/screens/password_configuration/forgot_password.dart';
 import 'package:fvapp/features/authentication/screens/signup/signup.dart';
+import 'package:fvapp/navigation_menu.dart';
 import 'package:fvapp/utils/validators/validation.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -79,7 +81,7 @@ class FVLoginForm extends StatelessWidget {
 
                 // Forgot Password
                 TextButton(
-                  onPressed: () => Get.to(() => const ForgotPassword()),
+                  onPressed: () => Get.to(() => const ForgetPassword()),
                   child: const Text(FVText.forgotPassword),
                 ),
               ],

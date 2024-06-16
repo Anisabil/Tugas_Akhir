@@ -37,13 +37,15 @@ class FVCircularImage extends StatelessWidget {
                 : FVColors.white),
         borderRadius: BorderRadius.circular(100),
       ),
-      child: Center(
-        child: Image(
-          fit: fit,
-          image: isNetworkImage
-              ? NetworkImage(image)
-              : AssetImage(image) as ImageProvider,
-          color: overlayColor,
+      child: ClipOval(
+        child: FittedBox(
+          fit: fit ?? BoxFit.cover,
+          child: Image(
+            image: isNetworkImage
+                ? NetworkImage(image)
+                : AssetImage(image) as ImageProvider,
+            color: overlayColor,
+          ),
         ),
       ),
     );

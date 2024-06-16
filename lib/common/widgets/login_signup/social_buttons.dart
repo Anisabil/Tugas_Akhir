@@ -19,18 +19,20 @@ class FVSocialButtons extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          decoration: BoxDecoration(
-              border: Border.all(color: FVColors.grey),
-              borderRadius: BorderRadius.circular(100)),
-          child: IconButton(
-            onPressed: () => controller.googleSignIn(),
-            icon: const Image(
-              width: FVSizes.iconMd,
-              height: FVSizes.iconMd,
-              image: AssetImage(FVImages.google),
-            ),
-          ),
-        ),
+  decoration: BoxDecoration(
+    border: Border.all(color: FVColors.grey),
+    borderRadius: BorderRadius.circular(100)
+  ),
+  child: IconButton(
+    onPressed: () => Get.find<LoginController>().googleSignIn(),
+    icon: const Image(
+      width: FVSizes.iconMd,
+      height: FVSizes.iconMd,
+      image: AssetImage(FVImages.google),
+    ),
+  ),
+),
+
         const SizedBox(
           width: FVSizes.spaceBtwItems,
         ),

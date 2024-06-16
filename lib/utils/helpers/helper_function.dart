@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../constants/colors.dart';
+
 class FVHelperFunctions {
   static Color? getColor(String value) {
-    if (value == 'Teal') {
-      return Colors.teal;
-    } else if (value == 'Teal') {
-      return Colors.teal;
+    if (value == 'Gold') {
+      return FVColors.gold;
+    } else if (value == 'Gold') {
+      return FVColors.gold;
     } else if (value == 'Red') {
       return Colors.red;
     } else if (value == 'Blue') {

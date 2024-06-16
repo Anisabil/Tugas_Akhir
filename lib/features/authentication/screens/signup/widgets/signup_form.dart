@@ -53,7 +53,7 @@ class FVSignupForm extends StatelessWidget {
 
           // Username
           TextFormField(
-            controller: controller.username,
+            controller: controller.userName,
             validator: (value) =>
                 FVValidator.validateEmptyText('Nama pengguna', value),
             expands: false,

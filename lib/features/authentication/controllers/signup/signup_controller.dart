@@ -1,3 +1,4 @@
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:fvapp/data/repositories/authentication/authentication_repository.dart';
 import 'package:fvapp/data/repositories/user/user_repository.dart';
@@ -18,7 +19,7 @@ class SignupController extends GetxController {
   final privacyPolicy = true.obs;
   final email = TextEditingController();
   final lastName = TextEditingController();
-  final username = TextEditingController();
+  final userName = TextEditingController();
   final password = TextEditingController();
   final firstName = TextEditingController();
   final phoneNumber = TextEditingController();
@@ -59,7 +60,7 @@ class SignupController extends GetxController {
         id: userCredential.user!.uid,
         firstName: firstName.text.trim(),
         lastName: lastName.text.trim(),
-        username: username.text.trim(),
+        userName: userName.text.trim(),
         email: email.text.trim(),
         phoneNumber: phoneNumber.text.trim(),
         profilePicture: '',
@@ -79,7 +80,7 @@ class SignupController extends GetxController {
       Get.to(() => VerifyEmailScreen(email: email.text.trim()));
     } catch (e) {
       // show some generic error to the user
-      FVLoaders.errorSnackBar(title: 'Cepat!', message: e.toString());
+      FVLoaders.errorSnackBar(title: 'Ada kesalahan!', message: e.toString());
     } finally {
       // remove loader
       FVFullScreenLoader.stopLoading();
