@@ -8,6 +8,7 @@ import 'package:fvapp/features/studio/payment/midtrans.dart';
 import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/features/studio/screens/cart/widgets/cart_items.dart';
 import 'package:fvapp/features/studio/screens/checkout/SuccessCheckoutScreen.dart';
+import 'package:fvapp/features/studio/screens/checkout/webview.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_address_section.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
 import 'package:fvapp/features/studio/screens/event/widgets/event_list.dart';
@@ -46,12 +47,15 @@ class CheckoutScreen extends StatelessWidget {
 
     final dark = FVHelperFunctions.isDarkMode(context);
 
-    final String selectedPackageImageUrl = formData['selectedPackageImageUrl'] ?? '';
-    final String selectedPackageCategory = formData['selectedPackageCategory'] ?? '';
+    final String selectedPackageImageUrl =
+        formData['selectedPackageImageUrl'] ?? '';
+    final String selectedPackageCategory =
+        formData['selectedPackageCategory'] ?? '';
     final String selectedPackageName = formData['selectedPackageName'] ?? '';
 
     final DateTime selectedDay = formData['selectedDay'] ?? DateTime.now();
-    final String formattedSelectedDay = DateFormat('dd MMMM yyyy').format(selectedDay);
+    final String formattedSelectedDay =
+        DateFormat('dd MMMM yyyy').format(selectedDay);
 
     return Scaffold(
       appBar: FVAppBar(
@@ -98,7 +102,8 @@ class CheckoutScreen extends StatelessWidget {
                     const SizedBox(height: FVSizes.spaceBtwItems),
                     Text('Tema Acara: ${formData['selectedTema'] ?? ''}'),
                     const SizedBox(height: FVSizes.spaceBtwItems),
-                    Text('Pembayaran: ${formData['selectedPembayaran'] ?? ''}', style: Theme.of(context).textTheme.bodyMedium),
+                    Text('Pembayaran: ${formData['selectedPembayaran'] ?? ''}',
+                        style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: FVSizes.spaceBtwItems),
                     ReadMoreText(
                       'Deskripsi Tambahan: ${formData['additionalDescription'] ?? ''}',
@@ -137,7 +142,8 @@ class CheckoutScreen extends StatelessWidget {
               }
 
               // Tambahkan packageId ke formData jika belum ada
-              if (formData['package'] != null && formData['package'].id != null) {
+              if (formData['package'] != null &&
+                  formData['package'].id != null) {
                 formData['packageId'] = formData['package'].id;
                 formData['packageName'] = formData['package'].name;
               } else {
@@ -163,7 +169,8 @@ class CheckoutScreen extends StatelessWidget {
                 packageName: formData['packageName'] as String,
                 totalPrice: formData['price'] as double,
                 downPayment: formData['downPayment'] as double? ?? 0.0,
-                remainingPayment: formData['remainingPayment'] as double? ?? 0.0,
+                remainingPayment:
+                    formData['remainingPayment'] as double? ?? 0.0,
                 date: formData['selectedDay'] as DateTime? ?? DateTime.now(),
                 theme: formData['selectedTema'] as String? ?? '',
                 paymentMethod: formData['selectedPembayaran'] as String? ?? '',
@@ -181,15 +188,22 @@ class CheckoutScreen extends StatelessWidget {
               }
 
               // Buka URL Snap Midtrans
-              await launchPaymentUrl(redirectUrl);
+              await launchUrl(Uri.parse(redirectUrl));
+              Get.to(() => SuccessCheckoutScreen(
+                    image: FVImages.successIlustration,
+                    title: 'Pembayaran Berhasil',
+                    subTitle:
+                        'Isi Biodata, download Invoice dan hubungi Fotografer untuk perencanaan mengabadikan momen yang lebih baik',
+                    onPressed: () => Get.to(() => NavigationMenu()),
+                  ));
+              // Get.to(FlutterWebView(
+              //   url: redirectUrl,
+              // ))?.then((value) {
+              //   if (value) {}
+
+              // });
 
               // Jika pembayaran berhasil, arahkan ke SuccessCheckoutScreen
-              Get.to(() => SuccessCheckoutScreen(
-                image: FVImages.successIlustration, 
-                title: 'Pembayaran Berhasil', 
-                subTitle: 'Isi Biodata, download Invoice dan hubungi Fotografer untuk perencanaan mengabadikan momen yang lebih baik', 
-                onPressed: () => Get.to(() => NavigationMenu()),
-              ));
             } catch (e) {
               print('Failed to proceed to payment: $e');
               // Tambahkan penanganan kesalahan di sini
@@ -200,7 +214,7 @@ class CheckoutScreen extends StatelessWidget {
       ),
     );
   }
-  
+
   Future<void> launchPaymentUrl(String redirectUrl) async {
     final Uri url = Uri.parse(redirectUrl);
     print('Launching URL: $url');
