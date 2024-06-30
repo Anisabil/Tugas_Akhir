@@ -58,14 +58,14 @@ class FVOrderListItems extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              rent.status,
+                              rent.status, // Pastikan status ditampilkan di sini
                               style: Theme.of(context).textTheme.bodyLarge!.apply(
                                     color: FVColors.gold,
                                     fontWeightDelta: 1,
                                   ),
                             ),
                             Text(
-                              DateFormat('dd MMM yyyy').format(rent.date),
+                              rent.packageName,
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           ],

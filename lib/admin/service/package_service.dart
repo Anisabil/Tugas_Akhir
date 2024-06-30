@@ -10,9 +10,10 @@ class PackageService {
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final Uuid _uuid = Uuid();
 
-  Future<void> addPackage(String name, String description, double price, String categoryId, List<String> imagePaths) async {
+  Future<void> addPackage(String name, String description, double price, String categoryId, List<String> imagePaths, List<String> videoPaths) async {
     String id = _uuid.v4();
-    List<String> imageUrls = await uploadImages(imagePaths, id);
+    List<String> imageUrls = await uploadFiles(imagePaths, id, 'images');
+    List<String> videoUrls = await uploadFiles(videoPaths, id, 'videos');
 
     Package package = Package(
       id: id,
@@ -21,16 +22,21 @@ class PackageService {
       price: price,
       categoryId: categoryId,
       imageUrls: imageUrls,
+      videoUrls: videoUrls,
     );
 
     await _dbRef.child(id).set(package.toJson());
   }
 
-  Future<void> updatePackage(String id, String name, String description, double price, String categoryId, List<String>? imagePaths) async {
+  Future<void> updatePackage(String id, String name, String description, double price, String categoryId, List<String>? imagePaths, List<String>? videoPaths) async {
     List<String>? imageUrls;
+    List<String>? videoUrls;
 
     if (imagePaths != null) {
-      imageUrls = await uploadImages(imagePaths, id);
+      imageUrls = await uploadFiles(imagePaths, id, 'images');
+    }
+    if (videoPaths != null) {
+      videoUrls = await uploadFiles(videoPaths, id, 'videos');
     }
 
     await _dbRef.child(id).update({
@@ -39,6 +45,7 @@ class PackageService {
       'price': price,
       'categoryId': categoryId,
       'imageUrls': imageUrls,
+      'videoUrls': videoUrls,
     });
   }
 
@@ -58,13 +65,13 @@ class PackageService {
     return packages;
   }
 
-  Future<List<String>> uploadImages(List<String> imagePaths, String packageId) async {
-    List<String> imageUrls = [];
-    for (String imagePath in imagePaths) {
-      File file = File(imagePath);
-      TaskSnapshot snapshot = await _storage.ref('packages/$packageId/${_uuid.v4()}').putFile(file);
-      imageUrls.add(await snapshot.ref.getDownloadURL());
+  Future<List<String>> uploadFiles(List<String> filePaths, String packageId, String folder) async {
+    List<String> fileUrls = [];
+    for (String filePath in filePaths) {
+      File file = File(filePath);
+      TaskSnapshot snapshot = await _storage.ref('packages/$packageId/$folder/${_uuid.v4()}').putFile(file);
+      fileUrls.add(await snapshot.ref.getDownloadURL());
     }
-    return imageUrls;
+    return fileUrls;
   }
 }

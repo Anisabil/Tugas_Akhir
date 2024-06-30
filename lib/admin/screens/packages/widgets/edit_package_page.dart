@@ -1,17 +1,21 @@
+import 'dart:io';
+
+import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:firebase_database/firebase_database.dart';
 
 class EditPackagePage extends StatefulWidget {
   final String packageId;
   final String packageName;
   final List<File> imageFiles;
   final List<String> imageUrls;
+  final List<File> videoFiles;
+  final List<String> videoUrls;
   final int price;
   final String description;
   final List<String> categories;
@@ -23,6 +27,8 @@ class EditPackagePage extends StatefulWidget {
     required this.packageName,
     required this.imageFiles,
     required this.imageUrls,
+    required this.videoFiles,
+    required this.videoUrls,
     required this.price,
     required this.description,
     required this.categories,
@@ -39,9 +45,15 @@ class _EditPackagePageState extends State<EditPackagePage> {
   final TextEditingController _descriptionController = TextEditingController();
   List<File> _imageFiles = [];
   List<String> _imageUrls = [];
+  List<File> _videoFiles = [];
+  List<String> _videoUrls = [];
   String? _selectedCategory;
 
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
+
+  List<VideoPlayerController> _videoControllers = [];
+  List<ChewieController> _chewieControllers = [];
+  List<Future<void>> _initializeVideoFutures = [];
 
   @override
   void initState() {
@@ -52,6 +64,51 @@ class _EditPackagePageState extends State<EditPackagePage> {
     _selectedCategory = widget.selectedCategory;
     _imageFiles = widget.imageFiles;
     _imageUrls = widget.imageUrls;
+    _videoFiles = widget.videoFiles;
+    _videoUrls = widget.videoUrls;
+
+    _initializeVideoControllers();
+  }
+
+  void _initializeVideoControllers() {
+    for (var videoFile in _videoFiles) {
+      var videoPlayerController = VideoPlayerController.file(videoFile);
+      _videoControllers.add(videoPlayerController);
+      _initializeVideoFutures.add(videoPlayerController.initialize());
+
+      var chewieController = ChewieController(
+        videoPlayerController: videoPlayerController,
+        aspectRatio: videoPlayerController.value.aspectRatio,
+        autoPlay: false,
+        looping: false,
+      );
+      _chewieControllers.add(chewieController);
+    }
+
+    for (var videoUrl in _videoUrls) {
+      var videoPlayerController = VideoPlayerController.network(videoUrl);
+      _videoControllers.add(videoPlayerController);
+      _initializeVideoFutures.add(videoPlayerController.initialize());
+
+      var chewieController = ChewieController(
+        videoPlayerController: videoPlayerController,
+        aspectRatio: videoPlayerController.value.aspectRatio,
+        autoPlay: false,
+        looping: false,
+      );
+      _chewieControllers.add(chewieController);
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var controller in _videoControllers) {
+      controller.dispose();
+    }
+    for (var chewieController in _chewieControllers) {
+      chewieController.dispose();
+    }
+    super.dispose();
   }
 
   Future<void> _pickImages() async {
@@ -65,6 +122,31 @@ class _EditPackagePageState extends State<EditPackagePage> {
     }
   }
 
+  Future<void> _pickVideos() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        File videoFile = File(pickedFile.path);
+        _videoFiles.add(videoFile);
+
+        var videoPlayerController = VideoPlayerController.file(videoFile);
+        _videoControllers.add(videoPlayerController);
+
+        var chewieController = ChewieController(
+          videoPlayerController: videoPlayerController,
+          aspectRatio: videoPlayerController.value.aspectRatio,
+          autoPlay: false,
+          looping: false,
+        );
+        _chewieControllers.add(chewieController);
+
+        _initializeVideoFutures.add(videoPlayerController.initialize());
+      });
+    }
+  }
+
   void _removeImage(int index) {
     setState(() {
       if (index < _imageFiles.length) {
@@ -74,6 +156,24 @@ class _EditPackagePageState extends State<EditPackagePage> {
       }
     });
   }
+
+  void _removeVideo(int index) {
+  setState(() {
+    if (index < _videoFiles.length) {
+      _videoFiles.removeAt(index);
+    } else {
+      _videoUrls.removeAt(index - _videoFiles.length);
+    }
+
+    _videoControllers[index].dispose();
+    _chewieControllers[index].dispose();
+
+    _videoControllers.removeAt(index);
+    _chewieControllers.removeAt(index);
+    _initializeVideoFutures.removeAt(index);
+  });
+}
+
 
   void _deletePackage() async {
     final bool confirmDelete = await showDialog(
@@ -129,9 +229,17 @@ class _EditPackagePageState extends State<EditPackagePage> {
     try {
       List<String> imageUrls = _imageUrls;
       for (File imageFile in _imageFiles) {
-        String? imageUrl = await _uploadImage(imageFile, widget.packageId);
+        String? imageUrl = await _uploadFile(imageFile, widget.packageId, 'images');
         if (imageUrl != null) {
           imageUrls.add(imageUrl);
+        }
+      }
+
+      List<String> videoUrls = _videoUrls;
+      for (File videoFile in _videoFiles) {
+        String? videoUrl = await _uploadFile(videoFile, widget.packageId, 'videos');
+        if (videoUrl != null) {
+          videoUrls.add(videoUrl);
         }
       }
 
@@ -141,6 +249,7 @@ class _EditPackagePageState extends State<EditPackagePage> {
         'price': double.parse(_priceController.text),
         'categoryId': _selectedCategory,
         'imageUrls': imageUrls,
+        'videoUrls': videoUrls,
       });
 
       Navigator.of(context).pop();
@@ -157,14 +266,14 @@ class _EditPackagePageState extends State<EditPackagePage> {
     }
   }
 
-  Future<String?> _uploadImage(File imageFile, String packageId) async {
+  Future<String?> _uploadFile(File file, String packageId, String folder) async {
     try {
       TaskSnapshot snapshot = await FirebaseStorage.instance
-          .ref('packages/$packageId/${imageFile.path.split('/').last}')
-          .putFile(imageFile);
+          .ref('packages/$packageId/$folder/${file.path.split('/').last}')
+          .putFile(file);
       return await snapshot.ref.getDownloadURL();
     } catch (e) {
-      print('Error uploading image: $e');
+      print('Error uploading file: $e');
       return null;
     }
   }
@@ -181,6 +290,11 @@ class _EditPackagePageState extends State<EditPackagePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const Text(
+                'Gambar',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
               _imageFiles.isEmpty && _imageUrls.isEmpty
                   ? Container(
                       height: 200,
@@ -193,65 +307,142 @@ class _EditPackagePageState extends State<EditPackagePage> {
                   : SizedBox(
                       height: 200,
                       child: ListView.builder(
+  scrollDirection: Axis.horizontal,
+  itemCount: _imageFiles.length + _imageUrls.length,
+  itemBuilder: (context, index) {
+    if (index < _imageFiles.length) {
+      return Container(
+        width: 200,
+        height: 200,
+        child: Stack(
+          children: [
+            Image.file(
+              _imageFiles[index],
+              width: 200,
+              height: 200,
+              fit: BoxFit.cover,
+            ),
+            Positioned(
+              right: 0,
+              child: IconButton(
+                icon: const Icon(Icons.cancel, color: FVColors.gold),
+                onPressed: () => _removeImage(index),
+              ),
+            ),
+          ],
+        ),
+      );
+    } else {
+      int urlIndex = index - _imageFiles.length;
+      return Container(
+        width: 200,
+        height: 200,
+        child: Stack(
+          children: [
+            Image.network(
+              _imageUrls[urlIndex],
+              width: 200,
+              height: 200,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  color: Colors.grey[300],
+                  child: const Center(
+                    child: Text('Gambar tidak tersedia'),
+                  ),
+                );
+              },
+            ),
+            Positioned(
+              right: 0,
+              child: IconButton(
+                icon: const Icon(Icons.cancel, color: FVColors.gold),
+                onPressed: () => _removeImage(index),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+  },
+),
+
+                    ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _pickImages,
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Pilih Gambar'),
+                ),
+              ),
+              const SizedBox(height: 32),
+              const Text(
+                'Video',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _videoFiles.isEmpty && _videoUrls.isEmpty
+                  ? Container(
+                      height: 600,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      child: const Center(
+                        child: Text('Tidak ada video yang dipilih'),
+                      ),
+                    )
+                  : SizedBox(
+                      height: 200,
+                      child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _imageFiles.length + _imageUrls.length,
+                        itemCount: _chewieControllers.length,
                         itemBuilder: (context, index) {
-                          if (index < _imageFiles.length) {
-                            return Stack(
-                              children: [
-                                Image.file(
-                                  _imageFiles[index],
-                                  width: 200,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.cancel, color: Colors.red),
-                                    onPressed: () => _removeImage(index),
-                                  ),
-                                ),
-                              ],
-                            );
-                          } else {
-                            int urlIndex = index - _imageFiles.length;
-                            return Stack(
-                              children: [
-                                Image.network(
-                                  _imageUrls[urlIndex],
-                                  width: 200,
-                                  height: 200,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey[300],
-                                      child: const Center(
-                                        child: Text('Gambar tidak tersedia'),
+                          return FutureBuilder(
+                            future: _initializeVideoFutures[index],
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.done) {
+                                return Stack(
+                                  children: [
+                                    AspectRatio(
+                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 16 / 9,
+                                      child: Chewie(controller: _chewieControllers[index]),
+                                    ),
+                                    Positioned(
+                                      right: 0,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.cancel, color: FVColors.gold),
+                                        onPressed: () => _removeVideo(index),
                                       ),
-                                    );
-                                  },
-                                ),
-                                Positioned(
-                                  right: 0,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.cancel, color: FVColors.gold),
-                                    onPressed: () => _removeImage(index),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return Container(
+                                  width: 200,
+                                  height: 600,
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
                                   ),
-                                ),
-                              ],
-                            );
-                          }
+                                );
+                              }
+                            },
+                          );
                         },
                       ),
                     ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _pickImages,
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Pilih Gambar'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _pickVideos,
+                  icon: const Icon(Icons.video_library),
+                  label: const Text('Pilih Video'),
+                ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
+
               TextField(
                 controller: _packageNameController,
                 decoration: const InputDecoration(
@@ -292,17 +483,10 @@ class _EditPackagePageState extends State<EditPackagePage> {
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 32),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: _updatePackage,
-                      child: const Text('Simpan'),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
                   if (widget.packageName.isNotEmpty)
                     Expanded(
                       child: ElevatedButton(
@@ -310,9 +494,16 @@ class _EditPackagePageState extends State<EditPackagePage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.red,
                         ),
-                        child: const Text('Hapus'),
+                        child: const Text('Hapus Paket'),
                       ),
                     ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: _updatePackage,
+                      child: const Text('Simpan Perubahan'),
+                    ),
+                  ),
                 ],
               ),
             ],
@@ -322,3 +513,4 @@ class _EditPackagePageState extends State<EditPackagePage> {
     );
   }
 }
+

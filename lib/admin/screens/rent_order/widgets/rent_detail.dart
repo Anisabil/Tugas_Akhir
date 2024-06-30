@@ -1,134 +1,124 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
-import 'package:fvapp/common/widgets/appbar/appbar.dart';
+import 'package:intl/intl.dart';
+import 'package:fvapp/admin/controllers/rent_detail_controller.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
-import 'package:fvapp/features/studio/screens/cart/widgets/cart_items.dart';
-import 'package:fvapp/features/studio/screens/checkout/widgets/billing_address_section.dart';
+import 'package:fvapp/common/widgets/texts/section_heading.dart';
+import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
-import 'package:fvapp/features/studio/screens/checkout/widgets/billing_payment_section.dart';
-import 'package:fvapp/features/studio/screens/event/widgets/event_list.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
-import 'package:fvapp/utils/helpers/helper_function.dart';
-import 'package:fvapp/utils/popups/loaders.dart';
+import 'package:get/get.dart';
 
-class RentDetail extends StatefulWidget {
-  const RentDetail({super.key});
+class RentDetail extends StatelessWidget {
+  final String rentId;
 
-  @override
-  _RentDetailState createState() => _RentDetailState();
-}
+  RentDetail({Key? key, required this.rentId}) : super(key: key);
 
-class _RentDetailState extends State<RentDetail> {
-  bool isPaidDP = true; // Status pembayaran sewa, true = Bayar DP, false = Lunas
-
-  void _setPaymentStatus(bool dpStatus) {
-    setState(() {
-      isPaidDP = dpStatus;
-    });
-
-    final snackBar = FVLoaders.successSnackBar(
-      title: 'Berhasil',
-      message: isPaidDP ? 'Status diubah menjadi Bayar DP' : 'Status diubah menjadi Lunas',
-    );
-
-    if (snackBar != null) {
-      ScaffoldMessenger.of(context).showSnackBar(snackBar);
-    }
-  }
+  final RentDetailController controller = Get.put(RentDetailController());
 
   @override
   Widget build(BuildContext context) {
-    final dark = FVHelperFunctions.isDarkMode(context);
+    controller.loadRentDetail(rentId);
+
     return Scaffold(
-      appBar: FVAppBar(
-        showBackArrow: true,
+      appBar: AppBar(
+        leading: BackButton(),
         title: Text(
           'Detail Sewa',
-          style: Theme.of(context).textTheme.headlineSmall,
+          // style: Theme.of(context).textTheme.,
         ),
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(FVSizes.defaultSpace),
-          child: Column(
-            children: [
-              // Items in Cart
-              // const FVCartItems(showAddRemoveButtons: false),
-              const SizedBox(height: FVSizes.spaceBtwSection),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return Center(child: CircularProgressIndicator());
+        }
 
-              // Billing Section
-              FVRoundedContainer(
-                showBorder: true,
-                padding: const EdgeInsets.all(FVSizes.md),
-                backgroundColor: dark ? FVColors.black : FVColors.white,
-                child: const Column(
+        if (controller.rent.value == null) {
+          return Center(child: Text('No rent details available'));
+        }
+
+        Rent rent = controller.rent.value!;
+        final dark = Theme.of(context).brightness == Brightness.dark;
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(FVSizes.defaultSpace),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FVRoundedContainer(
+                  showBorder: true,
+                  padding: const EdgeInsets.all(FVSizes.md),
+                  backgroundColor: dark ? FVColors.black : FVColors.white,
+                  child: Padding(
+                    padding: const EdgeInsets.all(FVSizes.md),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        FVSectionHeading(
+                          title: 'Status ${rent.status}',
+                          showActionButton: false,
+                        ),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Nama Klien: ${rent.userName}'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Paket: ${rent.packageName}'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Tema: ${rent.theme}'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Metode Pembayaran: ${rent.paymentMethod}'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Deskripsi: ${rent.description}'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        FVBillingAmountSection(
+                          totalPrice: rent.totalPrice,
+                          downPayment: rent.downPayment,
+                          remainingPayment: rent.remainingPayment,
+                        ),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: FVSizes.spaceBtwSection),
+                Row(
                   children: [
-                    // Pricing
-                    // FVBillingAmountSection(),
-                    SizedBox(height: FVSizes.spaceBtwItems),
-
-                    // Divider
-                    Divider(),
-                    SizedBox(height: FVSizes.spaceBtwItems),
-
-                    // Payment Method
-                    FVBillingPaymentSection(),
-                    SizedBox(height: FVSizes.spaceBtwItems),
-
-                    // Address
-                    // FVBillingAddressSection(),
-                    SizedBox(height: FVSizes.spaceBtwItems * 2),
-
-                    // Date
-                    EventList(),
-                    SizedBox(height: FVSizes.spaceBtwItems),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: rent.status == 'On Hold'
+                            ? () {
+                                controller.setStatus('In Progress');
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: rent.status == 'On Hold' ? FVColors.gold : FVColors.grey,
+                        ),
+                        child: Text('In Progress'),
+                      ),
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: rent.status == 'In Progress'
+                            ? () {
+                                controller.setStatus('Completed');
+                              }
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: rent.status == 'In Progress' ? FVColors.gold : FVColors.grey,
+                        ),
+                        child: Text('Completed'),
+                      ),
+                    ),
                   ],
                 ),
-              ),
-
-              // Status Buttons
-              const SizedBox(height: FVSizes.spaceBtwSection),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _setPaymentStatus(true),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Bayar DP'),
-                        ],
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: isPaidDP ? FVColors.gold : Colors.grey,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: FVSizes.spaceBtwItems),
-
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () => _setPaymentStatus(false),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text('Lunas'),
-                        ],
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: !isPaidDP ? FVColors.gold : Colors.grey,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

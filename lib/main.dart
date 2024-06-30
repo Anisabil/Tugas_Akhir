@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fvapp/admin/controllers/event_controller.dart';
+import 'package:fvapp/admin/controllers/rent_detail_controller.dart';
 import 'package:fvapp/features/personalization/controllers/user_controller.dart';
+import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
 import 'package:fvapp/features/studio/screens/checkout/temporary_data/temporary_controller.dart';
 import 'package:fvapp/features/studio/screens/event/controller/event_controller.dart';
 import 'package:fvapp/navigation_controller.dart';
@@ -40,6 +42,8 @@ Future<void> main() async {
   Get.put(EventController());
   Get.put(EventFormController());
   Get.put(NavigationController());
+  Get.put(RentController());
+  Get.put(RentDetailController());
 
   runApp(const App());
 }

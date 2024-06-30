@@ -4,7 +4,8 @@ class Package {
   final String description;
   final double price;
   final String categoryId;
-  final List<String> imageUrls; // List of image URLs
+  final List<String> imageUrls;
+  final List<String> videoUrls; // List of video URLs
 
   Package({
     required this.id,
@@ -13,6 +14,7 @@ class Package {
     required this.price,
     required this.categoryId,
     required this.imageUrls,
+    required this.videoUrls,
   });
 
   factory Package.fromJson(Map<String, dynamic> json) {
@@ -23,6 +25,7 @@ class Package {
       price: json['price']?.toDouble() ?? 0.0,
       categoryId: json['categoryId'] ?? '',
       imageUrls: List<String>.from(json['imageUrls'] ?? []),
+      videoUrls: List<String>.from(json['videoUrls'] ?? []),
     );
   }
 
@@ -34,6 +37,7 @@ class Package {
       'price': price,
       'categoryId': categoryId,
       'imageUrls': imageUrls,
+      'videoUrls': videoUrls,
     };
   }
 }

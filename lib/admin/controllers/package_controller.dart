@@ -16,16 +16,15 @@ class PackageController extends GetxController {
     packages.value = await _packageService.getPackages();
   }
 
-  Future<void> addPackage(String name, String description, double price, String categoryId, List<String> imagePaths) async {
-  await _packageService.addPackage(name, description, price, categoryId, imagePaths);
-  fetchPackages();
-}
+  Future<void> addPackage(String name, String description, double price, String categoryId, List<String> imagePaths, List<String> videoPaths) async {
+    await _packageService.addPackage(name, description, price, categoryId, imagePaths, videoPaths);
+    fetchPackages();
+  }
 
-Future<void> updatePackage(String id, String name, String description, double price, String categoryId, List<String>? imagePaths) async {
-  await _packageService.updatePackage(id, name, description, price, categoryId, imagePaths);
-  fetchPackages();
-}
-
+  Future<void> updatePackage(String id, String name, String description, double price, String categoryId, List<String>? imagePaths, List<String>? videoPaths) async {
+    await _packageService.updatePackage(id, name, description, price, categoryId, imagePaths, videoPaths);
+    fetchPackages();
+  }
 
   Future<void> deletePackage(String id) async {
     await _packageService.deletePackage(id);

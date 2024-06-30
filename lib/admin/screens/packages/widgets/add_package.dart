@@ -1,10 +1,12 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:fvapp/utils/constants/colors.dart';
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
-import 'package:fvapp/admin/controllers/package_controller.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:video_player/video_player.dart';
+import 'package:chewie/chewie.dart';
+import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
 
 class AddPackagePage extends StatefulWidget {
@@ -20,10 +22,26 @@ class _AddPackagePageState extends State<AddPackagePage> {
   final TextEditingController _packageNameController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  List<File> _selectedImages = [];
-  String? _selectedCategory;
+  List<File> _imageFiles = [];
+  List<String> _videoUrls = [];
+  List<File> _videoFiles = [];
 
-  final PackageController _packageController = Get.put(PackageController());
+  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
+
+  List<VideoPlayerController> _videoControllers = [];
+  List<ChewieController> _chewieControllers = [];
+  List<Future<void>> _initializeVideoFutures = [];
+
+  @override
+  void dispose() {
+    for (var controller in _videoControllers) {
+      controller.dispose();
+    }
+    for (var chewieController in _chewieControllers) {
+      chewieController.dispose();
+    }
+    super.dispose();
+  }
 
   Future<void> _pickImages() async {
     final ImagePicker picker = ImagePicker();
@@ -31,32 +49,90 @@ class _AddPackagePageState extends State<AddPackagePage> {
 
     if (pickedFiles != null) {
       setState(() {
-        _selectedImages = pickedFiles.map((file) => File(file.path)).toList();
+        _imageFiles.addAll(pickedFiles.map((file) => File(file.path)).toList());
       });
     }
   }
 
-  Future<void> _savePackage() async {
+  Future<void> _pickVideos() async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        File videoFile = File(pickedFile.path);
+        _videoFiles.add(videoFile);
+
+        var videoPlayerController = VideoPlayerController.file(videoFile);
+        _videoControllers.add(videoPlayerController);
+
+        var chewieController = ChewieController(
+          videoPlayerController: videoPlayerController,
+          aspectRatio: videoPlayerController.value.aspectRatio,
+          autoPlay: false,
+          looping: false,
+        );
+        _chewieControllers.add(chewieController);
+
+        _initializeVideoFutures.add(videoPlayerController.initialize());
+      });
+    }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _imageFiles.removeAt(index);
+    });
+  }
+
+  void _removeVideo(int index) {
+    setState(() {
+      _videoFiles.removeAt(index);
+
+      _videoControllers[index].dispose();
+      _chewieControllers[index].dispose();
+
+      _videoControllers.removeAt(index);
+      _chewieControllers.removeAt(index);
+      _initializeVideoFutures.removeAt(index);
+    });
+  }
+
+  void _savePackage() async {
     if (_packageNameController.text.isEmpty ||
         _priceController.text.isEmpty ||
-        _descriptionController.text.isEmpty ||
-        _selectedImages.isEmpty ||
-        _selectedCategory == null) {
+        _descriptionController.text.isEmpty) {
       FVLoaders.errorSnackBar(
         title: 'Error',
-        message: 'Semua field harus diisi dan gambar harus dipilih.',
+        message: 'Semua field harus diisi.',
       );
       return;
     }
 
     try {
-      await _packageController.addPackage(
-        _packageNameController.text,
-        _descriptionController.text,
-        double.parse(_priceController.text),
-        _selectedCategory!,
-        _selectedImages.map((file) => file.path).toList(),
-      );
+      List<String> imageUrls = [];
+      for (File imageFile in _imageFiles) {
+        String? imageUrl = await _uploadFile(imageFile, 'images');
+        if (imageUrl != null) {
+          imageUrls.add(imageUrl);
+        }
+      }
+
+      List<String> videoUrls = [];
+      for (File videoFile in _videoFiles) {
+        String? videoUrl = await _uploadFile(videoFile, 'videos');
+        if (videoUrl != null) {
+          videoUrls.add(videoUrl);
+        }
+      }
+
+      await _databaseReference.child('packages').push().set({
+        'name': _packageNameController.text,
+        'description': _descriptionController.text,
+        'price': double.parse(_priceController.text),
+        'imageUrls': imageUrls,
+        'videoUrls': videoUrls,
+      });
 
       Navigator.of(context).pop();
       FVLoaders.successSnackBar(
@@ -72,17 +148,23 @@ class _AddPackagePageState extends State<AddPackagePage> {
     }
   }
 
-  void _removeImage(int index) {
-    setState(() {
-      _selectedImages.removeAt(index);
-    });
+  Future<String?> _uploadFile(File file, String folder) async {
+    try {
+      TaskSnapshot snapshot = await FirebaseStorage.instance
+          .ref('packages/$folder/${file.path.split('/').last}')
+          .putFile(file);
+      return await snapshot.ref.getDownloadURL();
+    } catch (e) {
+      print('Error uploading file: $e');
+      return null;
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Paket Baru'),
+        title: const Text('Tambah Paket'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -90,7 +172,12 @@ class _AddPackagePageState extends State<AddPackagePage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _selectedImages.isEmpty
+              const Text(
+                'Gambar',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _imageFiles.isEmpty
                   ? Container(
                       height: 200,
                       width: double.infinity,
@@ -103,36 +190,106 @@ class _AddPackagePageState extends State<AddPackagePage> {
                       height: 200,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: _selectedImages.length,
+                        itemCount: _imageFiles.length,
                         itemBuilder: (context, index) {
-                          File imageFile = _selectedImages[index];
-                          return Stack(
-                            children: [
-                              Image.file(
-                                imageFile,
-                                height: 180,
-                                width: 180,
-                                fit: BoxFit.cover,
-                              ),
-                              Positioned(
-                                right: 0,
-                                child: IconButton(
-                                  icon: const Icon(Icons.cancel, color: FVColors.gold),
-                                  onPressed: () => _removeImage(index),
+                          return Container(
+                            width: 200,
+                            height: 200,
+                            child: Stack(
+                              children: [
+                                Image.file(
+                                  _imageFiles[index],
+                                  width: 200,
+                                  height: 200,
+                                  fit: BoxFit.cover,
                                 ),
-                              ),
-                            ],
+                                Positioned(
+                                  right: 0,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.cancel, color: FVColors.gold),
+                                    onPressed: () => _removeImage(index),
+                                  ),
+                                ),
+                              ],
+                            ),
                           );
                         },
                       ),
                     ),
               const SizedBox(height: 16),
-              ElevatedButton.icon(
-                onPressed: _pickImages,
-                icon: const Icon(Icons.photo_library),
-                label: const Text('Pilih Gambar'),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _pickImages,
+                  icon: const Icon(Icons.photo_library),
+                  label: const Text('Pilih Gambar'),
+                ),
               ),
+              const SizedBox(height: 32),
+              const Text(
+                'Video',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 8),
+              _videoFiles.isEmpty
+                  ? Container(
+                      height: 200,
+                      width: double.infinity,
+                      color: Colors.grey[300],
+                      child: const Center(
+                        child: Text('Tidak ada video yang dipilih'),
+                      ),
+                    )
+                  : SizedBox(
+                      height: 200,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _chewieControllers.length,
+                        itemBuilder: (context, index) {
+                          return FutureBuilder(
+                            future: _initializeVideoFutures[index],
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.done) {
+                                return Stack(
+                                  children: [
+                                    AspectRatio(
+                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 16 / 9,
+                                      child: Chewie(controller: _chewieControllers[index]),
+                                    ),
+                                    Positioned(
+                                      right: 0,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.cancel, color: FVColors.gold),
+                                        onPressed: () => _removeVideo(index),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              } else {
+                                return Container(
+                                  width: 200,
+                                  height: 600,
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                );
+                              }
+                            },
+                          );
+                        },
+                      ),
+                    ),
               const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _pickVideos,
+                  icon: const Icon(Icons.video_library),
+                  label: const Text('Pilih Video'),
+                ),
+              ),
+              const SizedBox(height: 32),
               TextField(
                 controller: _packageNameController,
                 decoration: const InputDecoration(
@@ -149,23 +306,21 @@ class _AddPackagePageState extends State<AddPackagePage> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                decoration: const InputDecoration(
-                  labelText: 'Kategori',
-                ),
+                value: widget.categories.isNotEmpty ? widget.categories[0] : null,
+                onChanged: (newValue) {
+                  // Handle dropdown value change
+                },
                 items: widget.categories.map((category) {
-                  return DropdownMenuItem<String>(
+                  return DropdownMenuItem(
                     value: category,
                     child: Text(category),
                   );
                 }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    _selectedCategory = value;
-                  });
-                },
+                decoration: const InputDecoration(
+                  labelText: 'Kategori Paket',
+                ),
               ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
               TextField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
@@ -173,10 +328,13 @@ class _AddPackagePageState extends State<AddPackagePage> {
                 ),
                 maxLines: 3,
               ),
-              const SizedBox(width: double.infinity),
-              ElevatedButton(
-                onPressed: _savePackage,
-                child: const Text('Simpan'),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _savePackage,
+                  child: const Text('Simpan Paket'),
+                ),
               ),
             ],
           ),

@@ -51,6 +51,8 @@ class SettingPackages extends StatelessWidget {
                         packageName: package.name,
                         imageFiles: [], // Initialize with an empty list or the actual list of images
                         imageUrls: package.imageUrls,
+                        videoFiles: [],
+                        videoUrls: package.videoUrls,
                         price: package.price.toInt(),
                         description: package.description,
                         categories: [

@@ -3,7 +3,7 @@ import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:http/http.dart' as http;
 
 Future<String> initiateMidtransPaymentProcess(Rent rent) async {
-  final clientKey = 'SB-Mid-client-FyQWww0JuWijB_iF'; // Ganti dengan client key Anda
+  final clientKey = 'SB-Mid-client-FyQWww0JuWijB_iF';
   final auth = 'Basic ' + base64Encode(utf8.encode(clientKey + ':'));
 
   final response = await http.post(

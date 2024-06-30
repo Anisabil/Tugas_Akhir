@@ -1,16 +1,16 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/models/package_model.dart';
-import 'package:fvapp/features/studio/screens/order/order.dart';
 import 'package:fvapp/navigation_controller.dart';
-import 'package:fvapp/utils/constants/colors.dart';
-import 'package:fvapp/utils/helpers/helper_function.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'features/personalization/screens/settings/settings.dart';
 import 'features/studio/screens/home/home.dart';
 import 'features/studio/screens/rent/rent.dart';
+import 'features/studio/screens/order/order.dart';
+import 'admin/models/package_model.dart';
+import 'utils/constants/colors.dart';
+import 'utils/helpers/helper_function.dart';
 
 class NavigationMenu extends StatelessWidget {
   const NavigationMenu({super.key});
@@ -42,13 +42,7 @@ class NavigationMenu extends StatelessWidget {
           ],
         ),
       ),
-      body: Obx(() {
-        // Memastikan screens sudah diinisialisasi
-        if (controller.screens.isEmpty) {
-          return Center(child: CircularProgressIndicator());
-        }
-        return controller.screens[controller.selectedIndex.value];
-      }),
+      body: Obx(() => controller.screens[controller.selectedIndex.value]),
     );
   }
 }

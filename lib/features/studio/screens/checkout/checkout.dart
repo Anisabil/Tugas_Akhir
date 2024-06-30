@@ -7,11 +7,14 @@ import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
 import 'package:fvapp/features/studio/payment/midtrans.dart';
 import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/features/studio/screens/cart/widgets/cart_items.dart';
+import 'package:fvapp/features/studio/screens/checkout/SuccessCheckoutScreen.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_address_section.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
 import 'package:fvapp/features/studio/screens/event/widgets/event_list.dart';
 import 'package:fvapp/features/studio/screens/multi_step_form/multi_step_form.dart';
+import 'package:fvapp/navigation_menu.dart';
 import 'package:fvapp/utils/constants/colors.dart';
+import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
 import 'package:get/get.dart';
@@ -125,77 +128,88 @@ class CheckoutScreen extends StatelessWidget {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(FVSizes.defaultSpace),
         child: ElevatedButton(
-  onPressed: () async {
-    try {
-      // Ambil data pengguna
-      final user = await userController.getUserData();
-      if (user == null) {
-        throw Exception('Failed to get user data');
-      }
+          onPressed: () async {
+            try {
+              // Ambil data pengguna
+              final user = await userController.getUserData();
+              if (user == null) {
+                throw Exception('Failed to get user data');
+              }
 
-      // Tambahkan packageId ke formData jika belum ada
-      if (formData['package'] != null && formData['package'].id != null) {
-        formData['packageId'] = formData['package'].id;
-      } else {
-        throw Exception('Package ID is missing');
-      }
+              // Tambahkan packageId ke formData jika belum ada
+              if (formData['package'] != null && formData['package'].id != null) {
+                formData['packageId'] = formData['package'].id;
+                formData['packageName'] = formData['package'].name;
+              } else {
+                throw Exception('Package ID is missing');
+              }
 
-      // Debug print untuk formData
-      print('FormData: $formData');
+              formData['userName'] = user.userName;
 
-      // Periksa validitas data
-      if (formData['packageId'] == null || formData['price'] == null) {
-        throw Exception('Form data is incomplete');
-      }
+              // Debug print untuk formData
+              print('FormData: $formData');
 
-      // Buat objek Rent dari formData
-      final rent = Rent(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        userId: user.id,
-        packageId: formData['packageId'] as String,
-        totalPrice: formData['price'] as double,
-        downPayment: formData['downPayment'] as double? ?? 0.0,
-        remainingPayment: formData['remainingPayment'] as double? ?? 0.0,
-        date: formData['selectedDay'] as DateTime? ?? DateTime.now(),
-        theme: formData['selectedTema'] as String? ?? '',
-        paymentMethod: formData['selectedPembayaran'] as String? ?? '',
-        description: formData['additionalDescription'] as String? ?? '',
-        status: '', // Atur nilai default jika diperlukan
-      );
+              // Periksa validitas data
+              if (formData['packageId'] == null || formData['price'] == null) {
+                throw Exception('Form data is incomplete');
+              }
 
-      // Simpan data sewa
-      await rentController.addRent(rent);
+              // Buat objek Rent dari formData
+              final rent = Rent(
+                id: DateTime.now().millisecondsSinceEpoch.toString(),
+                userId: user.id,
+                userName: formData['userName'] as String,
+                packageId: formData['packageId'] as String,
+                packageName: formData['packageName'] as String,
+                totalPrice: formData['price'] as double,
+                downPayment: formData['downPayment'] as double? ?? 0.0,
+                remainingPayment: formData['remainingPayment'] as double? ?? 0.0,
+                date: formData['selectedDay'] as DateTime? ?? DateTime.now(),
+                theme: formData['selectedTema'] as String? ?? '',
+                paymentMethod: formData['selectedPembayaran'] as String? ?? '',
+                description: formData['additionalDescription'] as String? ?? '',
+                status: 'On Hold',
+              );
 
-      // Proses pembayaran dengan Midtrans
-      final redirectUrl = await initiateMidtransPaymentProcess(rent);
-      if (redirectUrl == null || redirectUrl.isEmpty) {
-        throw Exception('Failed to get Redirect URL');
-      }
+              // Simpan data sewa
+              await rentController.addRent(rent);
 
-      // Buka URL Snap Midtrans
-      await launchPaymentUrl(redirectUrl);
-    } catch (e) {
-      print('Failed to proceed to payment: $e');
-      // Tambahkan penanganan kesalahan di sini
-    }
-  },
-  child: const Text('Lanjutkan Pembayaran'),
-),
+              // Proses pembayaran dengan Midtrans
+              final redirectUrl = await initiateMidtransPaymentProcess(rent);
+              if (redirectUrl == null || redirectUrl.isEmpty) {
+                throw Exception('Failed to get Redirect URL');
+              }
 
+              // Buka URL Snap Midtrans
+              await launchPaymentUrl(redirectUrl);
+
+              // Jika pembayaran berhasil, arahkan ke SuccessCheckoutScreen
+              Get.to(() => SuccessCheckoutScreen(
+                image: FVImages.successIlustration, 
+                title: 'Pembayaran Berhasil', 
+                subTitle: 'Isi Biodata, download Invoice dan hubungi Fotografer untuk perencanaan mengabadikan momen yang lebih baik', 
+                onPressed: () => Get.to(() => NavigationMenu()),
+              ));
+            } catch (e) {
+              print('Failed to proceed to payment: $e');
+              // Tambahkan penanganan kesalahan di sini
+            }
+          },
+          child: const Text('Lanjutkan Pembayaran'),
+        ),
       ),
     );
   }
   
   Future<void> launchPaymentUrl(String redirectUrl) async {
-  final Uri url = Uri.parse(redirectUrl);
-  print('Launching URL: $url');
+    final Uri url = Uri.parse(redirectUrl);
+    print('Launching URL: $url');
 
-  if (await canLaunch(url.toString())) {
-    await launch(url.toString(), forceSafariVC: false, forceWebView: false);
-  } else {
-    print('Could not launch $url');
-    throw Exception('Failed to launch payment URL: $url');
+    if (await canLaunch(url.toString())) {
+      await launch(url.toString(), forceSafariVC: false, forceWebView: false);
+    } else {
+      print('Could not launch $url');
+      throw Exception('Failed to launch payment URL: $url');
+    }
   }
-}
-
 }

@@ -1,16 +1,16 @@
 class FVText {
   // on Boarding Title
-  static const String onBoardingTitle1 = "Selamat Datang di Kang Ramdani Visual Story";
-  static const String onBoardingTitle2 = "Memperindah Momen Bersama Kami";
-  static const String onBoardingTitle3 = "Mulai Pencarian Fotografi Anda";
+  static const String onBoardingTitle1 = "Selamat Datang di KR Visual Story";
+  static const String onBoardingTitle2 = "Cari Layanan yang Tepat untuk Anda";
+  static const String onBoardingTitle3 = "Booking dengan Mudah dan Aman";
 
   // on Boarding Sub Title
   static const String onBoardingSubTitle1 =
-      "Temukan Layanan Terbaik untuk Momen Spesial Anda";
+      "Kami siap membantu Anda menemukan paket layanan terbaik untuk kebutuhan acara Anda";
   static const String onBoardingSubTitle2 =
-      "Jelajahi Beragam Layanan Fotografi untuk Setiap Kebutuhan Anda";
+      "Gunakan fitur pencarian untuk menelusuri berbagai paket layanan, dan harga yang sesuai untuk Anda";
   static const String onBoardingSubTitle3 =
-      "Temukan Layanan Fotografi yang Tepat untuk Setiap Momen Berharga";
+      "Selamat menggunakan aplikasi kami dan nikmati pengalaman pemesanan yang praktis!";
 
   // Auth Form Text
   static const String firstName = "Nama Depan";
@@ -48,7 +48,7 @@ class FVText {
   static const String done = "Selesai";
   static const String confirmEmail = "Verifikasi alamat email Anda";
   static const String confirmEmailSubTitle =
-      "Selamat, akun Anda telah terisi. Verifikasi email anda untuk pengalaman dalam menjelajahi dunia pemotretan";
+      "Selamat, akun Anda telah dibuat. Verifikasi email anda untuk pengalaman dalam menjelajahi dunia pemotretan";
   static const String fvContinue = "Lanjutkan";
   static const String fvInvoice = "Invoice";
   static const String fvCall = "Hubungi";

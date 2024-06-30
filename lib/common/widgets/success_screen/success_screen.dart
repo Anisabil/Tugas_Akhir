@@ -57,7 +57,7 @@ class SuccessScreen extends StatelessWidget {
         padding: const EdgeInsets.all(FVSizes.defaultSpace),
         child: SizedBox(
           width: double.infinity,
-          child: OutlinedButton(
+          child: ElevatedButton(
             onPressed: onPressed,
             child: const Text(FVText.fvContinue),
           ),

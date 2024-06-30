@@ -11,9 +11,9 @@ class FVImages {
   static const String onBoardingImage1 =
       "assets/images/on_boarding_images/fv_fvapp.gif";
   static const String onBoardingImage2 =
-      "assets/images/on_boarding_images/fv_wedding.gif";
-  static const String onBoardingImage3 =
       "assets/images/on_boarding_images/fv_search.gif";
+  static const String onBoardingImage3 =
+      "assets/images/on_boarding_images/fv_wedding.gif";
 
   // Animations
   static const String successIlustration =
