@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:fvapp/utils/formatters/formatter.dart';
 
 class UserModel {
@@ -34,7 +33,7 @@ class UserModel {
   String get formattedPhoneNo => FVFormatter.formatPhoneNumber(phoneNumber);
 
   // Static function to split full name into first and last name
-  static List<String> nameParts(fullName) => fullName.split("");
+  static List<String> nameParts(fullName) => fullName.split(" ");
 
   // Static function to generate a userName from the full name
   static String generateuserName(fullName) {

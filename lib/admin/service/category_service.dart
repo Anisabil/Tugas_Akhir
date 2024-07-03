@@ -12,6 +12,24 @@ class CategoryService {
     await _dbRef.child(id).set(category.toJson());
   }
 
+  Future<Category?> getCategoryById(String id) async {
+    try {
+      // Gunakan await dan then untuk mendapatkan DataSnapshot dari DatabaseEvent
+      DataSnapshot snapshot = await _dbRef.child(id).once().then((event) => event.snapshot);
+
+      // Pastikan snapshot.value bukan null sebelum mengonversi ke Map
+      if (snapshot.value != null) {
+        Map<dynamic, dynamic> data = snapshot.value as Map<dynamic, dynamic>;
+        return Category.fromJson(Map<String, dynamic>.from(data));
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Error getting category by id: $e');
+      return null;
+    }
+  }
+
   Future<void> updateCategory(String id, String name) async {
     await _dbRef.child(id).update({'name': name});
   }

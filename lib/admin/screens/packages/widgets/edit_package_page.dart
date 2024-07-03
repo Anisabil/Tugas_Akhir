@@ -1,13 +1,15 @@
-import 'dart:io';
-
-import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:fvapp/admin/models/category_model.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
+import 'package:get/get.dart';
+import 'package:fvapp/admin/controllers/category_controller.dart';
 
 class EditPackagePage extends StatefulWidget {
   final String packageId;
@@ -18,7 +20,6 @@ class EditPackagePage extends StatefulWidget {
   final List<String> videoUrls;
   final int price;
   final String description;
-  final List<String> categories;
   final String selectedCategory;
 
   const EditPackagePage({
@@ -31,7 +32,6 @@ class EditPackagePage extends StatefulWidget {
     required this.videoUrls,
     required this.price,
     required this.description,
-    required this.categories,
     required this.selectedCategory,
   }) : super(key: key);
 
@@ -50,6 +50,10 @@ class _EditPackagePageState extends State<EditPackagePage> {
   String? _selectedCategory;
 
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
+  final CategoryController _categoryController = Get.find<CategoryController>();
+  Category? getCategoryById(String categoryId) {
+  return _categoryController.categories.firstWhereOrNull((category) => category.id == categoryId);
+}
 
   List<VideoPlayerController> _videoControllers = [];
   List<ChewieController> _chewieControllers = [];
@@ -61,13 +65,16 @@ class _EditPackagePageState extends State<EditPackagePage> {
     _packageNameController.text = widget.packageName;
     _priceController.text = widget.price.toString();
     _descriptionController.text = widget.description;
-    _selectedCategory = widget.selectedCategory;
+    _categoryController.fetchCategories();
     _imageFiles = widget.imageFiles;
     _imageUrls = widget.imageUrls;
     _videoFiles = widget.videoFiles;
     _videoUrls = widget.videoUrls;
 
     _initializeVideoControllers();
+
+    // Fetch categories
+    _categoryController.fetchCategories();
   }
 
   void _initializeVideoControllers() {
@@ -158,22 +165,21 @@ class _EditPackagePageState extends State<EditPackagePage> {
   }
 
   void _removeVideo(int index) {
-  setState(() {
-    if (index < _videoFiles.length) {
-      _videoFiles.removeAt(index);
-    } else {
-      _videoUrls.removeAt(index - _videoFiles.length);
-    }
+    setState(() {
+      if (index < _videoFiles.length) {
+        _videoFiles.removeAt(index);
+      } else {
+        _videoUrls.removeAt(index - _videoFiles.length);
+      }
 
-    _videoControllers[index].dispose();
-    _chewieControllers[index].dispose();
+      _videoControllers[index].dispose();
+      _chewieControllers[index].dispose();
 
-    _videoControllers.removeAt(index);
-    _chewieControllers.removeAt(index);
-    _initializeVideoFutures.removeAt(index);
-  });
-}
-
+      _videoControllers.removeAt(index);
+      _chewieControllers.removeAt(index);
+      _initializeVideoFutures.removeAt(index);
+    });
+  }
 
   void _deletePackage() async {
     final bool confirmDelete = await showDialog(
@@ -307,66 +313,65 @@ class _EditPackagePageState extends State<EditPackagePage> {
                   : SizedBox(
                       height: 200,
                       child: ListView.builder(
-  scrollDirection: Axis.horizontal,
-  itemCount: _imageFiles.length + _imageUrls.length,
-  itemBuilder: (context, index) {
-    if (index < _imageFiles.length) {
-      return Container(
-        width: 200,
-        height: 200,
-        child: Stack(
-          children: [
-            Image.file(
-              _imageFiles[index],
-              width: 200,
-              height: 200,
-              fit: BoxFit.cover,
-            ),
-            Positioned(
-              right: 0,
-              child: IconButton(
-                icon: const Icon(Icons.cancel, color: FVColors.gold),
-                onPressed: () => _removeImage(index),
-              ),
-            ),
-          ],
-        ),
-      );
-    } else {
-      int urlIndex = index - _imageFiles.length;
-      return Container(
-        width: 200,
-        height: 200,
-        child: Stack(
-          children: [
-            Image.network(
-              _imageUrls[urlIndex],
-              width: 200,
-              height: 200,
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  color: Colors.grey[300],
-                  child: const Center(
-                    child: Text('Gambar tidak tersedia'),
-                  ),
-                );
-              },
-            ),
-            Positioned(
-              right: 0,
-              child: IconButton(
-                icon: const Icon(Icons.cancel, color: FVColors.gold),
-                onPressed: () => _removeImage(index),
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-  },
-),
-
+                        scrollDirection: Axis.horizontal,
+                        itemCount: _imageFiles.length + _imageUrls.length,
+                        itemBuilder: (context, index) {
+                          if (index < _imageFiles.length) {
+                            return Container(
+                              width: 200,
+                              height: 200,
+                              child: Stack(
+                                children: [
+                                  Image.file(
+                                    _imageFiles[index],
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    child: IconButton(
+                                      icon: const Icon(Icons.cancel, color: FVColors.gold),
+                                      onPressed: () => _removeImage(index),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          } else {
+                            int urlIndex = index - _imageFiles.length;
+                            return Container(
+                              width: 200,
+                              height: 200,
+                              child: Stack(
+                                children: [
+                                  Image.network(
+                                    _imageUrls[urlIndex],
+                                    width: 200,
+                                    height: 200,
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Colors.grey[300],
+                                        child: const Center(
+                                          child: Text('Gambar tidak tersedia'),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  Positioned(
+                                    right: 0,
+                                    child: IconButton(
+                                      icon: const Icon(Icons.cancel, color: FVColors.gold),
+                                      onPressed: () => _removeImage(index),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+                        },
+                      ),
                     ),
               const SizedBox(height: 16),
               SizedBox(
@@ -458,23 +463,26 @@ class _EditPackagePageState extends State<EditPackagePage> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedCategory,
-                onChanged: (newValue) {
-                  setState(() {
-                    _selectedCategory = newValue;
-                  });
-                },
-                items: widget.categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                decoration: const InputDecoration(
-                  labelText: 'Kategori Paket',
-                ),
-              ),
+              Obx(() {
+                return DropdownButtonFormField<String>(
+                  value: _selectedCategory, // Menggunakan nilai _selectedCategory yang sudah diatur sebelumnya
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedCategory = newValue; // Memperbarui nilai _selectedCategory saat ada perubahan
+                    });
+                  },
+                  items: _categoryController.categories.map((category) {
+                    return DropdownMenuItem(
+                      value: category.name,
+                      child: Text(category.name),
+                    );
+                  }).toList(),
+                  decoration: const InputDecoration(
+                    labelText: 'Kategori Paket',
+                  ),
+                );
+              }),
+
               const SizedBox(height: 16),
               TextField(
                 controller: _descriptionController,

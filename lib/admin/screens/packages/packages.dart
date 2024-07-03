@@ -55,12 +55,6 @@ class SettingPackages extends StatelessWidget {
                         videoUrls: package.videoUrls,
                         price: package.price.toInt(),
                         description: package.description,
-                        categories: [
-                          'Basic Package',
-                          'Silver Package',
-                          'Golden Package',
-                          'Diamond Package',
-                        ],
                         selectedCategory: package.categoryId,
                       ),
                     ));

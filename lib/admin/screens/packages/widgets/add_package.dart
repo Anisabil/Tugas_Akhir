@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/category_controller.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
@@ -25,12 +27,20 @@ class _AddPackagePageState extends State<AddPackagePage> {
   List<File> _imageFiles = [];
   List<String> _videoUrls = [];
   List<File> _videoFiles = [];
+  String? _selectedCategory;
 
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
+  final CategoryController _categoryController = Get.find<CategoryController>();
 
   List<VideoPlayerController> _videoControllers = [];
   List<ChewieController> _chewieControllers = [];
   List<Future<void>> _initializeVideoFutures = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _categoryController.fetchCategories();
+  }
 
   @override
   void dispose() {
@@ -132,6 +142,7 @@ class _AddPackagePageState extends State<AddPackagePage> {
         'price': double.parse(_priceController.text),
         'imageUrls': imageUrls,
         'videoUrls': videoUrls,
+        'category': _selectedCategory, // Save the selected category
       });
 
       Navigator.of(context).pop();
@@ -162,6 +173,9 @@ class _AddPackagePageState extends State<AddPackagePage> {
 
   @override
   Widget build(BuildContext context) {
+    print('Items: ${_categoryController.categories.map((category) => category.name).toList()}');
+    print('Selected category: $_selectedCategory');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tambah Paket'),
@@ -305,22 +319,27 @@ class _AddPackagePageState extends State<AddPackagePage> {
                 keyboardType: TextInputType.number,
               ),
               const SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: widget.categories.isNotEmpty ? widget.categories[0] : null,
-                onChanged: (newValue) {
-                  // Handle dropdown value change
-                },
-                items: widget.categories.map((category) {
-                  return DropdownMenuItem(
-                    value: category,
-                    child: Text(category),
-                  );
-                }).toList(),
-                decoration: const InputDecoration(
-                  labelText: 'Kategori Paket',
-                ),
-              ),
-                const SizedBox(height: 16),
+              Obx(() {
+                return DropdownButtonFormField<String>(
+                  value: _selectedCategory,
+                  onChanged: (newValue) {
+                    setState(() {
+                      _selectedCategory = newValue;
+                    });
+                  },
+                  items: _categoryController.categories.map((category) {
+                    return DropdownMenuItem(
+                      key: ValueKey(category.id),
+                      value: category.name,
+                      child: Text(category.name),
+                    );
+                  }).toList(),
+                  decoration: InputDecoration(
+                    labelText: 'Kategori Paket',
+                  ),
+                );
+              }),
+              const SizedBox(height: 16),
               TextField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(

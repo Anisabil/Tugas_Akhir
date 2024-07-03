@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/screens/rent_order/widgets/rent_detail.dart';
-import 'package:fvapp/utils/constants/colors.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
+import 'package:fvapp/features/studio/payment/model/rent_model.dart';
+import 'package:fvapp/features/personalization/models/user_model.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:fvapp/utils/constants/colors.dart';
+import 'package:fvapp/admin/screens/chat/chat_list.dart';
+import 'package:fvapp/admin/screens/rent_order/widgets/rent_detail.dart';
 
 class RentalItem extends StatelessWidget {
   final String rentalName;
@@ -130,11 +134,47 @@ class _RentalListState extends State<RentalList> {
         },
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () async {
+          try {
+            UserModel userModel = await getCurrentUser();
+            print('User data: ${userModel.toJson()}');
+            if (userModel.role == 'admin') {
+              Get.to(() => AdminChatListScreen());
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
+              );
+            }
+          } catch (e) {
+            print('Error getting current user: ${e.toString()}');
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${e.toString()}')),
+            );
+          }
+        },
         child: const Icon(Iconsax.messages),
         backgroundColor: FVColors.gold,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
+}
+
+Future<UserModel> getCurrentUser() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user == null) {
+    print('User not logged in');
+    throw Exception('User not logged in');
+  }
+
+  print('Current user ID: ${user.uid}');
+
+  final doc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+  if (!doc.exists) {
+    print('User document does not exist for ID: ${user.uid}');
+    throw Exception('User document does not exist');
+  }
+
+  print('User document found: ${doc.data()}');
+  return UserModel.fromSnapshot(doc);
 }

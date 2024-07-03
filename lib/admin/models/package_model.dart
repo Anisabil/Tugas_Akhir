@@ -4,6 +4,7 @@ class Package {
   final String description;
   final double price;
   final String categoryId;
+  String categoryName;
   final List<String> imageUrls;
   final List<String> videoUrls; // List of video URLs
 
@@ -15,6 +16,7 @@ class Package {
     required this.categoryId,
     required this.imageUrls,
     required this.videoUrls,
+    this.categoryName = '',
   });
 
   factory Package.fromJson(Map<String, dynamic> json) {
