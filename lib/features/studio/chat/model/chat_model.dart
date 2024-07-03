@@ -4,7 +4,9 @@ class Message {
   final String senderId;
   final String receiverId;
   final int timestamp;
-  final String imageUrl; // Tambahkan atribut imageUrl
+  final String imageUrl; // Atribut untuk URL gambar
+  final String fileUrl; // Atribut untuk URL file
+  final String fileName; // Atribut untuk nama file
 
   Message({
     required this.id,
@@ -12,7 +14,9 @@ class Message {
     required this.senderId,
     required this.receiverId,
     required this.timestamp,
-    required this.imageUrl, // Inisialisasi atribut imageUrl
+    required this.imageUrl,
+    required this.fileUrl,
+    required this.fileName,
   });
 
   factory Message.fromMap(Map<String, dynamic> map) {
@@ -22,7 +26,9 @@ class Message {
       senderId: map['senderId'] ?? '',
       receiverId: map['receiverId'] ?? '',
       timestamp: map['timestamp'] ?? 0,
-      imageUrl: map['imageUrl'] ?? '', // Ambil nilai imageUrl dari map
+      imageUrl: map['imageUrl'] ?? '',
+      fileUrl: map['fileUrl'] ?? '', // Inisialisasi atribut fileUrl
+      fileName: map['fileName'] ?? '', // Inisialisasi atribut fileName
     );
   }
 }

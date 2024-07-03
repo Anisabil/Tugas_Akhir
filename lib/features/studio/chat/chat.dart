@@ -4,7 +4,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:fvapp/features/studio/chat/model/chat_model.dart';
 import 'package:fvapp/features/studio/chat/screen/message_input.dart';
 import 'package:fvapp/utils/constants/colors.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class ChatScreen extends StatelessWidget {
   final String receiverId;
@@ -100,16 +102,16 @@ class MessageList extends StatelessWidget {
           );
         }
 
-        // Sort messages by timestamp in descending order
-        messages.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+        // Sort messages by timestamp in ascending order (oldest first)
+        messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
         return ListView.builder(
-          reverse: true, // Show latest message at the bottom
           itemCount: messages.length,
           itemBuilder: (context, index) {
             final message = messages[index];
             bool isClient = message.senderId == currentUserId; // Assuming `senderId` is a field in Message model
             bool hasImage = message.imageUrl.isNotEmpty; // Check if message has imageUrl
+            bool hasFile = message.fileUrl.isNotEmpty; // Check if message has fileUrl
 
             return Align(
               alignment: isClient ? Alignment.centerRight : Alignment.centerLeft,
@@ -125,6 +127,9 @@ class MessageList extends StatelessWidget {
                         ),
                       ),
                     );
+                  } else if (hasFile) {
+                    // Open file URL
+                    _launchURL(message.fileUrl);
                   }
                 },
                 child: Container(
@@ -143,11 +148,38 @@ class MessageList extends StatelessWidget {
                           style: TextStyle(color: Colors.black),
                         ),
                       if (hasImage) // Show image if available
-                        Image.network(
-                          message.imageUrl,
-                          height: 150, // Adjust size as needed
-                          width: 150,
-                          fit: BoxFit.cover,
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Image.network(
+                            message.imageUrl,
+                            height: 150, // Adjust size as needed
+                            width: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      if (hasFile) // Show file if available
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Container(
+                            constraints: BoxConstraints(maxWidth: 200),
+                            child: ElevatedButton.icon(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: FVColors.grey,
+                                side: BorderSide(color: FVColors.grey),
+                              ),
+                              onPressed: () {
+                                _launchURL(message.fileUrl);
+                              },
+                              icon: Icon(Iconsax.attach_circle, color: Colors.black),
+                              label: Flexible(
+                                child: Text(
+                                  message.fileName,
+                                  style: TextStyle(color: Colors.black),
+                                  overflow: TextOverflow.ellipsis, // Prevent overflow
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       SizedBox(height: 5),
                       Text(
@@ -163,5 +195,13 @@ class MessageList extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }

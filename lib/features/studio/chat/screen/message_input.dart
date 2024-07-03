@@ -5,6 +5,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
 
 class MessageInput extends StatefulWidget {
@@ -35,9 +36,9 @@ class _MessageInputState extends State<MessageInput> {
     var message = {
       'senderId': widget.currentUserId,
       'text': messageText,
-      'fileUrl': fileUrl ?? '', // Ganti dengan logika unggah file Anda
-      'fileName': fileName ?? '',
-      'imageUrl': imageUrl ?? '', // Ganti dengan logika unggah gambar Anda
+      'fileUrl': fileUrl ?? '', // URL file diunggah
+      'fileName': fileName ?? '', // Nama file
+      'imageUrl': imageUrl ?? '', // URL gambar diunggah
       'timestamp': ServerValue.timestamp,
     };
 
@@ -46,19 +47,24 @@ class _MessageInputState extends State<MessageInput> {
     _messageController.clear();
   }
 
-  void _sendFile() async {
+  Future<void> _sendFile() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'doc', 'docx'], // Tambahkan ekstensi file yang diizinkan
+      allowedExtensions: ['pdf', 'doc', 'docx'], // Ekstensi file yang diizinkan
     );
 
     if (result != null) {
       File file = File(result.files.single.path!);
       String fileName = result.files.single.name;
 
-      // Simpan file ke Firebase Storage atau penyimpanan yang Anda gunakan
+      Reference storageRef = FirebaseStorage.instance.ref().child('files').child(fileName);
 
-      _sendMessage('', fileUrl: '', fileName: fileName);
+      UploadTask uploadTask = storageRef.putFile(file);
+      TaskSnapshot snapshot = await uploadTask;
+
+      String fileUrl = await snapshot.ref.getDownloadURL();
+
+      _sendMessage('', fileUrl: fileUrl, fileName: fileName);
     }
   }
 
@@ -91,20 +97,28 @@ class _MessageInputState extends State<MessageInput> {
               controller: _messageController,
               decoration: InputDecoration(
                 hintText: 'Ketik pesan...',
-                border: OutlineInputBorder(),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 10.0, horizontal: 20.0),
+                suffixIcon: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: Icon(Iconsax.attach_circle),
+                      onPressed: _sendFile,
+                    ),
+                    IconButton(
+                      icon: Icon(Iconsax.camera),
+                      onPressed: _sendImage,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           IconButton(
-            icon: Icon(Icons.insert_drive_file),
-            onPressed: _sendFile,
-          ),
-          IconButton(
-            icon: Icon(Icons.camera_alt),
-            onPressed: _sendImage,
-          ),
-          IconButton(
-            icon: Icon(Icons.send),
+            icon: Icon(Iconsax.send_14),
             onPressed: () => _sendMessage(_messageController.text),
           ),
         ],

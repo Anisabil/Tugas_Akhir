@@ -4,7 +4,9 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:fvapp/features/studio/chat/model/chat_model.dart';
 import 'package:fvapp/features/studio/chat/screen/message_input.dart';
 import 'package:fvapp/utils/constants/colors.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AdminChatScreen extends StatelessWidget {
   final String roomId;
@@ -101,6 +103,7 @@ class AdminMessageList extends StatelessWidget {
             final message = messages[index];
             bool isAdmin = message.senderId == currentUserId; // Assuming `senderId` is a field in Message model
             bool hasImage = message.imageUrl.isNotEmpty; // Check if message has imageUrl
+            bool hasFile = message.fileUrl.isNotEmpty; // Check if message has fileUrl
 
             return Align(
               alignment: isAdmin ? Alignment.centerRight : Alignment.centerLeft,
@@ -116,6 +119,9 @@ class AdminMessageList extends StatelessWidget {
                         ),
                       ),
                     );
+                  } else if (hasFile) {
+                    // Open file URL
+                    _launchURL(message.fileUrl);
                   }
                 },
                 child: Container(
@@ -134,11 +140,34 @@ class AdminMessageList extends StatelessWidget {
                           style: TextStyle(color: Colors.black),
                         ),
                       if (hasImage) // Show image if available
-                        Image.network(
-                          message.imageUrl,
-                          height: 150, // Adjust size as needed
-                          width: 150,
-                          fit: BoxFit.cover,
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Image.network(
+                            message.imageUrl,
+                            height: 150, // Adjust size as needed
+                            width: 150,
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      if (hasFile) // Show file if available
+                        Padding(
+                          padding: EdgeInsets.symmetric(vertical: 5),
+                          child: Container(
+                            constraints: BoxConstraints(maxWidth: 200),
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                _launchURL(message.fileUrl);
+                              },
+                              icon: Icon(Iconsax.attach_circle),
+                              label: Flexible(
+                                child: Text(
+                                  message.fileName,
+                                  style: TextStyle(color: Colors.black),
+                                  overflow: TextOverflow.ellipsis, // Prevent overflow
+                                ),
+                              ),
+                            ),
+                          ),
                         ),
                       SizedBox(height: 5),
                       Text(
@@ -154,5 +183,13 @@ class AdminMessageList extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _launchURL(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
   }
 }
