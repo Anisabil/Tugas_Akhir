@@ -11,12 +11,13 @@ import 'package:get/get.dart';
 
 class EventScreen extends StatelessWidget {
   final Package package;
+  final String packageId;
   final int currentStep;
 
   const EventScreen({
     Key? key,
     required this.package,
-    this.currentStep = 0,
+    this.currentStep = 0, required this.packageId,
   }) : super(key: key);
 
   @override
@@ -27,7 +28,6 @@ class EventScreen extends StatelessWidget {
       appBar: AppBar(title: Text('Pilih Tanggal Sewa')),
       body: Column(
         children: [
-          // Tambahkan MultiStepFormIndicator di sini
           MultiStepFormIndicator(
             currentStep: currentStep,
             totalSteps: 3,
@@ -60,4 +60,3 @@ class EventScreen extends StatelessWidget {
     );
   }
 }
-

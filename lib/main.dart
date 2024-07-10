@@ -4,12 +4,10 @@ import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/admin/controllers/rent_detail_controller.dart';
 import 'package:fvapp/features/personalization/controllers/user_controller.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
-import 'package:fvapp/features/studio/screens/checkout/temporary_data/temporary_controller.dart';
 import 'package:fvapp/features/studio/screens/event/controller/event_controller.dart';
 import 'package:fvapp/navigation_controller.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 import 'app.dart';
 import 'package:firebase_core/firebase_core.dart';

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/models/category_model.dart';
@@ -48,6 +49,7 @@ class _EditPackagePageState extends State<EditPackagePage> {
   List<File> _videoFiles = [];
   List<String> _videoUrls = [];
   String? _selectedCategory;
+  String? _selectedCategoryName;
 
   final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
   final CategoryController _categoryController = Get.find<CategoryController>();
@@ -73,6 +75,11 @@ class _EditPackagePageState extends State<EditPackagePage> {
 
     _initializeVideoControllers();
 
+    _selectedCategory = widget.selectedCategory;
+    _selectedCategoryName = _categoryController.categories
+        .firstWhere((category) => category.id == widget.selectedCategory)
+        .name;
+    
     // Fetch categories
     _categoryController.fetchCategories();
   }
@@ -221,56 +228,64 @@ class _EditPackagePageState extends State<EditPackagePage> {
   }
 
   Future<void> _updatePackage() async {
-    if (_packageNameController.text.isEmpty ||
-        _priceController.text.isEmpty ||
-        _descriptionController.text.isEmpty ||
-        _selectedCategory == null) {
-      FVLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Semua field harus diisi.',
-      );
-      return;
-    }
-
-    try {
-      List<String> imageUrls = _imageUrls;
-      for (File imageFile in _imageFiles) {
-        String? imageUrl = await _uploadFile(imageFile, widget.packageId, 'images');
-        if (imageUrl != null) {
-          imageUrls.add(imageUrl);
-        }
-      }
-
-      List<String> videoUrls = _videoUrls;
-      for (File videoFile in _videoFiles) {
-        String? videoUrl = await _uploadFile(videoFile, widget.packageId, 'videos');
-        if (videoUrl != null) {
-          videoUrls.add(videoUrl);
-        }
-      }
-
-      await _databaseReference.child('packages/${widget.packageId}').update({
-        'name': _packageNameController.text,
-        'description': _descriptionController.text,
-        'price': double.parse(_priceController.text),
-        'categoryId': _selectedCategory,
-        'imageUrls': imageUrls,
-        'videoUrls': videoUrls,
-      });
-
-      Navigator.of(context).pop();
-      FVLoaders.successSnackBar(
-        title: 'Berhasil',
-        message: 'Paket berhasil diupdate.',
-      );
-    } catch (e) {
-      print('Error occurred while updating package: $e');
-      FVLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Terjadi kesalahan saat mengupdate paket.',
-      );
-    }
+  if (_packageNameController.text.isEmpty ||
+      _priceController.text.isEmpty ||
+      _descriptionController.text.isEmpty ||
+      _selectedCategory == null) {
+    FVLoaders.errorSnackBar(
+      title: 'Error',
+      message: 'Semua field harus diisi.',
+    );
+    return;
   }
+
+  try {
+    List<String> imageUrls = _imageUrls;
+    for (File imageFile in _imageFiles) {
+      String? imageUrl = await _uploadFile(imageFile, widget.packageId, 'images');
+      if (imageUrl != null) {
+        imageUrls.add(imageUrl);
+      }
+    }
+
+    List<String> videoUrls = _videoUrls;
+    for (File videoFile in _videoFiles) {
+      String? videoUrl = await _uploadFile(videoFile, widget.packageId, 'videos');
+      if (videoUrl != null) {
+        videoUrls.add(videoUrl);
+      }
+    }
+
+    await FirebaseFirestore.instance.collection('packages').doc(widget.packageId).update({
+      'name': _packageNameController.text,
+      'description': _descriptionController.text,
+      'price': double.parse(_priceController.text),
+      'categoryId': _selectedCategory,
+      'categoryName': _selectedCategoryName,
+      'imageUrls': imageUrls,
+      'videoUrls': videoUrls,
+    });
+
+    // Update local state to reflect changes
+    setState(() {
+      _imageUrls = imageUrls;
+      _videoUrls = videoUrls;
+    });
+
+    Navigator.of(context).pop();
+    FVLoaders.successSnackBar(
+      title: 'Berhasil',
+      message: 'Paket berhasil diupdate.',
+    );
+  } catch (e) {
+    print('Error occurred while updating package: $e');
+    FVLoaders.errorSnackBar(
+      title: 'Error',
+      message: 'Terjadi kesalahan saat mengupdate paket.',
+    );
+  }
+}
+
 
   Future<String?> _uploadFile(File file, String packageId, String folder) async {
     try {
@@ -410,7 +425,7 @@ class _EditPackagePageState extends State<EditPackagePage> {
                                 return Stack(
                                   children: [
                                     AspectRatio(
-                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 16 / 9,
+                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 6 / 9,
                                       child: Chewie(controller: _chewieControllers[index]),
                                     ),
                                     Positioned(
@@ -464,24 +479,27 @@ class _EditPackagePageState extends State<EditPackagePage> {
               ),
               const SizedBox(height: 16),
               Obx(() {
-                return DropdownButtonFormField<String>(
-                  value: _selectedCategory, // Menggunakan nilai _selectedCategory yang sudah diatur sebelumnya
-                  onChanged: (newValue) {
-                    setState(() {
-                      _selectedCategory = newValue; // Memperbarui nilai _selectedCategory saat ada perubahan
-                    });
-                  },
-                  items: _categoryController.categories.map((category) {
-                    return DropdownMenuItem(
-                      value: category.name,
-                      child: Text(category.name),
-                    );
-                  }).toList(),
-                  decoration: const InputDecoration(
-                    labelText: 'Kategori Paket',
-                  ),
-                );
-              }),
+  return DropdownButtonFormField<String>(
+    value: _selectedCategory ?? widget.selectedCategory, // Menggunakan nilai default dari widget jika sebelumnya sudah ada
+    onChanged: (newValue) {
+      setState(() {
+        _selectedCategory = newValue; // Memperbarui nilai _selectedCategory saat ada perubahan
+        _selectedCategoryName = _categoryController.categories
+            .firstWhereOrNull((category) => category.id == newValue)
+            ?.name;
+      });
+    },
+    items: _categoryController.categories.map((category) {
+      return DropdownMenuItem(
+        value: category.id, // Menggunakan id kategori sebagai value
+        child: Text(category.name),
+      );
+    }).toList(),
+    decoration: const InputDecoration(
+      labelText: 'Kategori Paket',
+    ),
+  );
+}),
 
               const SizedBox(height: 16),
               TextField(
@@ -521,4 +539,3 @@ class _EditPackagePageState extends State<EditPackagePage> {
     );
   }
 }
-

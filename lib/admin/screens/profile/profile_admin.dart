@@ -76,17 +76,17 @@ class ProfileAdmin extends StatelessWidget {
                   //   title: 'Keranjangku',
                   //   subTitle: 'Tambahkan, hapus paket dan pindah ke checkout',
                   // ),
-                  FVSettingsMenuTile(
-                    icon: Iconsax.bag_tick,
-                    title: 'Paket Pilihanku',
-                    subTitle: 'Status sewa sedang di proses dan selesai',
-                    onTap: () => Get.to(() => const OrderScreen(userId: '1',)),
-                  ),
-                  const FVSettingsMenuTile(
-                    icon: Iconsax.bank,
-                    title: 'Akun Bank',
-                    subTitle: 'Tarik saldo ke rekening bank terdaftar',
-                  ),
+                  // FVSettingsMenuTile(
+                  //   icon: Iconsax.bag_tick,
+                  //   title: 'Paket Pilihanku',
+                  //   subTitle: 'Status sewa sedang di proses dan selesai',
+                  //   onTap: () => Get.to(() => const OrderScreen(userId: '1',)),
+                  // ),
+                  // const FVSettingsMenuTile(
+                  //   icon: Iconsax.bank,
+                  //   title: 'Akun Bank',
+                  //   subTitle: 'Tarik saldo ke rekening bank terdaftar',
+                  // ),
                   
                   const FVSettingsMenuTile(
                     icon: Iconsax.notification,
@@ -106,16 +106,16 @@ class ProfileAdmin extends StatelessWidget {
                   //   subTitle: 'Kelola data dan akun yang terhubung',
                   // ),
 
-                  const SizedBox(height: FVSizes.spaceBtwSection),
-                  FVSettingsMenuTile(
-                    icon: Iconsax.location,
-                    title: 'Tema',
-                    subTitle: 'Tetapkan tema sesuai keinginan',
-                    trailing: Switch(
-                      value: false, 
-                      onChanged: (value) {}
-                    ),
-                  ),
+                  // const SizedBox(height: FVSizes.spaceBtwSection),
+                  // FVSettingsMenuTile(
+                  //   icon: Iconsax.location,
+                  //   title: 'Tema',
+                  //   subTitle: 'Tetapkan tema sesuai keinginan',
+                  //   trailing: Switch(
+                  //     value: false, 
+                  //     onChanged: (value) {}
+                  //   ),
+                  // ),
 
                   // // App Settings
                   // const SizedBox(height: FVSizes.spaceBtwSection),
@@ -146,7 +146,7 @@ class ProfileAdmin extends StatelessWidget {
                   //   subTitle: 'Mengatur kualitas gambar untuk dilihat',
                   //   trailing: Switch(value: true, onChanged: (value) {}),
                   // ),
-                  const SizedBox(height: FVSizes.spaceBtwSection),
+                  const SizedBox(height: FVSizes.spaceBtwSection * 6),
 
                   // Button Logout
                   SizedBox(

@@ -25,7 +25,6 @@ class RentDetail extends StatelessWidget {
         leading: BackButton(),
         title: Text(
           'Detail Sewa',
-          // style: Theme.of(context).textTheme.,
         ),
       ),
       body: Obx(() {
@@ -40,83 +39,103 @@ class RentDetail extends StatelessWidget {
         Rent rent = controller.rent.value!;
         final dark = Theme.of(context).brightness == Brightness.dark;
 
-        return SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(FVSizes.defaultSpace),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FVRoundedContainer(
-                  showBorder: true,
-                  padding: const EdgeInsets.all(FVSizes.md),
-                  backgroundColor: dark ? FVColors.black : FVColors.white,
-                  child: Padding(
-                    padding: const EdgeInsets.all(FVSizes.md),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        FVSectionHeading(
-                          title: 'Status ${rent.status}',
-                          showActionButton: false,
-                        ),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Nama Klien: ${rent.userName}'),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Paket: ${rent.packageName}'),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Tema: ${rent.theme}'),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Metode Pembayaran: ${rent.paymentMethod}'),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Deskripsi: ${rent.description}'),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                        FVBillingAmountSection(
-                          totalPrice: rent.totalPrice,
-                          downPayment: rent.downPayment,
-                          remainingPayment: rent.remainingPayment,
-                        ),
-                        SizedBox(height: FVSizes.spaceBtwItems),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: FVSizes.spaceBtwSection),
-                Row(
+        return Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(FVSizes.defaultSpace),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: rent.status == 'On Hold'
-                            ? () {
-                                controller.setStatus('In Progress');
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: rent.status == 'On Hold' ? FVColors.gold : FVColors.grey,
+                    FVRoundedContainer(
+                      showBorder: true,
+                      padding: const EdgeInsets.all(FVSizes.md),
+                      backgroundColor: dark ? FVColors.black : FVColors.white,
+                      child: Padding(
+                        padding: const EdgeInsets.all(FVSizes.md),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            FVSectionHeading(
+                              title: 'Status ${rent.status}',
+                              showActionButton: false,
+                            ),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            Text('Nama Klien: ${rent.userName}'),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            Text('Paket: ${rent.packageName}'),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            Text('Tema: ${rent.theme}'),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            Text('Metode Pembayaran: ${rent.paymentMethod}'),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            Text('Deskripsi: ${rent.description}'),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                            FVBillingAmountSection(
+                              totalPrice: rent.totalPrice,
+                              downPayment: rent.downPayment,
+                              remainingPayment: rent.remainingPayment,
+                            ),
+                            SizedBox(height: FVSizes.spaceBtwItems),
+                          ],
                         ),
-                        child: Text('In Progress'),
                       ),
                     ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: rent.status == 'In Progress'
-                            ? () {
-                                controller.setStatus('Completed');
-                              }
-                            : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: rent.status == 'In Progress' ? FVColors.gold : FVColors.grey,
+                    const SizedBox(height: FVSizes.spaceBtwSection),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: rent.status == 'Belum Bayar'
+                                ? () {
+                                    controller.setStatus('Belum Lunas');
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: rent.status == 'Belum Bayar' ? FVColors.gold : FVColors.grey,
+                            ),
+                            child: Text('Belum Lunas', style: TextStyle(color: FVColors.darkGrey)),
+                          ),
                         ),
-                        child: Text('Completed'),
-                      ),
+                        SizedBox(width: 10),
+                        Expanded(
+                          child: ElevatedButton(
+                            onPressed: rent.status == 'Belum Lunas'
+                                ? () {
+                                    controller.setStatus('Lunas');
+                                  }
+                                : null,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: rent.status == 'Belum Lunas' ? FVColors.gold : FVColors.grey,
+                            ),
+                            child: Text('Lunas', style: TextStyle(color: FVColors.darkGrey),),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(FVSizes.defaultSpace),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    controller.deleteRent(rentId);
+                    Navigator.of(context).pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: FVColors.warning,
+                  ),
+                  child: Text('Hapus Sewa'),
+                ),
+              ),
+            ),
+          ],
         );
       }),
     );

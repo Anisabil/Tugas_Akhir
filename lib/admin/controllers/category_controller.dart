@@ -12,23 +12,26 @@ class CategoryController extends GetxController {
     fetchCategories();
   }
 
+  var isLoading = false.obs;
+
   void fetchCategories() async {
     try {
+      isLoading.value = true;
       categories.value = await _categoryService.getCategories();
     } catch (e) {
       print("Error fetching categories: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 
-  Future<Category?> getCategoryById(String categoryId) async {
+  String getCategoryNameById(String categoryId) {
     try {
-      return await _categoryService.getCategoryById(categoryId);
+      return categories.firstWhere((category) => category.id == categoryId).name;
     } catch (e) {
-      print("Error getting category by ID: $e");
-      return null;
+      return 'Unknown Category';
     }
   }
-
 
   void addCategory(String name) async {
     await _categoryService.addCategory(name);

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/package_controller.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
 import '../../../../utils/constants/colors.dart';
@@ -8,14 +10,14 @@ import '../../../../utils/helpers/helper_function.dart';
 
 class FVSearchContainer extends StatelessWidget {
   const FVSearchContainer({
-    super.key,
+    Key? key,
     required this.text,
     this.icon = Iconsax.search_normal,
     this.showBackground = true,
     this.showBorder = true,
     this.onTap,
     this.padding = const EdgeInsets.symmetric(horizontal: FVSizes.defaultSpace),
-  });
+  }) : super(key: key);
 
   final String text;
   final IconData? icon;
@@ -30,7 +32,7 @@ class FVSearchContainer extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: FVSizes.defaultSpace),
+        padding: padding,
         child: Container(
           width: FVDeviceUtils.getScreenWidth(context),
           padding: const EdgeInsets.all(FVSizes.md),
@@ -46,12 +48,16 @@ class FVSearchContainer extends StatelessWidget {
           child: Row(
             children: [
               Icon(icon, color: dark ? FVColors.darkGrey : Colors.grey),
-              const SizedBox(
-                width: FVSizes.spaceBtwItems,
-              ),
-              Text(
-                text,
-                style: Theme.of(context).textTheme.bodySmall,
+              const SizedBox(width: FVSizes.spaceBtwItems),
+              Expanded(
+                child: TextField(
+                  onChanged: (query) => Get.find<PackageController>().search(query),
+                  decoration: InputDecoration(
+                    hintText: text,
+                    border: InputBorder.none,
+                    hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: dark ? FVColors.darkGrey : Colors.grey),
+                  ),
+                ),
               ),
             ],
           ),

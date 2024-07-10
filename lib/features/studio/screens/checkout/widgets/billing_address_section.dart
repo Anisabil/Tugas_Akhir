@@ -6,7 +6,8 @@ import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:get/get.dart';
 
 class FVBillingAddressSection extends StatelessWidget {
-  const FVBillingAddressSection({super.key});
+  final Map<String, dynamic> formData;
+  const FVBillingAddressSection({super.key, required this.formData});
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +25,9 @@ class FVBillingAddressSection extends StatelessWidget {
         } else {
           final user = snapshot.data!;
           print('User data in FVBillingAddressSection: ${user.toJson()}');
+          
+          formData['clientEmail'] = user.email;
+          
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -35,7 +39,8 @@ class FVBillingAddressSection extends StatelessWidget {
                     size: 16,
                   ),
                   const SizedBox(width: FVSizes.spaceBtwItems),
-                  Text(user.userName, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(user.userName,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
               const SizedBox(height: FVSizes.spaceBtwItems / 2),
@@ -47,7 +52,8 @@ class FVBillingAddressSection extends StatelessWidget {
                     size: 16,
                   ),
                   const SizedBox(width: FVSizes.spaceBtwItems),
-                  Text(user.phoneNumber, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(user.phoneNumber,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
               const SizedBox(height: FVSizes.spaceBtwItems / 2),
@@ -59,7 +65,8 @@ class FVBillingAddressSection extends StatelessWidget {
                     size: 16,
                   ),
                   const SizedBox(width: FVSizes.spaceBtwItems),
-                  Text(user.email, style: Theme.of(context).textTheme.bodyMedium),
+                  Text(user.email,
+                      style: Theme.of(context).textTheme.bodyMedium),
                 ],
               ),
             ],

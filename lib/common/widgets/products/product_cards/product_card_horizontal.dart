@@ -16,7 +16,7 @@ import '../../icons/fv_circular_icon.dart';
 class FVProductCardHorizontal extends StatelessWidget {
   final Package package;
 
-  const FVProductCardHorizontal({super.key, required this.package,});
+  const FVProductCardHorizontal({Key? key, required this.package}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +49,10 @@ class FVProductCardHorizontal extends StatelessWidget {
                 SizedBox(
                   height: 120,
                   width: 120,
-                  child: FVRoundedImage(imageUrl: package.imageUrls.first),
+                  child: imageUrl != null
+                      ? Image.network(imageUrl, fit: BoxFit.cover)
+                      : Container(), // Placeholder or empty container if no image
                 ),
-
               ],
             ),
           ),
@@ -62,25 +63,19 @@ class FVProductCardHorizontal extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.only(top: FVSizes.md, left: FVSizes.sm),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  FVProductTitleText(title: package.name, smallSize: true),
+                  const SizedBox(height: FVSizes.spaceBtwItems / 2),
+                  FVBrandTitleWithVerifiedIcon(title: package.categoryName),
+                  const SizedBox(height: FVSizes.spaceBtwItems + 6.6),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      FVProductTitleText(
-                          title: package.name, smallSize: true),
-                      const SizedBox(height: FVSizes.spaceBtwItems / 2),
-                      FVBrandTitleWithVerifiedIcon(title: package.categoryId),
-                      const SizedBox(height: FVSizes.spaceBtwItems + 6.6),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          // Pricing
-                          FVProductPriceText(price: package.price),
-
-                        ],
-                      )
+                      // Pricing
+                      FVProductPriceText(price: package.price),
                     ],
-                  ),
+                  )
                 ],
               ),
             ),

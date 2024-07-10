@@ -13,10 +13,11 @@ import 'package:fvapp/features/studio/chat/chat.dart';
 
 class FVBottomAddToCart extends StatelessWidget {
   final Package package;
+  final String packageId;
 
   const FVBottomAddToCart({
     Key? key,
-    required this.package,
+    required this.package, required this.packageId,
   }) : super(key: key);
 
   @override
@@ -40,10 +41,14 @@ class FVBottomAddToCart extends StatelessWidget {
               try {
                 UserModel userModel = await getCurrentUser();
                 if (userModel.role == 'admin' || userModel.role == 'client') {
-                  Get.to(() => ChatScreen(receiverId: 'admin')); // Gunakan 'admin' sebagai ID fotografer
+                  Get.to(() => ChatScreen(
+                      receiverId:
+                          'admin')); // Gunakan 'admin' sebagai ID fotografer
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
+                    SnackBar(
+                        content:
+                            Text('Anda tidak memiliki akses ke fitur ini.')),
                   );
                 }
               } catch (e) {
@@ -68,7 +73,10 @@ class FVBottomAddToCart extends StatelessWidget {
           ),
           ElevatedButton(
             onPressed: () {
-              Get.to(() => EventScreen(package: package));
+              Get.to(() => EventScreen(
+                    package: package,
+                    packageId: packageId,
+                  ));
             },
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.all(FVSizes.md),
@@ -99,7 +107,8 @@ Future<UserModel> getCurrentUser() async {
 
   print('Current user ID: ${user.uid}');
 
-  final doc = await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
+  final doc =
+      await FirebaseFirestore.instance.collection('Users').doc(user.uid).get();
   if (!doc.exists) {
     print('User document does not exist for ID: ${user.uid}');
     throw Exception('User document does not exist');

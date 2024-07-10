@@ -1,14 +1,9 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
-import 'package:iconsax/iconsax.dart';
 
-import '../../../../../common/widgets/appbar/appbar.dart';
 import '../../../../../common/widgets/custom_shapes/curved_edges/curved_edges_widget.dart';
-import '../../../../../common/widgets/icons/fv_circular_icon.dart';
-import '../../../../../common/widgets/images/fv_rounded_image.dart';
 import '../../../../../utils/constants/colors.dart';
-import '../../../../../utils/constants/image_strings.dart';
 import '../../../../../utils/constants/sizes.dart';
 
 class FVProductImageSlider extends StatefulWidget {
@@ -30,18 +25,34 @@ class _FVProductImageSliderState extends State<FVProductImageSlider> {
   @override
   void initState() {
     super.initState();
+    print('Package ID: ${widget.packageId}');
     _fetchImages();
   }
 
   Future<void> _fetchImages() async {
-    DatabaseReference ref =
-        FirebaseDatabase.instance.ref('packages/${widget.packageId}/imageUrls');
-    DataSnapshot snapshot = await ref.get();
-    if (snapshot.exists) {
-      List<dynamic> urls = snapshot.value as List<dynamic>;
-      setState(() {
-        imageUrls = urls.cast<String>();
-      });
+    if (widget.packageId.isEmpty) {
+      print('Error: Package ID is empty');
+      return;
+    }
+
+    try {
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('packages')
+          .doc(widget.packageId)
+          .get();
+
+      if (documentSnapshot.exists) {
+        var data = documentSnapshot.data() as Map<String, dynamic>;
+        List<dynamic> urls = data['imageUrls'];
+        setState(() {
+          imageUrls = urls.cast<String>();
+        });
+        print('Fetched image URLs: $imageUrls'); // Log untuk debugging
+      } else {
+        print('No image URLs found.'); // Log jika tidak ada data gambar
+      }
+    } catch (e) {
+      print('Error fetching image URLs: $e'); // Log jika terjadi error
     }
   }
 
@@ -68,9 +79,14 @@ class _FVProductImageSliderState extends State<FVProductImageSlider> {
                           child: Image.network(
                             imageUrls[selectedIndex],
                             fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Text('Failed to load image'); // Menampilkan pesan jika gagal memuat gambar
+                            },
                           ),
                         )
-                      : Container(),
+                      : Container(
+                          child: Text('No image available'), // Menampilkan pesan jika tidak ada gambar
+                        ),
                 ),
               ),
             ),
@@ -86,8 +102,7 @@ class _FVProductImageSliderState extends State<FVProductImageSlider> {
                   shrinkWrap: true,
                   scrollDirection: Axis.horizontal,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  separatorBuilder: (_, __) =>
-                      const SizedBox(width: FVSizes.spaceBtwItems),
+                  separatorBuilder: (_, __) => const SizedBox(width: FVSizes.spaceBtwItems),
                   itemBuilder: (_, index) => GestureDetector(
                     onTap: () {
                       setState(() {
@@ -105,6 +120,9 @@ class _FVProductImageSliderState extends State<FVProductImageSlider> {
                           image: DecorationImage(
                             image: NetworkImage(imageUrls[index]),
                             fit: BoxFit.cover,
+                            onError: (error, stackTrace) {
+                              print('Error loading image: $error'); // Log error jika terjadi masalah
+                            },
                           ),
                         ),
                       ),

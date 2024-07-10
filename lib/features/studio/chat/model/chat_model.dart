@@ -1,12 +1,14 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Message {
   final String id;
   final String text;
   final String senderId;
   final String receiverId;
-  final int timestamp;
-  final String imageUrl; // Atribut untuk URL gambar
-  final String fileUrl; // Atribut untuk URL file
-  final String fileName; // Atribut untuk nama file
+  final Timestamp timestamp;
+  final String imageUrl;
+  final String fileUrl;
+  final String fileName;
 
   Message({
     required this.id,
@@ -19,16 +21,30 @@ class Message {
     required this.fileName,
   });
 
-  factory Message.fromMap(Map<String, dynamic> map) {
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'text': text,
+      'senderId': senderId,
+      'receiverId': receiverId,
+      'timestamp': timestamp,
+      'imageUrl': imageUrl,
+      'fileUrl': fileUrl,
+      'fileName': fileName,
+    };
+  }
+
+  factory Message.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Message(
-      id: map['id'] ?? '',
-      text: map['text'] ?? '',
-      senderId: map['senderId'] ?? '',
-      receiverId: map['receiverId'] ?? '',
-      timestamp: map['timestamp'] ?? 0,
-      imageUrl: map['imageUrl'] ?? '',
-      fileUrl: map['fileUrl'] ?? '', // Inisialisasi atribut fileUrl
-      fileName: map['fileName'] ?? '', // Inisialisasi atribut fileName
+      id: doc.id,
+      text: data['text'] ?? '',
+      senderId: data['senderId'] ?? '',
+      receiverId: data['receiverId'] ?? '',
+      timestamp: data['timestamp'] ?? Timestamp.now(),
+      imageUrl: data['imageUrl'] ?? '',
+      fileUrl: data['fileUrl'] ?? '',
+      fileName: data['fileName'] ?? '',
     );
   }
 }

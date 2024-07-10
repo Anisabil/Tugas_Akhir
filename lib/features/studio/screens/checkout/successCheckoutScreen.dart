@@ -1,28 +1,29 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
 import 'package:fvapp/common/styles/spacing_styles.dart';
+import 'package:fvapp/features/personalization/models/user_model.dart';
+import 'package:fvapp/features/studio/chat/chat.dart';
 import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
-import 'package:fvapp/features/studio/screens/invoice/invoice.dart';
+import 'package:fvapp/features/studio/screens/order/widgets/order_detail.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/constants/text_strings.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-
 class SuccessCheckoutScreen extends StatelessWidget {
-  const SuccessCheckoutScreen(
-      {super.key,
-      required this.image,
-      required this.title,
-      required this.subTitle,
-      required this.onPressed});
+  final String image, title, subTitle, rentId;
 
-  final String image, title, subTitle;
-  final VoidCallback onPressed;
+  const SuccessCheckoutScreen({
+    required this.image,
+    required this.title,
+    required this.subTitle,
+    required this.rentId,
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final InvoicePdf invoicepdf = InvoicePdf();
     return Scaffold(
       body: SingleChildScrollView(
         child: Padding(
@@ -56,14 +57,13 @@ class SuccessCheckoutScreen extends StatelessWidget {
                 children: [
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () async {
-                        final data = await invoicepdf.generateInvoicePDF();
-                        invoicepdf.savePdfFile("KR PDF", data);
+                      onPressed: () {
+                        Get.to(() => OrderDetail(rentId: rentId));
                       },
                       child: const Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Icon(Iconsax.document_text), // Ganti dengan ikon yang Anda inginkan
+                          Icon(Iconsax.document_text),
                           SizedBox(height: 5),
                           Text(FVText.fvInvoice),
                         ],
@@ -73,7 +73,26 @@ class SuccessCheckoutScreen extends StatelessWidget {
                   const SizedBox(width: FVSizes.spaceBtwInputFields),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: onPressed,
+                      onPressed: () async {
+                        try {
+                          UserModel userModel = await getCurrentUser();
+                          if (userModel.role == 'admin' || userModel.role == 'client') {
+                            Get.to(() => ChatScreen(
+                              receiverId:'admin')
+                            ); // Gunakan 'admin' sebagai ID fotografer
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Anda tidak memiliki akses ke fitur ini.')
+                              ),
+                            );
+                          }
+                        } catch (e) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error: ${e.toString()}')),
+                          );
+                        }
+                      },
                       child: const Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
@@ -91,8 +110,9 @@ class SuccessCheckoutScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                    onPressed: () => Get.to(() => const BiodataScreen()),
-                    child: const Text(FVText.fvBiodata)),
+                  onPressed: () => Get.to(() => const BiodataScreen()),
+                  child: const Text(FVText.fvBiodata),
+                ),
               ),
             ],
           ),
@@ -103,7 +123,7 @@ class SuccessCheckoutScreen extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: onPressed,
+            onPressed: () => Get.to(() => OrderDetail(rentId: rentId)),
             child: const Text(FVText.fvContinue),
           ),
         ),

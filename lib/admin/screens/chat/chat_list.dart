@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fvapp/admin/screens/chat/room_chat.dart';
 import 'package:get/get.dart';
+import 'package:fvapp/admin/screens/chat/room_chat.dart';
 
 class AdminChatListScreen extends StatelessWidget {
   @override
@@ -18,8 +17,8 @@ class AdminChatListScreen extends StatelessWidget {
       appBar: AppBar(
         title: Text('Daftar Chat'),
       ),
-      body: StreamBuilder<DatabaseEvent>(
-        stream: FirebaseDatabase.instance.reference().child('chat_rooms').onValue,
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('rooms').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(child: CircularProgressIndicator());
@@ -29,66 +28,103 @@ class AdminChatListScreen extends StatelessWidget {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
             return Center(child: Text('Tidak ada pesan'));
           }
 
-          Map<dynamic, dynamic> chatRoomsMap = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-          var chatRooms = chatRoomsMap.entries.map((entry) {
-            var roomId = entry.key;
-            var roomData = entry.value;
-            return {'roomId': roomId, 'lastMessage': roomData['lastMessage'], 'timestamp': roomData['timestamp']};
+          var chatRooms = snapshot.data!.docs;
+
+          // Filter hanya chat room yang melibatkan admin
+          var adminChatRooms = chatRooms.where((room) {
+            var userIds = room.id.split('_');
+            // Debugging: print userIds
+            print('userIds in room ${room.id}: $userIds');
+            return userIds.contains(currentUserId) && userIds.any((id) => id != currentUserId && id == 'client');
           }).toList();
 
+          // Debugging: print adminChatRooms
+          print('Admin chat rooms: ${adminChatRooms.map((room) => room.id).toList()}');
+
+          if (adminChatRooms.isEmpty) {
+            return Center(child: Text('Tidak ada pesan'));
+          }
+
           return ListView.builder(
-            itemCount: chatRooms.length,
+            itemCount: adminChatRooms.length,
             itemBuilder: (context, index) {
-              var room = chatRooms[index];
-              var roomId = room['roomId'];
-              var userIds = roomId.split('_');
-              var otherUserId = userIds.firstWhere((id) => id != currentUserId && id != 'admin', orElse: () => '');
+              var room = adminChatRooms[index];
+              var roomId = room.id;
 
-              // Debugging: print otherUserId
-              print('otherUserId: $otherUserId');
+              // Debugging: print roomId
+              print('Room ID: $roomId');
 
-              // Filter out cases where otherUserId is empty
-              if (otherUserId.isEmpty) {
-                return SizedBox.shrink(); // Skip rendering this ListTile
-              }
-
-              return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance.collection('Users').doc(otherUserId).get(),
-                builder: (context, userSnapshot) {
-                  if (userSnapshot.connectionState == ConnectionState.waiting) {
+              return FutureBuilder<QuerySnapshot>(
+                future: room.reference.collection('messages').orderBy('timestamp', descending: true).limit(1).get(),
+                builder: (context, messagesSnapshot) {
+                  if (messagesSnapshot.connectionState == ConnectionState.waiting) {
                     return ListTile(
                       title: Text('Loading...'),
                     );
-                  } else if (userSnapshot.hasError) {
-                    return ListTile(
-                      title: Text('Error: ${userSnapshot.error}'),
-                    );
-                  } else if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                    // Debugging: print error message
-                    print('User data not found for userId: $otherUserId');
-                    return ListTile(
-                      title: Text('Unknown User'),
-                    );
-                  } else {
-                    var userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                    var userRole = userData['role'];
+                  }
 
-                    // Debugging: print userData and userRole
-                    print('userData: $userData');
-                    print('userRole: $userRole');
-
+                  if (messagesSnapshot.hasError) {
                     return ListTile(
-                      title: Text('${userData['userName']} (${userRole})'),
-                      subtitle: Text('${room['lastMessage']}'),
-                      onTap: () {
-                        Get.to(() => AdminChatScreen(roomId: roomId));
-                      },
+                      title: Text('Error: ${messagesSnapshot.error}'),
                     );
                   }
+
+                  if (!messagesSnapshot.hasData || messagesSnapshot.data!.docs.isEmpty) {
+                    return ListTile(
+                      title: Text('No messages'),
+                    );
+                  }
+
+                  var lastMessage = messagesSnapshot.data!.docs.first.data() as Map<String, dynamic>;
+                  var userIds = roomId.split('_');
+                  var otherUserId = userIds.firstWhere((id) => id != currentUserId && id != 'admin', orElse: () => '');
+
+                  // Debugging: print otherUserId
+                  print('otherUserId: $otherUserId');
+
+                  return FutureBuilder<DocumentSnapshot>(
+                    future: FirebaseFirestore.instance.collection('Users').doc(otherUserId).get(),
+                    builder: (context, userSnapshot) {
+                      if (userSnapshot.connectionState == ConnectionState.waiting) {
+                        return ListTile(
+                          title: Text('Loading...'),
+                        );
+                      }
+
+                      if (userSnapshot.hasError) {
+                        return ListTile(
+                          title: Text('Error: ${userSnapshot.error}'),
+                        );
+                      }
+
+                      if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
+                        // Debugging: print error message
+                        print('User data not found for userId: $otherUserId');
+                        return ListTile(
+                          title: Text('Unknown User'),
+                        );
+                      }
+
+                      var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                      var userRole = userData['role'];
+
+                      // Debugging: print userData and userRole
+                      print('userData: $userData');
+                      print('userRole: $userRole');
+
+                      return ListTile(
+                        title: Text('${userData['userName']} (${userRole})'),
+                        subtitle: Text('${lastMessage['text'] ?? 'No message'}'),
+                        onTap: () {
+                          Get.to(() => AdminChatScreen(roomId: roomId));
+                        },
+                      );
+                    },
+                  );
                 },
               );
             },

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:fvapp/admin/models/package_model.dart';
 import '../../../../../common/widgets/products/cart/add_remove_button.dart';
 import '../../../../../common/widgets/products/cart/cart_item.dart';
 import '../../../../../common/widgets/texts/product_price_text.dart';
@@ -14,35 +14,37 @@ class FVCartItems extends StatelessWidget {
     this.showAddRemoveButtons = true,
     required this.formData,
   }) : super(key: key);
-  
+
   @override
   Widget build(BuildContext context) {
     // Tambahkan pernyataan print untuk memeriksa imageUrl
     print('Image URL: ${formData['selectedPackageImageUrl']}');
+    print('FormData: $formData');
 
     return Column(
       children: [
         // Cart Item
         FVCartItem(
+          id: formData['packageId'] ?? '', // Mengirim ID ke FVCartItem
           imageUrl: formData['selectedPackageImageUrl'] ?? '',
-          category: formData['selectedPackageCategory'] ?? '',
+          categoryName: formData['selectedPackageCategory'] ?? '',
           name: formData['selectedPackageName'] ?? '',
         ),
         if (showAddRemoveButtons) const SizedBox(height: FVSizes.spaceBtwItems),
 
         // Add remove button row with total price
-        if (showAddRemoveButtons) 
-        const Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Row(
-              children: [
-                // extra space
-                SizedBox(width: 70),
-              ],
-            ),
-          ],
-        )
+        if (showAddRemoveButtons)
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  // extra space
+                  SizedBox(width: 70),
+                ],
+              ),
+            ],
+          )
       ],
     );
   }

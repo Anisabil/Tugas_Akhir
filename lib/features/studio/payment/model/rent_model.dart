@@ -1,3 +1,7 @@
+import 'dart:typed_data';
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class Rent {
   String id;
   String userId;
@@ -12,6 +16,8 @@ class Rent {
   String description;
   String status;
   String userName;
+  String email;
+  Uint8List? qrCodeData;
 
   Rent({
     required this.id,
@@ -27,41 +33,47 @@ class Rent {
     required this.description,
     required this.status,
     required this.userName,
+    required this.email,
+    this.qrCodeData,
   });
 
-  factory Rent.fromMap(Map<String, dynamic> map) {
+  factory Rent.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    Map<String, dynamic> data = doc.data()!;
     return Rent(
-      id: map['id'],
-      userId: map['userId'],
-      packageId: map['packageId'],
-      packageName: map['packageName'],
-      totalPrice: (map['totalPrice'] is int) ? (map['totalPrice'] as int).toDouble() : map['totalPrice'],
-      downPayment: (map['downPayment'] is int) ? (map['downPayment'] as int).toDouble() : map['downPayment'],
-      remainingPayment: (map['remainingPayment'] is int) ? (map['remainingPayment'] as int).toDouble() : map['remainingPayment'],
-      date: DateTime.parse(map['date']),
-      theme: map['theme'],
-      paymentMethod: map['paymentMethod'],
-      description: map['description'],
-      status: map['status'],
-      userName: map['userName'],
+      id: doc.id,
+      userId: data['userId'],
+      packageId: data['packageId'],
+      packageName: data['packageName'],
+      totalPrice: data['totalPrice'],
+      downPayment: data['downPayment'],
+      remainingPayment: data['remainingPayment'],
+      date: (data['date'] as Timestamp).toDate(),
+      theme: data['theme'],
+      paymentMethod: data['paymentMethod'],
+      description: data['description'],
+      status: data['status'],
+      userName: data['userName'],
+      email: data['email'],
+      qrCodeData: data['qrCodeData'] != null ? Uint8List.fromList(List<int>.from(data['qrCodeData'])) : null,
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': id,
       'userId': userId,
       'packageId': packageId,
       'packageName': packageName,
       'totalPrice': totalPrice,
       'downPayment': downPayment,
       'remainingPayment': remainingPayment,
-      'date': date.toIso8601String(),
+      'date': Timestamp.fromDate(date),
       'theme': theme,
       'paymentMethod': paymentMethod,
       'description': description,
       'status': status,
       'userName': userName,
+      'email': email,
+      'qrCodeData': qrCodeData != null ? qrCodeData!.toList() : null,
     };
   }
 }

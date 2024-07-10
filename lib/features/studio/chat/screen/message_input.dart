@@ -1,10 +1,9 @@
 import 'dart:io';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -22,27 +21,30 @@ class _MessageInputState extends State<MessageInput> {
   final TextEditingController _messageController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
 
-  void _sendMessage(String messageText, {String? fileUrl, String? fileName, String? imageUrl}) {
+  void _sendMessage(String messageText, {String? fileUrl, String? fileName, String? imageUrl}) async {
     if (messageText.isEmpty && fileUrl == null && imageUrl == null) {
       return;
     }
 
-    DatabaseReference messageRef = FirebaseDatabase.instance
-        .reference()
-        .child('messages')
-        .child(widget.roomId)
-        .push();
+    // Debugging: print message details
+    print('Sending message: $messageText, fileUrl: $fileUrl, fileName: $fileName, imageUrl: $imageUrl');
 
-    var message = {
+    CollectionReference messages = FirebaseFirestore.instance
+        .collection('rooms')
+        .doc(widget.roomId)
+        .collection('messages'); // Menggunakan koleksi 'messages' di bawah dokumen 'roomId'
+
+    await messages.add({
       'senderId': widget.currentUserId,
       'text': messageText,
       'fileUrl': fileUrl ?? '', // URL file diunggah
       'fileName': fileName ?? '', // Nama file
       'imageUrl': imageUrl ?? '', // URL gambar diunggah
-      'timestamp': ServerValue.timestamp,
-    };
+      'timestamp': FieldValue.serverTimestamp(),
+    });
 
-    messageRef.set(message);
+    // Debugging: confirm message sent
+    print('Message sent.');
 
     _messageController.clear();
   }
@@ -57,12 +59,18 @@ class _MessageInputState extends State<MessageInput> {
       File file = File(result.files.single.path!);
       String fileName = result.files.single.name;
 
+      // Debugging: print file details
+      print('Selected file: $fileName');
+
       Reference storageRef = FirebaseStorage.instance.ref().child('files').child(fileName);
 
       UploadTask uploadTask = storageRef.putFile(file);
       TaskSnapshot snapshot = await uploadTask;
 
       String fileUrl = await snapshot.ref.getDownloadURL();
+
+      // Debugging: print file URL
+      print('File uploaded: $fileUrl');
 
       _sendMessage('', fileUrl: fileUrl, fileName: fileName);
     }
@@ -75,12 +83,18 @@ class _MessageInputState extends State<MessageInput> {
       File imageFile = File(pickedFile.path);
       String fileName = pickedFile.path.split('/').last;
 
+      // Debugging: print image details
+      print('Selected image: $fileName');
+
       Reference storageRef = FirebaseStorage.instance.ref().child('images').child(fileName);
 
       UploadTask uploadTask = storageRef.putFile(imageFile);
       TaskSnapshot snapshot = await uploadTask;
 
       String imageUrl = await snapshot.ref.getDownloadURL();
+
+      // Debugging: print image URL
+      print('Image uploaded: $imageUrl');
 
       _sendMessage('', imageUrl: imageUrl);
     }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/features/studio/screens/checkout/checkout.dart';
-import 'package:fvapp/features/studio/screens/checkout/temporary_data/temporary_controller.dart';
 import 'package:fvapp/features/studio/screens/multi_step_form/multi_step_form.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
@@ -21,13 +20,16 @@ class RentFormScreen extends StatelessWidget {
     required this.package,
     required this.selectedDay,
     this.currentStep = 1,
-  }) : super(key: key);
+  }) : super(key: key) {
+    print('RentFormScreen initialized with packageId: ${package.id}, packageName: ${package.name}');
+  }
 
   @override
   Widget build(BuildContext context) {
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     Map<String, dynamic> formData = {
       'package': package,
+      'packageId': package.id,
       'selectedDay': selectedDay,
       'selectedPackageImageUrl': package.imageUrls.isNotEmpty ? package.imageUrls[0] : '',
       'selectedPackageName': package.name,
@@ -39,7 +41,6 @@ class RentFormScreen extends StatelessWidget {
       appBar: AppBar(title: Text('Form Sewa')),
       body: Column(
         children: [
-          // Tambahkan MultiStepFormIndicator di sini
           MultiStepFormIndicator(
             currentStep: currentStep,
             totalSteps: 3,
@@ -67,13 +68,15 @@ class RentFormScreen extends StatelessWidget {
                   formData['additionalDescription'] == null) {
                 FVLoaders.errorSnackBar(title: 'Error', message: 'Silakan isi semua form');
               } else {
-                // Perhitungan untuk uang muka dan sisa pembayaran
+                // Calculate down payment and remaining payment
                 double totalPrice = formData['price'];
                 double downPayment = formData['selectedPembayaran'] == 'DP (Down Payment)' ? totalPrice * 0.3 : 0.0;
                 double remainingPayment = totalPrice - downPayment;
 
                 formData['downPayment'] = downPayment;
                 formData['remainingPayment'] = remainingPayment;
+
+                print('FormData: $formData');
 
                 Get.to(() => CheckoutScreen(
                   formData: formData,
@@ -91,9 +94,6 @@ class RentFormScreen extends StatelessWidget {
     );
   }
 }
-
-
-
 
 class RentForm extends StatefulWidget {
   final VoidCallback onNext;

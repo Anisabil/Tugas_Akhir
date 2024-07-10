@@ -7,14 +7,16 @@ import 'package:fvapp/common/widgets/texts/fv_brand_title_with_verified_icon.dar
 import 'package:fvapp/common/widgets/texts/product_title_text.dart';
 
 class FVCartItem extends StatelessWidget {
+  final String id;
   final String imageUrl;
-  final String category;
+  final String categoryName;
   final String name;
 
   const FVCartItem({
     Key? key,
+    required this.id,
     required this.imageUrl,
-    required this.category,
+    required this.categoryName,
     required this.name,
   }) : super(key: key);
 
@@ -47,7 +49,7 @@ class FVCartItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FVBrandTitleWithVerifiedIcon(title: category),
+            FVBrandTitleWithVerifiedIcon(title: categoryName),
             Flexible(
               child: FVProductTitleText(
                 title: name,

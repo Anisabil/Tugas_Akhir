@@ -26,9 +26,9 @@ class RentalItem extends StatelessWidget {
 
   Color getStatusColor(String status) {
     switch (status) {
-      case 'In Progress':
+      case 'Belum Lunas':
         return Colors.orange;
-      case 'Completed':
+      case 'Lunas':
         return Colors.green;
       default:
         return Colors.red;
@@ -91,7 +91,8 @@ class RentalList extends StatefulWidget {
 }
 
 class _RentalListState extends State<RentalList> {
-  final RentController _rentController = RentController();
+  final RentController _rentController = Get.find<RentController>(); // Gunakan Get.find untuk mendapatkan instance yang sudah diinisialisasi
+
   late Future<List<Rent>> _rentsFuture;
 
   @override
@@ -110,27 +111,28 @@ class _RentalListState extends State<RentalList> {
         future: _rentsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return Center(child: Text('No rentals found'));
-          } else {
-            List<Rent> rents = snapshot.data!;
-            return ListView.builder(
-              padding: EdgeInsets.zero,
-              itemCount: rents.length,
-              itemBuilder: (context, index) {
-                Rent rent = rents[index];
-                return RentalItem(
-                  rentalName: rent.userName,
-                  packageName: rent.packageName,
-                  status: rent.status,
-                  onTap: () => Get.to(() => RentDetail(rentId: rent.id)),
-                );
-              },
-            );
-          }
+  return Center(child: CircularProgressIndicator());
+} else if (snapshot.hasError) {
+  return Center(child: Text('Error: ${snapshot.error}'));
+} else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+  return Center(child: Text('No rentals found'));
+} else {
+  List<Rent> rents = snapshot.data!;
+  return ListView.builder(
+    padding: EdgeInsets.zero,
+    itemCount: rents.length,
+    itemBuilder: (context, index) {
+      Rent rent = rents[index];
+      return RentalItem(
+        rentalName: rent.userName,
+        packageName: rent.packageName,
+        status: rent.status,
+        onTap: () => Get.to(() => RentDetail(rentId: rent.id)),
+      );
+    },
+  );
+}
+
         },
       ),
       floatingActionButton: FloatingActionButton(

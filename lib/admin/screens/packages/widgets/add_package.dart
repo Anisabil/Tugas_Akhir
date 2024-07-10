@@ -1,15 +1,17 @@
 import 'dart:io';
 
-import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/controllers/category_controller.dart';
-import 'package:get/get.dart';
+import 'package:fvapp/admin/models/package_model.dart';
+import 'package:fvapp/utils/constants/colors.dart';
+import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:video_player/video_player.dart';
 import 'package:chewie/chewie.dart';
-import 'package:fvapp/utils/constants/colors.dart';
-import 'package:fvapp/utils/popups/loaders.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 class AddPackagePage extends StatefulWidget {
   final List<String> categories;
@@ -25,11 +27,11 @@ class _AddPackagePageState extends State<AddPackagePage> {
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<File> _imageFiles = [];
-  List<String> _videoUrls = [];
   List<File> _videoFiles = [];
   String? _selectedCategory;
+  String? _selectedCategoryName;
 
-  final DatabaseReference _databaseReference = FirebaseDatabase.instance.ref();
+  final CollectionReference _packagesRef = FirebaseFirestore.instance.collection('packages');
   final CategoryController _categoryController = Get.find<CategoryController>();
 
   List<VideoPlayerController> _videoControllers = [];
@@ -65,29 +67,43 @@ class _AddPackagePageState extends State<AddPackagePage> {
   }
 
   Future<void> _pickVideos() async {
-    final ImagePicker picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
+  final ImagePicker picker = ImagePicker();
+  final XFile? pickedFile = await picker.pickVideo(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        File videoFile = File(pickedFile.path);
-        _videoFiles.add(videoFile);
+  if (pickedFile != null) {
+    setState(() {
+      File videoFile = File(pickedFile.path);
+      _videoFiles.add(videoFile);
 
-        var videoPlayerController = VideoPlayerController.file(videoFile);
-        _videoControllers.add(videoPlayerController);
+      var videoPlayerController = VideoPlayerController.file(videoFile);
+      var chewieController = ChewieController(
+        videoPlayerController: videoPlayerController,
+        aspectRatio: videoPlayerController.value.aspectRatio,
+        autoPlay: false,
+        looping: false,
+        allowMuting: true, // Added allowMuting property
+        // other properties as needed
+      );
 
-        var chewieController = ChewieController(
-          videoPlayerController: videoPlayerController,
-          aspectRatio: videoPlayerController.value.aspectRatio,
-          autoPlay: false,
-          looping: false,
-        );
-        _chewieControllers.add(chewieController);
-
-        _initializeVideoFutures.add(videoPlayerController.initialize());
-      });
-    }
+      _videoControllers.add(videoPlayerController);
+      _chewieControllers.add(chewieController);
+      _initializeVideoFutures.add(videoPlayerController.initialize());
+    });
   }
+}
+
+void _removeVideo(int index) {
+  setState(() {
+    _videoFiles.removeAt(index);
+
+    _videoControllers[index].dispose();
+    _chewieControllers[index].dispose();
+
+    _videoControllers.removeAt(index);
+    _chewieControllers.removeAt(index);
+    _initializeVideoFutures.removeAt(index);
+  });
+}
 
   void _removeImage(int index) {
     setState(() {
@@ -95,87 +111,72 @@ class _AddPackagePageState extends State<AddPackagePage> {
     });
   }
 
-  void _removeVideo(int index) {
-    setState(() {
-      _videoFiles.removeAt(index);
-
-      _videoControllers[index].dispose();
-      _chewieControllers[index].dispose();
-
-      _videoControllers.removeAt(index);
-      _chewieControllers.removeAt(index);
-      _initializeVideoFutures.removeAt(index);
-    });
+void _savePackage() async {
+  if (_packageNameController.text.isEmpty ||
+      _priceController.text.isEmpty ||
+      _descriptionController.text.isEmpty ||
+      _selectedCategory == null) {
+    FVLoaders.errorSnackBar(
+      title: 'Error',
+      message: 'Semua field harus diisi.',
+    );
+    return;
   }
 
-  void _savePackage() async {
-    if (_packageNameController.text.isEmpty ||
-        _priceController.text.isEmpty ||
-        _descriptionController.text.isEmpty) {
-      FVLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Semua field harus diisi.',
-      );
-      return;
-    }
+  try {
+    List<String> imageUrls = await _uploadFiles(_imageFiles, 'images');
+    List<String> videoUrls = await _uploadFiles(_videoFiles, 'videos');
 
-    try {
-      List<String> imageUrls = [];
-      for (File imageFile in _imageFiles) {
-        String? imageUrl = await _uploadFile(imageFile, 'images');
-        if (imageUrl != null) {
-          imageUrls.add(imageUrl);
-        }
-      }
+    Package package = Package(
+      id: '',
+      name: _packageNameController.text,
+      description: _descriptionController.text,
+      price: double.parse(_priceController.text),
+      categoryId: _selectedCategory!,
+      categoryName: _selectedCategoryName!,
+      imageUrls: imageUrls,
+      videoUrls: videoUrls,
+    );
 
-      List<String> videoUrls = [];
-      for (File videoFile in _videoFiles) {
-        String? videoUrl = await _uploadFile(videoFile, 'videos');
-        if (videoUrl != null) {
-          videoUrls.add(videoUrl);
-        }
-      }
+    DocumentReference docRef = await _packagesRef.add(package.toJson());
+    String packageId = docRef.id;
 
-      await _databaseReference.child('packages').push().set({
-        'name': _packageNameController.text,
-        'description': _descriptionController.text,
-        'price': double.parse(_priceController.text),
-        'imageUrls': imageUrls,
-        'videoUrls': videoUrls,
-        'category': _selectedCategory, // Save the selected category
-      });
+    await _packagesRef.doc(packageId).update({'id': packageId});
 
-      Navigator.of(context).pop();
-      FVLoaders.successSnackBar(
-        title: 'Berhasil',
-        message: 'Paket berhasil ditambahkan.',
-      );
-    } catch (e) {
-      print('Error occurred while adding package: $e');
-      FVLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Terjadi kesalahan saat menambahkan paket.',
-      );
-    }
+    Navigator.of(context).pop();
+    FVLoaders.successSnackBar(
+      title: 'Berhasil',
+      message: 'Paket berhasil ditambahkan.',
+    );
+  } catch (e) {
+    print('Error occurred while adding package: $e');
+    FVLoaders.errorSnackBar(
+      title: 'Error',
+      message: 'Terjadi kesalahan saat menambahkan paket.',
+    );
   }
+}
 
-  Future<String?> _uploadFile(File file, String folder) async {
+
+  Future<List<String>> _uploadFiles(List<File> files, String folder) async {
+    List<String> urls = [];
+
     try {
-      TaskSnapshot snapshot = await FirebaseStorage.instance
-          .ref('packages/$folder/${file.path.split('/').last}')
-          .putFile(file);
-      return await snapshot.ref.getDownloadURL();
+      for (File file in files) {
+        TaskSnapshot snapshot = await FirebaseStorage.instance
+            .ref('packages/$folder/${file.path.split('/').last}')
+            .putFile(file);
+        urls.add(await snapshot.ref.getDownloadURL());
+      }
     } catch (e) {
-      print('Error uploading file: $e');
-      return null;
+      print('Error uploading files: $e');
     }
+
+    return urls;
   }
 
   @override
   Widget build(BuildContext context) {
-    print('Items: ${_categoryController.categories.map((category) => category.name).toList()}');
-    print('Selected category: $_selectedCategory');
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Tambah Paket'),
@@ -206,26 +207,22 @@ class _AddPackagePageState extends State<AddPackagePage> {
                         scrollDirection: Axis.horizontal,
                         itemCount: _imageFiles.length,
                         itemBuilder: (context, index) {
-                          return Container(
-                            width: 200,
-                            height: 200,
-                            child: Stack(
-                              children: [
-                                Image.file(
-                                  _imageFiles[index],
-                                  width: 200,
-                                  height: 200,
-                                  fit: BoxFit.cover,
+                          return Stack(
+                            children: [
+                              Image.file(
+                                _imageFiles[index],
+                                width: 200,
+                                height: 200,
+                                fit: BoxFit.cover,
+                              ),
+                              Positioned(
+                                right: 0,
+                                child: IconButton(
+                                  icon: const Icon(Icons.cancel, color: FVColors.gold),
+                                  onPressed: () => _removeImage(index),
                                 ),
-                                Positioned(
-                                  right: 0,
-                                  child: IconButton(
-                                    icon: const Icon(Icons.cancel, color: FVColors.gold),
-                                    onPressed: () => _removeImage(index),
-                                  ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           );
                         },
                       ),
@@ -235,7 +232,7 @@ class _AddPackagePageState extends State<AddPackagePage> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _pickImages,
-                  icon: const Icon(Icons.photo_library),
+                  icon: const Icon(Iconsax.camera),
                   label: const Text('Pilih Gambar'),
                 ),
               ),
@@ -267,7 +264,7 @@ class _AddPackagePageState extends State<AddPackagePage> {
                                 return Stack(
                                   children: [
                                     AspectRatio(
-                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 16 / 9,
+                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 6 / 9,
                                       child: Chewie(controller: _chewieControllers[index]),
                                     ),
                                     Positioned(
@@ -299,7 +296,7 @@ class _AddPackagePageState extends State<AddPackagePage> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _pickVideos,
-                  icon: const Icon(Icons.video_library),
+                  icon: const Icon(Iconsax.video),
                   label: const Text('Pilih Video'),
                 ),
               ),
@@ -325,12 +322,13 @@ class _AddPackagePageState extends State<AddPackagePage> {
                   onChanged: (newValue) {
                     setState(() {
                       _selectedCategory = newValue;
+                      _selectedCategoryName = _categoryController.categories.firstWhere((category) => category.id == newValue).name;
                     });
                   },
                   items: _categoryController.categories.map((category) {
                     return DropdownMenuItem(
                       key: ValueKey(category.id),
-                      value: category.name,
+                      value: category.id,
                       child: Text(category.name),
                     );
                   }).toList(),

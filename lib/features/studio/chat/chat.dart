@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -47,20 +48,20 @@ class MessageList extends StatelessWidget {
 
   const MessageList({Key? key, required this.roomId, required this.currentUserId}) : super(key: key);
 
-  String formatTimestamp(int timestamp) {
-    var date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  String formatTimestamp(Timestamp timestamp) {
+    var date = timestamp.toDate();
     return DateFormat('HH:mm').format(date);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DatabaseEvent>(
-      stream: FirebaseDatabase.instance
-          .reference()
-          .child('messages')
-          .child(roomId)
-          .orderByChild('timestamp')
-          .onValue,
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(roomId)
+          .collection('messages')
+          .orderBy('timestamp', descending: false)
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -74,44 +75,23 @@ class MessageList extends StatelessWidget {
           );
         }
 
-        if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(
             child: Text('Tidak ada pesan'),
           );
         }
 
-        List<Message> messages = [];
-        Map<dynamic, dynamic>? data = snapshot.data!.snapshot.value as Map<dynamic, dynamic>?;
-
-        if (data != null) {
-          data.forEach((key, value) {
-            if (value is Map<dynamic, dynamic>) {
-              try {
-                Map<String, dynamic> messageMap = value.map((key, value) => MapEntry(key.toString(), value));
-                messages.add(Message.fromMap(messageMap));
-              } catch (e) {
-                print('Error parsing message: $e');
-              }
-            }
-          });
-        }
-
-        if (messages.isEmpty) {
-          return Center(
-            child: Text('Tidak ada pesan'),
-          );
-        }
-
-        // Sort messages by timestamp in ascending order (oldest first)
-        messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
+        List<Message> messages = snapshot.data!.docs.map((doc) {
+          return Message.fromFirestore(doc);
+        }).toList();
 
         return ListView.builder(
           itemCount: messages.length,
           itemBuilder: (context, index) {
             final message = messages[index];
-            bool isClient = message.senderId == currentUserId; // Assuming `senderId` is a field in Message model
-            bool hasImage = message.imageUrl.isNotEmpty; // Check if message has imageUrl
-            bool hasFile = message.fileUrl.isNotEmpty; // Check if message has fileUrl
+            bool isClient = message.senderId == currentUserId;
+            bool hasImage = message.imageUrl.isNotEmpty;
+            bool hasFile = message.fileUrl.isNotEmpty;
 
             return Align(
               alignment: isClient ? Alignment.centerRight : Alignment.centerLeft,
@@ -123,12 +103,11 @@ class MessageList extends StatelessWidget {
                       builder: (context) => Dialog(
                         child: Image.network(
                           message.imageUrl,
-                          fit: BoxFit.contain, // Adjust image fit as needed
+                          fit: BoxFit.contain,
                         ),
                       ),
                     );
                   } else if (hasFile) {
-                    // Open file URL
                     _launchURL(message.fileUrl);
                   }
                 },
@@ -142,22 +121,22 @@ class MessageList extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (message.text.isNotEmpty) // Show text message if available
+                      if (message.text.isNotEmpty)
                         Text(
                           message.text,
                           style: TextStyle(color: Colors.black),
                         ),
-                      if (hasImage) // Show image if available
+                      if (hasImage)
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 5),
                           child: Image.network(
                             message.imageUrl,
-                            height: 150, // Adjust size as needed
+                            height: 150,
                             width: 150,
                             fit: BoxFit.cover,
                           ),
                         ),
-                      if (hasFile) // Show file if available
+                      if (hasFile)
                         Padding(
                           padding: EdgeInsets.symmetric(vertical: 5),
                           child: Container(
@@ -175,7 +154,7 @@ class MessageList extends StatelessWidget {
                                 child: Text(
                                   message.fileName,
                                   style: TextStyle(color: Colors.black),
-                                  overflow: TextOverflow.ellipsis, // Prevent overflow
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ),

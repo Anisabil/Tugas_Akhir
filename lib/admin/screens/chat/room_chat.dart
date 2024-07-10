@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart'; // Ganti import
+
 import 'package:fvapp/features/studio/chat/model/chat_model.dart';
 import 'package:fvapp/features/studio/chat/screen/message_input.dart';
 import 'package:fvapp/utils/constants/colors.dart';
@@ -45,20 +46,20 @@ class AdminMessageList extends StatelessWidget {
 
   const AdminMessageList({Key? key, required this.roomId, required this.currentUserId}) : super(key: key);
 
-  String formatTimestamp(int timestamp) {
-    var date = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  String formatTimestamp(Timestamp timestamp) {
+    var date = timestamp.toDate();
     return DateFormat('HH:mm').format(date);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<DatabaseEvent>(
-      stream: FirebaseDatabase.instance
-          .reference()
-          .child('messages')
-          .child(roomId)
-          .orderByChild('timestamp')
-          .onValue,
+    return StreamBuilder<QuerySnapshot>(
+      stream: FirebaseFirestore.instance
+          .collection('rooms')
+          .doc(roomId)
+          .collection('messages')
+          .orderBy('timestamp', descending: false) // Sesuaikan dengan field timestamp Anda
+          .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(
@@ -72,27 +73,13 @@ class AdminMessageList extends StatelessWidget {
           );
         }
 
-        if (!snapshot.hasData || snapshot.data!.snapshot.value == null) {
+        if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
           return Center(
             child: Text('Tidak ada pesan'),
           );
         }
 
-        List<Message> messages = [];
-        Map<dynamic, dynamic> data = snapshot.data!.snapshot.value as Map<dynamic, dynamic>;
-
-        data.forEach((key, value) {
-          if (value is Map<dynamic, dynamic>) {
-            Map<String, dynamic> messageMap = value.map((key, value) => MapEntry(key.toString(), value));
-            messages.add(Message.fromMap(messageMap));
-          }
-        });
-
-        if (messages.isEmpty) {
-          return Center(
-            child: Text('Tidak ada pesan'),
-          );
-        }
+        List<Message> messages = snapshot.data!.docs.map((doc) => Message.fromFirestore(doc)).toList();
 
         // Sort messages by timestamp in ascending order (oldest first)
         messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
@@ -172,7 +159,7 @@ class AdminMessageList extends StatelessWidget {
                       SizedBox(height: 5),
                       Text(
                         formatTimestamp(message.timestamp),
-                        style: TextStyle(color: Colors.black54, fontSize: 10),
+                        style: TextStyle(color: Colors.black.withOpacity(0.6), fontSize: 12),
                       ),
                     ],
                   ),

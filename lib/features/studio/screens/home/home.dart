@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/controllers/package_controller.dart';
 import 'package:fvapp/admin/models/package_model.dart';
+import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:fvapp/common/widgets/layouts/grid_layout.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
+import 'package:fvapp/features/personalization/models/user_model.dart';
+import 'package:fvapp/features/studio/chat/chat.dart';
 import 'package:fvapp/features/studio/screens/all_products/all_products.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/home_appbar.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/home_categories.dart';
@@ -12,6 +15,7 @@ import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:get/get.dart';
+import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/custom_shapes/containers/primary_header_container.dart';
 import '../../../../common/widgets/products/product_cards/product_card_vertical.dart';
@@ -33,13 +37,13 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 children: [
                   FVHomeAppBar(),
-                  SizedBox(height: FVSizes.spaceBtwSection),
+                  SizedBox(height: FVSizes.spaceBtwItems),
 
                   // Search bar
                   FVSearchContainer(
                     text: 'Cari Paket',
                   ),
-                  SizedBox(height: FVSizes.spaceBtwSection),
+                  SizedBox(height: FVSizes.spaceBtwItems),
 
                   // Categories
                   Padding(
@@ -55,7 +59,7 @@ class HomeScreen extends StatelessWidget {
                         SizedBox(height: FVSizes.spaceBtwItems),
 
                         // Categories
-                        FVHomeCategories(package: package),
+                        FVHomeCategories(packages: _packageController.packages),
                       ],
                     ),
                   ),
@@ -104,6 +108,31 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+              try {
+                UserModel userModel = await getCurrentUser();
+                if (userModel.role == 'admin' || userModel.role == 'client') {
+                  Get.to(() => ChatScreen(
+                      receiverId:
+                          'admin')); // Gunakan 'admin' sebagai ID fotografer
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                            Text('Anda tidak memiliki akses ke fitur ini.')),
+                  );
+                }
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Error: ${e.toString()}')),
+                );
+              }
+            },
+        child: const Icon(Iconsax.messages, color: Colors.white),
+        backgroundColor: FVColors.gold,
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

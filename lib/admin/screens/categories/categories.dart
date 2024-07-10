@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:fvapp/admin/screens/categories/widgets/box_category.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
 
-class SettingCategories extends StatefulWidget {
-  const SettingCategories({super.key});
+class SettingCategories extends StatelessWidget {
+  final CollectionReference _categoryRef =
+      FirebaseFirestore.instance.collection('categories');
 
-  @override
-  _SettingCategoriesState createState() => _SettingCategoriesState();
-}
-
-class _SettingCategoriesState extends State<SettingCategories> {
-  final DatabaseReference _categoryRef =
-      FirebaseDatabase.instance.reference().child('categories');
-
-  void _showEditPopup(BuildContext context, String categoryKey, String initialValue) {
+  void _showEditPopup(BuildContext context, String categoryId, String initialValue) {
     TextEditingController _controller = TextEditingController(text: initialValue);
     showDialog(
       context: context,
@@ -38,7 +31,7 @@ class _SettingCategoriesState extends State<SettingCategories> {
               child: Text('Simpan'),
               onPressed: () {
                 String newValue = _controller.text;
-                _categoryRef.child(categoryKey).set({'name': newValue}).then((_) {
+                _categoryRef.doc(categoryId).update({'name': newValue}).then((_) {
                   Navigator.of(context).pop();
                   FVLoaders.successSnackBar(
                     title: 'Berhasil',
@@ -53,7 +46,7 @@ class _SettingCategoriesState extends State<SettingCategories> {
     );
   }
 
-  void _showDeleteConfirmation(BuildContext context, String categoryKey) {
+  void _showDeleteConfirmation(BuildContext context, String categoryId) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -70,7 +63,7 @@ class _SettingCategoriesState extends State<SettingCategories> {
             TextButton(
               child: Text('Hapus'),
               onPressed: () {
-                _categoryRef.child(categoryKey).remove().then((_) {
+                _categoryRef.doc(categoryId).delete().then((_) {
                   Navigator.of(context).pop();
                   FVLoaders.successSnackBar(
                     title: 'Berhasil',
@@ -108,7 +101,7 @@ class _SettingCategoriesState extends State<SettingCategories> {
             TextButton(
               child: Text('Simpan'),
               onPressed: () {
-                _categoryRef.push().set({'name': newCategoryName}).then((_) {
+                _categoryRef.add({'name': newCategoryName}).then((_) {
                   Navigator.of(context).pop();
                   FVLoaders.successSnackBar(
                     title: 'Berhasil',
@@ -128,36 +121,41 @@ class _SettingCategoriesState extends State<SettingCategories> {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: StreamBuilder(
-          stream: _categoryRef.onValue,
-          builder: (context, AsyncSnapshot<DatabaseEvent> snapshot) {
-            if (snapshot.hasData && snapshot.data!.snapshot.value != null) {
-              Map<String, dynamic> categories =
-                  (snapshot.data!.snapshot.value as Map<dynamic, dynamic>).cast<String, dynamic>();
-              return GridView.builder(
-                itemCount: categories.length,
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 8,
-                  mainAxisSpacing: 8,
-                  childAspectRatio: 0.8,
-                ),
-                itemBuilder: (context, index) {
-                  String key = categories.keys.toList()[index];
-                  String categoryName = categories[key]['name'];
-                  return CategoryBox(
-                    icon: Icons.category,
-                    text: categoryName,
-                    onEdit: () => _showEditPopup(context, key, categoryName),
-                    onDelete: () => _showDeleteConfirmation(context, key),
-                  );
-                },
+        child: StreamBuilder<QuerySnapshot>(
+          stream: _categoryRef.snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.hasError) {
+              return Center(
+                child: Text('Error: ${snapshot.error}'),
               );
-            } else {
+            }
+
+            if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(
                 child: CircularProgressIndicator(),
               );
             }
+
+            List<DocumentSnapshot> categories = snapshot.data!.docs;
+            return GridView.builder(
+              itemCount: categories.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                crossAxisSpacing: 8,
+                mainAxisSpacing: 8,
+                childAspectRatio: 0.8,
+              ),
+              itemBuilder: (context, index) {
+                String categoryId = categories[index].id;
+                String categoryName = categories[index]['name'];
+                return CategoryBox(
+                  icon: Iconsax.category,
+                  text: categoryName,
+                  onEdit: () => _showEditPopup(context, categoryId, categoryName),
+                  onDelete: () => _showDeleteConfirmation(context, categoryId),
+                );
+              },
+            );
           },
         ),
       ),

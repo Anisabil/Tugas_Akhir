@@ -15,11 +15,14 @@ class EventBottomNavigationBar extends StatelessWidget {
   final Map<String, dynamic> formData;
 
   EventBottomNavigationBar({
-    required this.package,
-    required this.onNext,
-    required this.onFormSubmit,
-    required this.formData,
-  });
+  required this.package,
+  required this.onNext,
+  required this.onFormSubmit,
+  required this.formData,
+}) {
+  print('EventBottomNavigationBar initialized with packageId: ${package.id}, packageName: ${package.name}');
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +44,7 @@ class EventBottomNavigationBar extends StatelessWidget {
                 : () {
                     formData['selectedDay'] = controller.selectedDay!;
                     formData['packageId'] = package;
-
+print('FormData: $formData');
                     Get.to(() => RentFormScreen(
                       onNext: onNext,
                       onFormSubmit: onFormSubmit,

@@ -15,11 +15,13 @@ import '../../custom_shapes/containers/rounded_container.dart';
 import '../../images/fv_rounded_image.dart';
 import '../../texts/fv_brand_title_with_verified_icon.dart';
 import '../../texts/product_price_text.dart';
+import 'package:fvapp/admin/controllers/package_controller.dart'; // import the controller
 
 class FVProductCardVertical extends StatelessWidget {
   final Package package;
+  final PackageController packageController = Get.find(); // get the instance of the controller
 
-  const FVProductCardVertical({
+  FVProductCardVertical({
     required this.package,
     Key? key,
   }) : super(key: key);
@@ -28,21 +30,23 @@ class FVProductCardVertical extends StatelessWidget {
   Widget build(BuildContext context) {
     final dark = FVHelperFunctions.isDarkMode(context);
 
-    // Assume package.imageUrls is a list of URLs
-    String? imageUrl;
-    if (package.imageUrls != null && package.imageUrls.isNotEmpty) {
-      imageUrl = package.imageUrls.first;
-    } else {
-      imageUrl = null; // No image available
-    }
+    String? imageUrl = package.imageUrls.isNotEmpty ? package.imageUrls.first : null;
+    String categoryName = packageController.getCategoryNameById(package.categoryId); // get the category name by ID
 
     return GestureDetector(
-      onTap: () => Get.to(() => ProductDetail(
-        packageId: package.id, // Ensure you pass the correct packageId
-        packageName: package.name,
-        price: package.price,
-        description: package.description, categoryId: '', package: package,
-      )),
+      onTap: () {
+        print('Navigating to ProductDetail with packageId: ${package.id}');
+        Get.to(() => ProductDetail(
+          packageId: package.id,
+          packageName: package.name,
+          price: package.price,
+          description: package.description,
+          categoryId: package.categoryId,
+          categoryName: categoryName, // pass the category name
+          package: package,
+          videoUrls: package.videoUrls,
+        ));
+      },
       child: Container(
         width: 180,
         padding: const EdgeInsets.all(1),
@@ -52,15 +56,14 @@ class FVProductCardVertical extends StatelessWidget {
           color: dark ? FVColors.darkerGrey : FVColors.white,
         ),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Thumbnail
             FVRoundedContainer(
               height: 180,
               padding: const EdgeInsets.all(FVSizes.sm),
               backgroundColor: dark ? FVColors.dark : FVColors.light,
               child: Stack(
                 children: [
-                  // Thumbnail image
                   ClipRRect(
                     borderRadius: BorderRadius.circular(FVSizes.productImageRadius),
                     child: imageUrl != null
@@ -91,28 +94,24 @@ class FVProductCardVertical extends StatelessWidget {
               ),
             ),
             const SizedBox(height: FVSizes.spaceBtwItems / 2),
-
-            // Name and Category
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                FVProductTitleText(title: package.name, smallSize: true),
-                const SizedBox(height: FVSizes.spaceBtwItems / 2),
-                FVBrandTitleWithVerifiedIcon(
-                  title: package.categoryId, // assuming categoryId is the category name
-                ),
-              ],
-            ),
-
-            // Spacer and price section
             Padding(
               padding: const EdgeInsets.only(left: FVSizes.md, right: FVSizes.md, top: FVSizes.spaceBtwItems / 2),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Price
-                  FVProductPriceText(
-                    price: package.price,
+                  FVProductTitleText(title: package.name, smallSize: true),
+                  const SizedBox(height: FVSizes.spaceBtwItems / 2),
+                  FVBrandTitleWithVerifiedIcon(
+                    title: categoryName, // Display the category name here
+                  ),
+                  const SizedBox(height: FVSizes.spaceBtwItems / 2),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      FVProductPriceText(
+                        price: package.price,
+                      ),
+                    ],
                   ),
                 ],
               ),

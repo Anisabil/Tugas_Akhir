@@ -1,4 +1,10 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:fvapp/common/widgets/appbar/appbar.dart';
+import 'package:get/get.dart';
+
+import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:fvapp/common/widgets/products/cart/cart_item.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
@@ -11,26 +17,26 @@ import 'package:fvapp/features/studio/screens/checkout/SuccessCheckoutScreen.dar
 import 'package:fvapp/features/studio/screens/checkout/webview.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_address_section.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
-import 'package:fvapp/features/studio/screens/event/widgets/event_list.dart';
+import 'package:fvapp/features/studio/screens/checkout/widgets/billing_payment_section.dart';
+import 'package:fvapp/features/studio/screens/checkout/widgets/generate_qr_code.dart';
 import 'package:fvapp/features/studio/screens/multi_step_form/multi_step_form.dart';
+import 'package:fvapp/features/studio/screens/order/widgets/order_detail.dart';
 import 'package:fvapp/navigation_menu.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
-import 'package:get/get.dart';
+import 'package:fvapp/utils/popups/full_screen_loader.dart';
+import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../../../../common/widgets/appbar/appbar.dart';
-import '../../../../common/widgets/products/cart/coupon_widget.dart';
 
 class CheckoutScreen extends StatelessWidget {
   final Map<String, dynamic> formData;
   final VoidCallback onPrevious;
   final int currentStep;
-  final RentController rentController = RentController();
+  final RentController rentController = Get.find<RentController>();
   final UserController userController = Get.put(UserController());
 
   CheckoutScreen({
@@ -121,7 +127,7 @@ class CheckoutScreen extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: FVSizes.spaceBtwItems),
-                    FVBillingAddressSection(),
+                    FVBillingAddressSection(formData: formData),
                     const SizedBox(height: FVSizes.spaceBtwItems * 2),
                   ],
                 ),
@@ -134,6 +140,8 @@ class CheckoutScreen extends StatelessWidget {
         padding: const EdgeInsets.all(FVSizes.defaultSpace),
         child: ElevatedButton(
           onPressed: () async {
+            FVFullScreenLoader.openLoadingDialog('Sedang Di Proses...', FVImages.loadingIlustration);
+
             try {
               // Ambil data pengguna
               final user = await userController.getUserData();
@@ -141,16 +149,17 @@ class CheckoutScreen extends StatelessWidget {
                 throw Exception('Failed to get user data');
               }
 
-              // Tambahkan packageId ke formData jika belum ada
-              if (formData['package'] != null &&
-                  formData['package'].id != null) {
-                formData['packageId'] = formData['package'].id;
-                formData['packageName'] = formData['package'].name;
-              } else {
-                throw Exception('Package ID is missing');
+              // Ambil package dari formData
+              final Package? package = formData['package'] as Package?;
+              if (package == null || package.id.isEmpty || package.name.isEmpty) {
+                throw Exception('Package ID or name is invalid');
               }
 
+              // Tambahkan packageId dan packageName ke formData
+              formData['packageId'] = package.id;
+              formData['packageName'] = package.name;
               formData['userName'] = user.userName;
+              formData['clientEmail'] = user.email;
 
               // Debug print untuk formData
               print('FormData: $formData');
@@ -160,7 +169,7 @@ class CheckoutScreen extends StatelessWidget {
                 throw Exception('Form data is incomplete');
               }
 
-              // Buat objek Rent dari formData
+              // Generate QR code data
               final rent = Rent(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 userId: user.id,
@@ -169,61 +178,41 @@ class CheckoutScreen extends StatelessWidget {
                 packageName: formData['packageName'] as String,
                 totalPrice: formData['price'] as double,
                 downPayment: formData['downPayment'] as double? ?? 0.0,
-                remainingPayment:
-                    formData['remainingPayment'] as double? ?? 0.0,
+                remainingPayment: formData['remainingPayment'] as double? ?? 0.0,
                 date: formData['selectedDay'] as DateTime? ?? DateTime.now(),
                 theme: formData['selectedTema'] as String? ?? '',
                 paymentMethod: formData['selectedPembayaran'] as String? ?? '',
                 description: formData['additionalDescription'] as String? ?? '',
-                status: 'On Hold',
+                status: 'Belum Bayar',
+                email: user.email,
               );
 
               // Simpan data sewa
               await rentController.addRent(rent);
 
-              // Proses pembayaran dengan Midtrans
-              final redirectUrl = await initiateMidtransPaymentProcess(rent);
-              if (redirectUrl == null || redirectUrl.isEmpty) {
-                throw Exception('Failed to get Redirect URL');
-              }
+              // Generate QR Code untuk pembayaran
+              final qrCodeData = await rentController.generateQRCodeForPayment(rent);
 
-              // Buka URL Snap Midtrans
-              await launchUrl(Uri.parse(redirectUrl));
+              // Tampilkan pesan sukses
+              FVFullScreenLoader.stopLoading();
               Get.to(() => SuccessCheckoutScreen(
-                    image: FVImages.successIlustration,
-                    title: 'Pembayaran Berhasil',
-                    subTitle:
-                        'Isi Biodata, download Invoice dan hubungi Fotografer untuk perencanaan mengabadikan momen yang lebih baik',
-                    onPressed: () => Get.to(() => NavigationMenu()),
-                  ));
-              // Get.to(FlutterWebView(
-              //   url: redirectUrl,
-              // ))?.then((value) {
-              //   if (value) {}
-
-              // });
-
-              // Jika pembayaran berhasil, arahkan ke SuccessCheckoutScreen
-            } catch (e) {
-              print('Failed to proceed to payment: $e');
-              // Tambahkan penanganan kesalahan di sini
+                rentId: rent.id,
+                image: FVImages.successIlustration,
+                title: 'Pemesanan Berhasil',
+                subTitle: 'Terima kasih telah melakukan pemesanan. Anda dapat melihat QR Code pembayaran di riwayat sewa.',
+              ));
+            } catch (error) {
+              print('Error: $error'); // Log error untuk debugging
+              FVFullScreenLoader.stopLoading();
+              FVLoaders.errorSnackBar(
+                title: 'Error!',
+                message: 'Terjadi Kesalahan: $error',
+              );
             }
           },
-          child: const Text('Lanjutkan Pembayaran'),
+          child: Text('Lanjutkan Pembayaran'),
         ),
       ),
     );
-  }
-
-  Future<void> launchPaymentUrl(String redirectUrl) async {
-    final Uri url = Uri.parse(redirectUrl);
-    print('Launching URL: $url');
-
-    if (await canLaunch(url.toString())) {
-      await launch(url.toString(), forceSafariVC: false, forceWebView: false);
-    } else {
-      print('Could not launch $url');
-      throw Exception('Failed to launch payment URL: $url');
-    }
   }
 }

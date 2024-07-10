@@ -18,7 +18,8 @@ class NavigationController extends GetxController {
     description: 'Ini adalah deskripsi paket default.',
     price: 10.0,
     categoryId: '1',
-    imageUrls: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'], videoUrls: ['https://example.com/video.mkv'],
+    imageUrls: ['https://example.com/image1.jpg', 'https://example.com/image2.jpg'], videoUrls: ['https://example.com/video.mkv'], 
+    categoryName: 'package',
   );
 
   late final List<Widget> screens = [

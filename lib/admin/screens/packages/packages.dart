@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/controllers/package_controller.dart';
 import 'package:get/get.dart';
+import 'package:fvapp/admin/controllers/package_controller.dart';
 import 'package:fvapp/admin/screens/packages/widgets/add_package.dart';
 import 'package:fvapp/admin/screens/packages/widgets/edit_package_page.dart';
 import 'package:fvapp/utils/constants/colors.dart';
@@ -9,16 +9,11 @@ import 'package:iconsax/iconsax.dart';
 class SettingPackages extends StatelessWidget {
   final PackageController packageController = Get.put(PackageController());
 
-  void _navigateToAddPackage(BuildContext context) {
+  void _navigateToAddPackage(BuildContext context, List<String> categoryName) {
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => const AddPackagePage(
-          categories: [
-            'Basic Package',
-            'Silver Package',
-            'Golden Package',
-            'Diamond Package',
-          ],
+        builder: (context) => AddPackagePage(
+          categories: categoryName,
         ),
       ),
     );
@@ -30,6 +25,7 @@ class SettingPackages extends StatelessWidget {
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GetBuilder<PackageController>(
+          init: packageController,
           builder: (controller) {
             return GridView.builder(
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -44,8 +40,8 @@ class SettingPackages extends StatelessWidget {
                     package.imageUrls.isNotEmpty ? package.imageUrls[0] : null;
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
+                  onTap: () async {
+                    await Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => EditPackagePage(
                         packageId: package.id,
                         packageName: package.name,
@@ -58,6 +54,8 @@ class SettingPackages extends StatelessWidget {
                         selectedCategory: package.categoryId,
                       ),
                     ));
+                    // Setelah kembali dari EditPackagePage, pastikan untuk memuat ulang data paket
+                    packageController.fetchPackages();
                   },
                   child: Container(
                     padding: const EdgeInsets.all(16.0),
@@ -104,7 +102,12 @@ class SettingPackages extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _navigateToAddPackage(context),
+        onPressed: () async {
+          // Fetch categories first before navigating
+          packageController.fetchCategories();
+          List<String> categoryNames = packageController.categories.map((category) => category.name).toList();
+          _navigateToAddPackage(context, categoryNames);
+        },
         child: const Icon(Iconsax.add),
         backgroundColor: FVColors.gold,
       ),

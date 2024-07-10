@@ -43,12 +43,24 @@ class RentDetailController extends GetxController {
         Get.showSnackbar(snackBar);
       }
 
-      // Refresh rent detail
-      loadRentDetail(rent.value!.id);
-    } catch (e) {
-      Get.snackbar('Error', 'Gagal memperbarui status: $e');
+        // Refresh rent detail
+        loadRentDetail(rent.value!.id);
+      } catch (e) {
+        Get.snackbar('Error', 'Gagal memperbarui status: $e');
+      }
     }
   }
-}
 
+  Future<void> deleteRent(String rentId) async {
+    try {
+      isLoading(true);
+      await _rentController.deleteRent(rentId);
+      Get.snackbar('Berhasil', 'Data sewa berhasil dihapus');
+    } catch (e) {
+      print('Error deleting rent: $e');
+      Get.snackbar('Error', 'Gagal menghapus data sewa');
+    } finally {
+      isLoading(false);
+    }
+  }
 }

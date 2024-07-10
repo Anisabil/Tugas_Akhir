@@ -14,13 +14,14 @@ import '../../../../../utils/helpers/helper_function.dart';
 class FVProductMetaData extends StatelessWidget {
   final String packageName;
   final double price;
-  final String categoryId;
+  final String categoryName;
 
-  const FVProductMetaData(
-      {super.key,
-      required this.packageName,
-      required this.price,
-      required this.categoryId});
+  const FVProductMetaData({
+    super.key,
+    required this.packageName,
+    required this.price,
+    required this.categoryName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,10 +54,11 @@ class FVProductMetaData extends StatelessWidget {
               overlayColor: darkMode ? FVColors.white : FVColors.black,
             ),
             FVBrandTitleWithVerifiedIcon(
-              brandTextSize: TextSizes.medium, title: categoryId,
+              brandTextSize: TextSizes.medium, 
+              title: categoryName,
             ),
           ],
-        )
+        ),
       ],
     );
   }
