@@ -39,8 +39,9 @@ dependencies:
   cached_network_image: ^3.3.1
   file_picker: ^8.0.6
   qr_flutter: ^4.1.0
-  flutter_email_sender: ^6.0.3
   mailer: ^6.1.1
+  syncfusion_flutter_pdfviewer: ^26.1.41
+  permission_handler: ^11.3.1
 
   # package_info_plus: ^8.0.0
 

@@ -64,29 +64,6 @@ class ProfileAdmin extends StatelessWidget {
                   const SizedBox(
                     height: FVSizes.spaceBtwItems,
                   ),
-
-                  // FVSettingsMenuTile(
-                  //   icon: Iconsax.safe_home,
-                  //   title: 'Bandung',
-                  //   subTitle: 'Atur alamat',
-                  //   onTap: () => Get.to(() => const UserAddressScreen()),
-                  // ),
-                  // const FVSettingsMenuTile(
-                  //   icon: Iconsax.bag,
-                  //   title: 'Keranjangku',
-                  //   subTitle: 'Tambahkan, hapus paket dan pindah ke checkout',
-                  // ),
-                  // FVSettingsMenuTile(
-                  //   icon: Iconsax.bag_tick,
-                  //   title: 'Paket Pilihanku',
-                  //   subTitle: 'Status sewa sedang di proses dan selesai',
-                  //   onTap: () => Get.to(() => const OrderScreen(userId: '1',)),
-                  // ),
-                  // const FVSettingsMenuTile(
-                  //   icon: Iconsax.bank,
-                  //   title: 'Akun Bank',
-                  //   subTitle: 'Tarik saldo ke rekening bank terdaftar',
-                  // ),
                   
                   const FVSettingsMenuTile(
                     icon: Iconsax.notification,
@@ -94,58 +71,7 @@ class ProfileAdmin extends StatelessWidget {
                     subTitle: 'Atur segala jenis pesan notifikasi',
                   ),
 
-                  FVSettingsMenuTile(
-                    icon: Iconsax.notification,
-                    title: 'Jadwal',
-                    subTitle: 'Atur jadwal acara',
-                    onTap: () => Get.to(() => CalendarScreen()),
-                  ),
-                  // const FVSettingsMenuTile(
-                  //   icon: Iconsax.security_card,
-                  //   title: 'Privasi Akun',
-                  //   subTitle: 'Kelola data dan akun yang terhubung',
-                  // ),
-
-                  // const SizedBox(height: FVSizes.spaceBtwSection),
-                  // FVSettingsMenuTile(
-                  //   icon: Iconsax.location,
-                  //   title: 'Tema',
-                  //   subTitle: 'Tetapkan tema sesuai keinginan',
-                  //   trailing: Switch(
-                  //     value: false, 
-                  //     onChanged: (value) {}
-                  //   ),
-                  // ),
-
-                  // // App Settings
-                  // const SizedBox(height: FVSizes.spaceBtwSection),
-                  // const FVSectionHeading(
-                  //     title: 'Pengaturan Aplikasi', showActionButton: false),
-                  // const SizedBox(height: FVSizes.spaceBtwItems),
-                  // const FVSettingsMenuTile(
-                  //     icon: Iconsax.document_upload,
-                  //     title: 'Memuat Data',
-                  //     subTitle: 'Unggah data ke cloud firebase Anda',
-                  // ),
-
-                  // FVSettingsMenuTile(
-                  //   icon: Iconsax.location,
-                  //   title: 'Geolokasi',
-                  //   subTitle: 'Tetapkan rekomendasi berdasarkan lokasi',
-                  //   trailing: Switch(value: true, onChanged: (value) {}),
-                  // ),
-                  // FVSettingsMenuTile(
-                  //   icon: Iconsax.security_user,
-                  //   title: 'Mode Aman',
-                  //   subTitle: 'Hasil pencarian aman untuk segala usia',
-                  //   trailing: Switch(value: false, onChanged: (value) {}),
-                  // ),
-                  // FVSettingsMenuTile(
-                  //   icon: Iconsax.image,
-                  //   title: 'Kualitas Gambar HD',
-                  //   subTitle: 'Mengatur kualitas gambar untuk dilihat',
-                  //   trailing: Switch(value: true, onChanged: (value) {}),
-                  // ),
+                  
                   const SizedBox(height: FVSizes.spaceBtwSection * 6),
 
                   // Button Logout

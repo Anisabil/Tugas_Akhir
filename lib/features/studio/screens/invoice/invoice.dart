@@ -1,198 +1,230 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/services.dart';
+import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
-import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:open_file/open_file.dart';
+import 'package:intl/intl.dart';
 
 class InvoicePdf {
-  Future<Uint8List> generateInvoicePDF() async {
+  Future<Uint8List> generateInvoicePDF(Rent rent) async {
     final pdf = pw.Document();
-    List<pw.Widget> widgets = [];
     final image = (await rootBundle.load(FVImages.mylogo)).buffer.asUint8List();
 
-    final logoArea = pw.Row(
-      crossAxisAlignment: pw.CrossAxisAlignment.center,
+    // Get admin and client data from Firestore
+    final adminData = await _getAdminData();
+    final clientData = await _getClientData(rent.userId);
+
+    pdf.addPage(
+      pw.Page(
+        build: (context) {
+          return pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.start,
+            children: [
+              pw.Container(
+                color: PdfColors.black, // Set background color to black
+                padding: pw.EdgeInsets.symmetric(vertical: 20, horizontal: 40), // Padding for content
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.start,
+                  children: [
+                    pw.Row(
+                      crossAxisAlignment: pw.CrossAxisAlignment.center,
+                      children: [
+                        pw.Image(
+                          pw.MemoryImage(image),
+                          width: 160, // Ukuran logo diperbesar
+                          height: 160,
+                        ),
+                        pw.SizedBox(width: 10),
+                        pw.Column(
+                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                          children: [
+                            pw.Container(
+                              width: 113,
+                              height: 2,
+                              color: PdfColors.orange300,
+                            ),
+                            pw.SizedBox(height: 2),
+                            pw.Text(
+                          'INVOICE',
+                          style: pw.TextStyle(
+                            color: PdfColors.orange300,
+                            fontSize: 28,
+                            fontWeight: pw.FontWeight.bold,
+                          ),
+                        ),
+                        pw.SizedBox(height: 2),
+                        pw.Container(
+                          width: 113,
+                          height: 2,
+                          color: PdfColors.orange300,
+                        ),
+                            pw.SizedBox(height: 10),
+                            _buildContactInfo(adminData),
+                          ],
+                        ),
+                      ],
+                    ),
+                    pw.SizedBox(height: 15),
+                    _buildClientInfo(clientData),
+                    pw.SizedBox(height: 15),
+                    _buildRentTable(rent),
+                    pw.SizedBox(height: 15), // Added space below the table
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildBankDetails(),
+                        _buildFooter(rent),
+                      ],
+                    ),
+                    pw.SizedBox(height: 80),
+                    _buildSignature(),
+                    pw.SizedBox(height: 20),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+
+    // Save the PDF file
+    final output = await getExternalStorageDirectory();
+    final fileName = "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
+    final file = File("${output!.path}/$fileName");
+    await file.writeAsBytes(await pdf.save());
+
+    // Open the PDF file
+    OpenFile.open("${output.path}/$fileName");
+
+    // Return the PDF as Uint8List
+    return await file.readAsBytes();
+  }
+
+  pw.Widget _buildContactInfo(Map<String, dynamic> adminData) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
       children: [
-        // Logo
-        pw.Image(
-          pw.MemoryImage(image),
-          width: 100,
-          height: 100,
-        ),
-        pw.Padding(
-          padding: pw.EdgeInsets.only(left: 10.0),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                'Invoice',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              ),
-            ],
-          ),
-        ),
-        pw.Padding(
-          padding: pw.EdgeInsets.only(left: 10.0, top: 10.0),
-          child: pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text(
-                '0818 0420 2541',
-                style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
-              ),
-            ],
-          ),
+        pw.Text('No. Telp: ${adminData['phoneNumber']}', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('Instagram: @kr.visualstory', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('YouTube: kr.visualstory', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('Jl. Teknik Sipil No.1 Komplek USB YPKP', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('RT 06/02 Kelurahan Padasuka Kecamatan', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('Cimenyan Kabupaten Bandung 40191', style: pw.TextStyle(color: PdfColors.orange300)),
+      ],
+    );
+  }
+
+  pw.Widget _buildClientInfo(Map<String, dynamic> clientData) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Nama Client: ${clientData['userName']}', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('Email: ${clientData['email']}', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('No. Telp: ${clientData['phoneNumber']}', style: pw.TextStyle(color: PdfColors.orange300)),
+      ],
+    );
+  }
+
+  pw.Widget _buildRentTable(Rent rent) {
+    final data = [
+      ['Tanggal', 'Description', 'Price', 'Total'],
+      [
+        DateFormat('dd MMMM yyyy').format(rent.date),
+        'Paket: ${rent.packageName},\n' +
+            'Tema: ${rent.theme},\n' +
+            'Metode Pembayaran: ${rent.paymentMethod},\n' +
+            'Deskripsi: ${rent.description}',
+        rent.totalPrice.toString(),
+        '', // Empty cell for Total column
+      ],
+    ];
+
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Table(
+          border: pw.TableBorder.all(color: PdfColors.orange300),
+          columnWidths: {
+            0: pw.FixedColumnWidth(80), // Tanggal
+            1: pw.FlexColumnWidth(),   // Description
+            2: pw.FixedColumnWidth(80), // Price
+            3: pw.FixedColumnWidth(80), // Total
+          },
+          children: data.map((row) {
+            return pw.TableRow(
+              children: row.asMap().entries.map((entry) {
+                String cell = entry.value;
+
+                return pw.Container(
+                  alignment: pw.Alignment.centerLeft,
+                  padding: pw.EdgeInsets.all(8),
+                  child: pw.Text(
+                    cell,
+                    style: pw.TextStyle(color: PdfColors.orange300),
+                  ),
+                );
+              }).toList(),
+            );
+          }).toList(),
         ),
       ],
     );
-    final gap30 = pw.SizedBox(height: 30);
-    final balanceArea =
-      pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-      pw.Expanded(
-        child: pw.Container(
-          padding: pw.EdgeInsets.all(10.0),
-            height: 70.0,
-            decoration: pw.BoxDecoration(
-              border: pw.Border.all(color: PdfColor.fromHex('#FFD700')),
-            ),
-            child: pw.Column(
-              mainAxisAlignment: pw.MainAxisAlignment.center,
-              crossAxisAlignment: pw.CrossAxisAlignment.start,
-              children: [
-                pw.Text('Nama Client',
-                  style: pw.TextStyle(
-                    color: PdfColor.fromHex('#FFD700'),
-                    fontSize: 10.0,
-                  )
-                ),
-                pw.Text('Anisa & Sabil',
-                  style: pw.TextStyle(
-                    color: PdfColor.fromHex('#FFD700'),
-                    fontWeight: pw.FontWeight.bold,
-                  )
-                )
-              ]
-            )
-          )
-        ),
-      ]
+  }
+
+  pw.Widget _buildBankDetails() {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('Rekening BCA', style: pw.TextStyle(color: PdfColors.orange300)),
+        pw.Text('4372512036', style: pw.TextStyle(color: PdfColors.orange300, fontSize: 15)),
+        pw.Text('A/N HAMDAN RAMDANI', style: pw.TextStyle(color: PdfColors.orange300)),
+      ],
     );
-    widgets.add(logoArea);
-    widgets.add(gap30);
-    widgets.add(balanceArea);
-    widgets.add(gap30);
-    widgets.add(table());
+  }
 
-    pdf.addPage(pw.MultiPage(
-        pageFormat: PdfPageFormat.a3,
-        theme: pw.ThemeData.withFont(
-          base: pw.Font.ttf(await rootBundle.load('assets/fonts/Poppins-Regular.ttf')),
-          bold: pw.Font.ttf(await rootBundle.load('assets/fonts/Poppins-Bold.ttf')),
-          italic: pw.Font.ttf(await rootBundle.load('assets/fonts/Poppins-Italic.ttf')),
+  pw.Widget _buildFooter(Rent rent) {
+    return pw.Column(
+      crossAxisAlignment: pw.CrossAxisAlignment.start,
+      children: [
+        pw.Text('SUB TOTAL:               ${rent.totalPrice.toString()}', style: pw.TextStyle(color: PdfColors.orange300, fontSize: 10)),
+        pw.Text('DOWN PAYMENT:       ${rent.downPayment.toString()}', style: pw.TextStyle(color: PdfColors.orange300, fontSize: 10)),
+        pw.Text('SISA PEMBAYARAN: ${rent.remainingPayment.toString()}', style: pw.TextStyle(color: PdfColors.orange300, fontSize: 10)),
+      ],
+    );
+  }
+
+  pw.Widget _buildSignature() {
+    return pw.Row(
+      mainAxisAlignment: pw.MainAxisAlignment.end,
+      children: [
+        pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.end,
+          children: [
+            pw.Text('Hormat Kami,', style: pw.TextStyle(color: PdfColors.orange300)),
+            pw.SizedBox(height: 30),
+            pw.Text('Kr.Visualstory', style: pw.TextStyle(color: PdfColors.orange300)),
+          ],
         ),
-        build: (pw.Context context) {
-          return [
-          pw.Container(
-            color: PdfColors.black, // Warna latar belakang halaman jadi hitam
-            padding: pw.EdgeInsets.all(32.0),
-            child: pw.Column(children: widgets),
-          ),
-        ];
-        }));
-    return pdf.save();
+      ],
+    );
   }
 
-  pw.Table table() {
-    List<pw.TableRow> rows = [];
-
-    for (int i = 0; i < 4; i++) {
-      rows.add(
-        pw.TableRow(
-          children: <pw.Widget>[
-          pw.Padding(
-            padding: pw.EdgeInsets.all(10.0),
-            child: pw.Text('2024-5-26',
-                textAlign: pw.TextAlign.left,
-                style: pw.TextStyle(fontSize: 10.0))),
-          pw.Padding(
-            padding: pw.EdgeInsets.all(10.0),
-            child: pw.Text('Prewedding Golden Package',
-                textAlign: pw.TextAlign.left,
-                style: pw.TextStyle(fontSize: 10.0))),
-          pw.Padding(
-            padding: pw.EdgeInsets.all(10.0),
-            child: pw.Text('2.450.000',
-                textAlign: pw.TextAlign.left,
-                style: pw.TextStyle(fontSize: 10.0))),
-          pw.Padding(
-            padding: pw.EdgeInsets.all(10.0),
-            child: pw.Text('2.450.000',
-                textAlign: pw.TextAlign.left,
-                style: pw.TextStyle(fontSize: 10.0))),
-      ]));
-    }
-    return pw.Table(
-        border: pw.TableBorder.all(color: PdfColor.fromHex('#FFD700')),
-        columnWidths: const <int, pw.TableColumnWidth>{
-          0: pw.FixedColumnWidth(50),
-          1: pw.FixedColumnWidth(150),
-          2: pw.FixedColumnWidth(50),
-          6: pw.FixedColumnWidth(50),
-        },
-        children: <pw.TableRow>[
-          pw.TableRow(
-              decoration: pw.BoxDecoration(color: PdfColor.fromHex('#FFD700')),
-              children: <pw.Widget>[
-                pw.Padding(
-                    padding: pw.EdgeInsets.all(10.0),
-                    child: pw.Text('Tanggal',
-                        textAlign: pw.TextAlign.left,
-                        style: pw.TextStyle(
-                          fontSize: 10.0,
-                          color: PdfColor.fromHex('#FFD700'),
-                          fontWeight: pw.FontWeight.bold,
-                        ))),
-                pw.Padding(
-                    padding: pw.EdgeInsets.all(10.0),
-                    child: pw.Text('Deskripsi',
-                        textAlign: pw.TextAlign.left,
-                        style: pw.TextStyle(
-                          fontSize: 10.0,
-                          color: PdfColor.fromHex('#FFD700'),
-                          fontWeight: pw.FontWeight.bold,
-                        ))),
-                pw.Padding(
-                    padding: pw.EdgeInsets.all(10.0),
-                    child: pw.Text('Harga',
-                        textAlign: pw.TextAlign.left,
-                        style: pw.TextStyle(
-                          fontSize: 10.0,
-                          color: PdfColor.fromHex('#FFD700'),
-                          fontWeight: pw.FontWeight.bold,
-                        ))),
-                pw.Padding(
-                    padding: pw.EdgeInsets.all(10.0),
-                    child: pw.Text('Total',
-                        textAlign: pw.TextAlign.left,
-                        style: pw.TextStyle(
-                          fontSize: 10.0,
-                          color: PdfColor.fromHex('#FFD700'),
-                          fontWeight: pw.FontWeight.bold,
-                        )))
-              ]),
-            ...rows
-        ]
-      );
+  Future<Map<String, dynamic>> _getAdminData() async {
+    final querySnapshot = await FirebaseFirestore.instance
+        .collection('Users')
+        .where('role', isEqualTo: 'admin')
+        .get();
+    return querySnapshot.docs.first.data();
   }
 
-  Future<void> savePdfFile(String fileName, Uint8List byteList) async {
-    final output = await getTemporaryDirectory();
-    var filePath = "${output.path}/$fileName.pdf";
-    final file = File(filePath);
-    await file.writeAsBytes(byteList);
-    await OpenFile.open(filePath);
+  Future<Map<String, dynamic>> _getClientData(String userId) async {
+    final snapshot = await FirebaseFirestore.instance.collection('Users').doc(userId).get();
+    return snapshot.data()!;
   }
 }

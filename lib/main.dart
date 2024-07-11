@@ -43,5 +43,7 @@ Future<void> main() async {
   Get.put(RentController());
   Get.put(RentDetailController());
 
+  print('RentController initialized successfully');
+
   runApp(const App());
 }

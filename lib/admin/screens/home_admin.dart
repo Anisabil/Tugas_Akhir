@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/screens/event/event.dart';
 import 'package:fvapp/admin/screens/packages/packages.dart';
 import 'package:fvapp/admin/screens/profile/profile_admin.dart';
 import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
@@ -21,7 +22,7 @@ class HomeAdmin extends StatelessWidget {
     final dark = FVHelperFunctions.isDarkMode(context);
 
     return DefaultTabController(
-      length: 4,
+      length: 5,
       child: Scaffold(
         appBar: FVAppBar(
           title: Row(
@@ -88,6 +89,9 @@ class HomeAdmin extends StatelessWidget {
                       child: Text('Sewa'),
                     ),
                     Tab(
+                      child: Text('Jadwal'),
+                    ),
+                    Tab(
                       child: Text('Profil'),
                     ),
                   ],
@@ -100,6 +104,7 @@ class HomeAdmin extends StatelessWidget {
               SettingCategories(),
               SettingPackages(),
               RentalList(),
+              CalendarScreen(),
               const ProfileAdmin(),
             ],
           ),
