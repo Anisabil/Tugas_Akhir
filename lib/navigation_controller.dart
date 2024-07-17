@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:fvapp/features/studio/about/about_app.dart';
 import 'package:get/get.dart';
 
 import 'features/personalization/screens/settings/settings.dart';
@@ -24,7 +25,7 @@ class NavigationController extends GetxController {
 
   late final List<Widget> screens = [
     HomeScreen(package: defaultPackage),
-    const RentScreen(),
+    AboutApp(),
     user != null ? OrderScreen(userId: user!.uid) : Container(), // Tampilkan kontainer kosong jika user null
     const SettingsScreen(),
   ];

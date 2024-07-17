@@ -5,26 +5,12 @@ class CategoryService {
   final CollectionReference _categoryCollection =
       FirebaseFirestore.instance.collection('categories');
 
-  Future<void> addCategory(String name) async {
-    await _categoryCollection.add({'name': name});
+  Future<void> addCategory(String name, String imageUrl) async {
+    await _categoryCollection.add({'name': name, 'imageUrl': imageUrl});
   }
 
-  Future<Category?> getCategoryById(String id) async {
-    try {
-      DocumentSnapshot snapshot = await _categoryCollection.doc(id).get();
-      if (snapshot.exists) {
-        return Category.fromSnapshot(snapshot);
-      } else {
-        return null;
-      }
-    } catch (e) {
-      print('Error getting category by id: $e');
-      return null;
-    }
-  }
-
-  Future<void> updateCategory(String id, String name) async {
-    await _categoryCollection.doc(id).update({'name': name});
+  Future<void> updateCategory(String id, String name, String imageUrl) async {
+    await _categoryCollection.doc(id).update({'name': name, 'imageUrl': imageUrl});
   }
 
   Future<void> deleteCategory(String id) async {

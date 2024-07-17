@@ -197,6 +197,7 @@ class CheckoutScreen extends StatelessWidget {
               FVFullScreenLoader.stopLoading();
               Get.to(() => SuccessCheckoutScreen(
                 rentId: rent.id,
+                package: package,
                 image: FVImages.successIlustration,
                 title: 'Pemesanan Berhasil',
                 subTitle: 'Terima kasih telah melakukan pemesanan. Anda dapat melihat QR Code pembayaran di riwayat sewa.',

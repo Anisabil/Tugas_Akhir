@@ -30,13 +30,13 @@ class LoginScreen extends StatelessWidget {
               const FVLoginForm(),
 
               // Divider
-              FVFormDivider(dividerText: FVText.orSignInWith.capitalize!,),
-              const SizedBox(
-                height: FVSizes.spaceBtwSection,
-              ),
+              // FVFormDivider(dividerText: FVText.orSignInWith.capitalize!,),
+              // const SizedBox(
+              //   height: FVSizes.spaceBtwSection,
+              // ),
 
               // Footer
-              const FVSocialButtons(),
+              // const FVSocialButtons(),
             ],
           ),
         ),

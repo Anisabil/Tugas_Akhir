@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/screens/home_admin.dart';
+import 'package:fvapp/admin/home_admin.dart';
 import 'package:fvapp/features/authentication/controllers/login/login_controller.dart';
 import 'package:fvapp/features/authentication/screens/password_configuration/forgot_password.dart';
 import 'package:fvapp/features/authentication/screens/signup/signup.dart';

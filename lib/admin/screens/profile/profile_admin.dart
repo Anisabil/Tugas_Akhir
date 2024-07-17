@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/screens/event/event.dart';
 import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
@@ -72,7 +71,7 @@ class ProfileAdmin extends StatelessWidget {
                   ),
 
                   
-                  const SizedBox(height: FVSizes.spaceBtwSection * 6),
+                  const SizedBox(height: FVSizes.spaceBtwSection * 8),
 
                   // Button Logout
                   SizedBox(

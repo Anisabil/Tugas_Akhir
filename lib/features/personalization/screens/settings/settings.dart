@@ -76,17 +76,17 @@ class SettingsScreen extends StatelessWidget {
                   //   title: 'Keranjangku',
                   //   subTitle: 'Tambahkan, hapus paket dan pindah ke checkout',
                   // ),
-                  FVSettingsMenuTile(
-                    icon: Iconsax.bag_tick,
-                    title: 'Riwayat Sewa',
-                    subTitle: 'Status sewa sedang di proses dan selesai',
-                    onTap: () => Get.to(() => const OrderScreen(userId: '1',)),
-                  ),
-                  const FVSettingsMenuTile(
-                    icon: Iconsax.bank,
-                    title: 'Akun Bank',
-                    subTitle: 'Tarik saldo ke rekening bank terdaftar',
-                  ),
+                  // FVSettingsMenuTile(
+                  //   icon: Iconsax.bag_tick,
+                  //   title: 'Riwayat Sewa',
+                  //   subTitle: 'Status sewa sedang di proses dan selesai',
+                  //   onTap: () => Get.to(() => const OrderScreen(userId: '1',)),
+                  // ),
+                  // const FVSettingsMenuTile(
+                  //   icon: Iconsax.bank,
+                  //   title: 'Akun Bank',
+                  //   subTitle: 'Tarik saldo ke rekening bank terdaftar',
+                  // ),
                   // const FVSettingsMenuTile(
                   //   icon: Iconsax.discount_shape,
                   //   title: 'Kupon',
@@ -103,16 +103,16 @@ class SettingsScreen extends StatelessWidget {
                   //   subTitle: 'Kelola data dan akun yang terhubung',
                   // ),
 
-                  const SizedBox(height: FVSizes.spaceBtwSection),
-                  FVSettingsMenuTile(
-                    icon: Iconsax.location,
-                    title: 'Tema',
-                    subTitle: 'Tetapkan tema sesuai keinginan',
-                    trailing: Switch(
-                      value: false, 
-                      onChanged: (value) {}
-                    ),
-                  ),
+                  // const SizedBox(height: FVSizes.spaceBtwSection),
+                  // FVSettingsMenuTile(
+                  //   icon: Iconsax.location,
+                  //   title: 'Tema',
+                  //   subTitle: 'Tetapkan tema sesuai keinginan',
+                  //   trailing: Switch(
+                  //     value: false, 
+                  //     onChanged: (value) {}
+                  //   ),
+                  // ),
 
                   // // App Settings
                   // const SizedBox(height: FVSizes.spaceBtwSection),
@@ -145,20 +145,25 @@ class SettingsScreen extends StatelessWidget {
                   // ),
                   const SizedBox(height: FVSizes.spaceBtwSection),
 
-                  // Button Logout
-                  SizedBox(
-                    width: double.infinity,
-                    child: OutlinedButton(
-                      onPressed: () => controller.logout(),
-                      child: const Text(FVText.logout),
-                    ),
-                  ),
+                  
                 ],
               ),
             ),
           ],
         ),
       ),
+      bottomNavigationBar: 
+        // Button Logout
+        Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: SizedBox(
+            width: double.infinity,
+            child: OutlinedButton(
+              onPressed: () => controller.logout(),
+              child: const Text(FVText.logout),
+            ),
+          ),
+        ),
     );
   }
 }

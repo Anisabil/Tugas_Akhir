@@ -11,7 +11,7 @@ class App extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       themeMode: ThemeMode.system,
-      title: 'FVAPP',
+      title: 'KR Visual Story',
       debugShowCheckedModeBanner: false,
       theme: FVAppTheme.lightTheme,
       darkTheme: FVAppTheme.darkTheme,

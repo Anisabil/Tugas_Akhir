@@ -93,7 +93,7 @@ var packages = <Package>[].obs;
 }
 
 String getCategoryNameById(String categoryId) {
-    return categories.firstWhere((category) => category.id == categoryId, orElse: () => Category(id: '', name: 'Unknown')).name;
+    return categories.firstWhere((category) => category.id == categoryId, orElse: () => Category(id: '', name: 'Unknown', imageUrl: '')).name;
   }
 
   // Method untuk menambahkan paket baru

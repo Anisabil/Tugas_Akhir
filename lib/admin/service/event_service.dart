@@ -1,27 +1,45 @@
-import 'package:firebase_database/firebase_database.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fvapp/admin/models/event_model.dart';
+import 'package:fvapp/features/studio/payment/model/rent_model.dart';
+import 'package:get/get.dart';
 
 class EventService {
-  final DatabaseReference _eventsRef = FirebaseDatabase.instance.ref().child('events');
+  final CollectionReference _eventsRef = FirebaseFirestore.instance.collection('events');
+  final CollectionReference _rentsRef = FirebaseFirestore.instance.collection('rents');
+  final events = <Event>[].obs;
 
-  Future<List<Event>?> fetchEvents() async {
+  Future<List<Event>> fetchEvents() async {
+    List<Event> events = [];
     try {
-      final DataSnapshot snapshot = await _eventsRef.get();
-      if (snapshot.exists) {
-        final data = snapshot.value as Map<dynamic, dynamic>;
-        return data.entries.map((entry) {
-          return Event.fromJson({...entry.value, 'eventId': entry.key});
-        }).toList();
+      QuerySnapshot snapshot = await _eventsRef.get();
+      for (var doc in snapshot.docs) {
+        events.add(Event.fromFirestore(doc));
       }
     } catch (e) {
       print('Error fetching events: $e');
     }
-    return null;
+    return events;
+  }
+
+  Future<List<Rent>> fetchRents() async {
+    List<Rent> rents = [];
+    try {
+      QuerySnapshot snapshot = await _rentsRef.get();
+      print('Total rents fetched: ${snapshot.docs.length}');
+      for (var doc in snapshot.docs) {
+        print('Rent data: ${doc.data()}');
+        rents.add(Rent.fromFirestore(doc));
+      }
+      print('Rents fetched: $rents');
+    } catch (e) {
+      print('Error fetching rents: $e');
+    }
+    return rents;
   }
 
   Future<void> addEvent(Event event) async {
     try {
-      await _eventsRef.push().set(event.toJson());
+      await _eventsRef.add(event.toFirestore());
     } catch (e) {
       print('Error adding event: $e');
     }
@@ -29,7 +47,7 @@ class EventService {
 
   Future<void> editEvent(Event event) async {
     try {
-      await _eventsRef.child(event.eventId).set(event.toJson());
+      await _eventsRef.doc(event.eventId).set(event.toFirestore());
     } catch (e) {
       print('Error editing event: $e');
     }
@@ -37,7 +55,7 @@ class EventService {
 
   Future<void> deleteEvent(String eventId) async {
     try {
-      await _eventsRef.child(eventId).remove();
+      await _eventsRef.doc(eventId).delete();
     } catch (e) {
       print('Error deleting event: $e');
     }

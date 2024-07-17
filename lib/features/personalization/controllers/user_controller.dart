@@ -19,10 +19,12 @@ import '../../../utils/popups/loaders.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
+  CollectionReference<Map<String, dynamic>> usersCollection = FirebaseFirestore.instance.collection('users');
 
   final profileLoading = false.obs;
   Rx<UserModel> user = UserModel.empty().obs;
 
+  var userId = ''.obs;
   final hidePassword = false.obs;
   final verifyEmail = TextEditingController();
   final verifyPassword = TextEditingController();
@@ -34,6 +36,10 @@ class UserController extends GetxController {
   void onInit() {
     super.onInit();
     fetchUserData();
+  }
+
+  void setUserId(String id) {
+    userId.value = id;
   }
 
   Future<void> fecthUserRecord() async {
@@ -234,11 +240,13 @@ class UserController extends GetxController {
         final File imageFile = File(pickedFile.path);
 
         // Upload to Firebase Storage
-        final Reference storageReference =
-            FirebaseStorage.instance.ref().child('profile_pictures/${user.value.id}');
+        final Reference storageReference = FirebaseStorage.instance
+            .ref()
+            .child('profile_pictures/${user.value.id}');
         final UploadTask uploadTask = storageReference.putFile(imageFile);
 
-        final TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => {});
+        final TaskSnapshot taskSnapshot =
+            await uploadTask.whenComplete(() => {});
         final String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
         // Update profile picture URL in Firestore
@@ -251,6 +259,27 @@ class UserController extends GetxController {
         title: 'Error',
         message: 'Gagal mengunggah foto profil. Silakan coba lagi.',
       );
+    }
+  }
+
+  Future<UserModel?> fetchAdmin() async {
+    // Logic to fetch admin user
+    try {
+      // Assuming you fetch the admin user by role or another identifier
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .where('role', isEqualTo: 'admin')
+          .limit(1)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        return UserModel.fromSnapshot(querySnapshot.docs.first);
+      } else {
+        return null; // Return null or handle case when admin not found
+      }
+    } catch (e) {
+      print('Error fetching admin: $e');
+      return null; // Handle error case
     }
   }
 }

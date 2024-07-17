@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fvapp/admin/controllers/event_controller.dart';
+import 'package:fvapp/admin/controllers/promo_controller.dart';
 import 'package:fvapp/admin/controllers/rent_detail_controller.dart';
 import 'package:fvapp/features/personalization/controllers/user_controller.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
@@ -42,6 +43,7 @@ Future<void> main() async {
   Get.put(NavigationController());
   Get.put(RentController());
   Get.put(RentDetailController());
+  Get.put(PromoController());
 
   print('RentController initialized successfully');
 

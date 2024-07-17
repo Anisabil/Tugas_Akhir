@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
 import 'package:fvapp/common/styles/spacing_styles.dart';
 import 'package:fvapp/features/personalization/models/user_model.dart';
 import 'package:fvapp/features/studio/chat/chat.dart';
 import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
+import 'package:fvapp/features/studio/screens/home/home.dart';
 import 'package:fvapp/features/studio/screens/order/widgets/order_detail.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/constants/text_strings.dart';
@@ -13,12 +15,14 @@ import 'package:iconsax/iconsax.dart';
 
 class SuccessCheckoutScreen extends StatelessWidget {
   final String image, title, subTitle, rentId;
+  final Package package; // Tambahkan package
 
   const SuccessCheckoutScreen({
     required this.image,
     required this.title,
     required this.subTitle,
     required this.rentId,
+    required this.package, // Tambahkan package
     Key? key,
   }) : super(key: key);
 
@@ -65,7 +69,7 @@ class SuccessCheckoutScreen extends StatelessWidget {
                         children: [
                           Icon(Iconsax.document_text),
                           SizedBox(height: 5),
-                          Text(FVText.fvInvoice),
+                          Text('QR Code'),
                         ],
                       ),
                     ),
@@ -76,15 +80,16 @@ class SuccessCheckoutScreen extends StatelessWidget {
                       onPressed: () async {
                         try {
                           UserModel userModel = await getCurrentUser();
-                          if (userModel.role == 'admin' || userModel.role == 'client') {
+                          if (userModel.role == 'admin' ||
+                              userModel.role == 'client') {
                             Get.to(() => ChatScreen(
-                              receiverId:'admin')
-                            ); // Gunakan 'admin' sebagai ID fotografer
+                                receiverId:
+                                    'admin')); // Gunakan 'admin' sebagai ID fotografer
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
-                                content: Text('Anda tidak memiliki akses ke fitur ini.')
-                              ),
+                                  content: Text(
+                                      'Anda tidak memiliki akses ke fitur ini.')),
                             );
                           }
                         } catch (e) {
@@ -105,15 +110,6 @@ class SuccessCheckoutScreen extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: FVSizes.spaceBtwSection),
-
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () => Get.to(() => const BiodataScreen()),
-                  child: const Text(FVText.fvBiodata),
-                ),
-              ),
             ],
           ),
         ),
@@ -123,7 +119,7 @@ class SuccessCheckoutScreen extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => Get.to(() => OrderDetail(rentId: rentId)),
+            onPressed: () => Get.to(() => HomeScreen(package: package)), // Navigasi ke HomeScreen dengan package
             child: const Text(FVText.fvContinue),
           ),
         ),

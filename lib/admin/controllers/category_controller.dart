@@ -33,13 +33,13 @@ class CategoryController extends GetxController {
     }
   }
 
-  void addCategory(String name) async {
-    await _categoryService.addCategory(name);
+  void addCategory(String name, String imageUrl) async {
+    await _categoryService.addCategory(name, imageUrl);
     fetchCategories();
   }
 
-  void updateCategory(String id, String name) async {
-    await _categoryService.updateCategory(id, name);
+  void updateCategory(String id, String name, String imageUrl) async {
+    await _categoryService.updateCategory(id, name, imageUrl);
     fetchCategories();
   }
 

@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:fvapp/admin/screens/event/event.dart';
+import 'package:fvapp/admin/screens/event/events.dart';
 import 'package:fvapp/admin/screens/packages/packages.dart';
 import 'package:fvapp/admin/screens/profile/profile_admin.dart';
+import 'package:fvapp/admin/screens/promo/promo.dart';
 import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
 import 'package:fvapp/admin/screens/rent_order/widgets/rent_detail.dart';
 import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:get/get.dart';
 
-import '../../common/widgets/appbar/tabbar.dart';
-import '../../utils/constants/colors.dart';
-import '../../utils/constants/image_strings.dart';
-import '../../utils/constants/sizes.dart';
-import '../../utils/helpers/helper_function.dart';
-import 'categories/categories.dart';
+import '../common/widgets/appbar/tabbar.dart';
+import '../utils/constants/colors.dart';
+import '../utils/constants/image_strings.dart';
+import '../utils/constants/sizes.dart';
+import '../utils/helpers/helper_function.dart';
+import 'screens/categories/categories.dart';
 
 class HomeAdmin extends StatelessWidget {
   const HomeAdmin({super.key});
@@ -22,7 +23,7 @@ class HomeAdmin extends StatelessWidget {
     final dark = FVHelperFunctions.isDarkMode(context);
 
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         appBar: FVAppBar(
           title: Row(
@@ -80,6 +81,9 @@ class HomeAdmin extends StatelessWidget {
                 bottom: const FVTabBar(
                   tabs: [
                     Tab(
+                      child: Text('Promo'),
+                    ),
+                    Tab(
                       child: Text('Kategori'),
                     ),
                     Tab(
@@ -101,10 +105,11 @@ class HomeAdmin extends StatelessWidget {
           },
           body: TabBarView(
             children: [
-              SettingCategories(),
+              PromoScreen(),
+              CategoryScreen(),
               SettingPackages(),
               RentalList(),
-              CalendarScreen(),
+              Events(rentId: '',),
               const ProfileAdmin(),
             ],
           ),

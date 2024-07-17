@@ -2,14 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
 class CategoryBox extends StatelessWidget {
-  final IconData icon;
+  final String imageUrl; // Ubah dari IconData menjadi String
   final String text;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const CategoryBox({
     Key? key,
-    required this.icon,
+    required this.imageUrl, // Ganti parameter icon dengan imageUrl
     required this.text,
     required this.onEdit,
     required this.onDelete,
@@ -24,7 +24,7 @@ class CategoryBox extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 40),
+            Image.network(imageUrl, width: 40, height: 40), // Gunakan Image.network untuk menampilkan gambar dari URL
             const SizedBox(height: 8),
             Text(text, textAlign: TextAlign.center),
             const SizedBox(height: 8),

@@ -10,12 +10,18 @@ import 'package:qr_flutter/qr_flutter.dart';
 
 class RentController extends GetxController {
   late CollectionReference<Map<String, dynamic>> _rentsCollection;
+  var rents = <Rent>[].obs;
+  var rentId = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
     _rentsCollection = FirebaseFirestore.instance.collection('rents');
     initializeRentsCollection();
+  }
+
+  void setRentId(String id) {
+    rentId.value = id;
   }
 
   Future<void> initializeRentsCollection() async {

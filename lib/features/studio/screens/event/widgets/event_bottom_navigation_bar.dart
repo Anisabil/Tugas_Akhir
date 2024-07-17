@@ -15,14 +15,13 @@ class EventBottomNavigationBar extends StatelessWidget {
   final Map<String, dynamic> formData;
 
   EventBottomNavigationBar({
-  required this.package,
-  required this.onNext,
-  required this.onFormSubmit,
-  required this.formData,
-}) {
-  print('EventBottomNavigationBar initialized with packageId: ${package.id}, packageName: ${package.name}');
-}
-
+    required this.package,
+    required this.onNext,
+    required this.onFormSubmit,
+    required this.formData,
+  }) {
+    print('EventBottomNavigationBar initialized with packageId: ${package.id}, packageName: ${package.name}');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +33,7 @@ class EventBottomNavigationBar extends StatelessWidget {
         init: eventFormController,
         builder: (controller) {
           return ElevatedButton(
+            // Jika selectedDay null atau hari tersebut adalah hari event, tombol tidak dapat ditekan
             onPressed: controller.selectedDay == null || eventFormController.isEventDay(controller.selectedDay!)
                 ? () {
                     FVLoaders.errorSnackBar(
@@ -43,8 +43,8 @@ class EventBottomNavigationBar extends StatelessWidget {
                   }
                 : () {
                     formData['selectedDay'] = controller.selectedDay!;
-                    formData['packageId'] = package;
-print('FormData: $formData');
+                    formData['packageId'] = package.id; // Simpan ID paket, bukan objek paket
+                    print('FormData: $formData');
                     Get.to(() => RentFormScreen(
                       onNext: onNext,
                       onFormSubmit: onFormSubmit,
@@ -52,9 +52,11 @@ print('FormData: $formData');
                       selectedDay: controller.selectedDay!, // Pass selected day to the next screen
                     ));
                   },
-            child: const Text('Selanjutnya'),
+            child: const Text('Selanjutnya', style: TextStyle(color: FVColors.grey),),
             style: ElevatedButton.styleFrom(
-              backgroundColor: controller.selectedDay == null || eventFormController.isEventDay(controller.selectedDay!) ? FVColors.grey : FVColors.gold,
+              backgroundColor: controller.selectedDay == null || eventFormController.isEventDay(controller.selectedDay!)
+                  ? FVColors.darkerGrey // Warna tombol ketika tidak dapat ditekan
+                  : FVColors.gold, // Warna tombol ketika dapat ditekan
             ),
           );
         },

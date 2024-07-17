@@ -59,7 +59,7 @@ class FVText {
   static const String yourAccountCreatedTitle =
       "Akun anda berhasil ditambahkan!";
   static const String yourAccountCreatedSubTitle =
-      "Selamat datang di ruang fotografi Anda : Akun anda telah dibuat, rasakan nikmatnya mencari fotografer yang sesuai keinginan";
+      "Selamat datang di ruang fotografi Anda : Akun Anda telah dibuat, rasakan nikmatnya mencari paket jasa sesuai keinginan Anda";
   static const String logout = "Keluar";
 
   // Home

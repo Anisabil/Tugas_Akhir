@@ -102,10 +102,10 @@ class FVSignupForm extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: FVSizes.spaceBtwInputFields),
+          // const SizedBox(height: FVSizes.spaceBtwInputFields),
 
           // Terms&conditions Checkbox
-          const FVTermsAndConditionCheckbox(),
+          // const FVTermsAndConditionCheckbox(),
           const SizedBox(height: FVSizes.spaceBtwSection),
 
           // Signup Button

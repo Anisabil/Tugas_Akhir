@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/controllers/package_controller.dart';
+import 'package:fvapp/admin/controllers/promo_controller.dart';
 import 'package:fvapp/admin/models/package_model.dart';
+import 'package:fvapp/admin/models/promo_model.dart';
 import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:fvapp/common/widgets/layouts/grid_layout.dart';
@@ -26,6 +28,7 @@ class HomeScreen extends StatelessWidget {
   HomeScreen({required this.package});
 
   final PackageController _packageController = Get.find(); // Gunakan Get.find() untuk mengambil instance PackageController
+  final PromoController _promoController = Get.put(PromoController());
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +76,27 @@ class HomeScreen extends StatelessWidget {
               padding: const EdgeInsets.all(FVSizes.defaultSpace),
               child: Column(
                 children: [
-                  const FVPromoSlide(
-                    // Promo Slider
-                    banners: [
-                      FVImages.banner01,
-                      FVImages.banner02,
-                      FVImages.banner03,
-                    ],
+                  StreamBuilder<List<PromoImage>>(
+                    stream: _promoController.getImages(),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+
+                      List<PromoImage> promoImages = snapshot.data ?? [];
+
+                      if (promoImages.isEmpty) {
+                        return Center(child: Text('No promo images available.'));
+                      }
+
+                      return FVPromoSlide(
+                        banners: promoImages.map((image) => image.imageUrl).toList(),
+                      );
+                    },
                   ),
                   const SizedBox(height: FVSizes.spaceBtwSection),
 
@@ -110,25 +127,22 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
-              try {
-                UserModel userModel = await getCurrentUser();
-                if (userModel.role == 'admin' || userModel.role == 'client') {
-                  Get.to(() => ChatScreen(
-                      receiverId:
-                          'admin')); // Gunakan 'admin' sebagai ID fotografer
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content:
-                            Text('Anda tidak memiliki akses ke fitur ini.')),
-                  );
-                }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: ${e.toString()}')),
-                );
-              }
-            },
+          try {
+            UserModel userModel = await getCurrentUser();
+            if (userModel.role == 'admin' || userModel.role == 'client') {
+              Get.to(() => ChatScreen(
+                  receiverId: 'admin')); // Gunakan 'admin' sebagai ID fotografer
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
+              );
+            }
+          } catch (e) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text('Error: ${e.toString()}')),
+            );
+          }
+        },
         child: const Icon(Iconsax.messages, color: Colors.white),
         backgroundColor: FVColors.gold,
       ),

@@ -88,7 +88,7 @@ class RentFormScreen extends StatelessWidget {
               }
             }
           },
-          child: Text('Lanjut'),
+          child: Text('Selanjutnya'),
         ),
       ),
     );

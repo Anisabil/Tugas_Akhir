@@ -33,34 +33,21 @@ class FVSearchContainer extends StatelessWidget {
       onTap: onTap,
       child: Padding(
         padding: padding,
-        child: Container(
-          width: FVDeviceUtils.getScreenWidth(context),
-          padding: const EdgeInsets.all(FVSizes.md),
-          decoration: BoxDecoration(
-            color: showBackground
-                ? dark
-                    ? FVColors.dark
-                    : FVColors.light
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(FVSizes.cardRadiusLg),
-            border: showBorder ? Border.all(color: FVColors.grey) : null,
-          ),
-          child: Row(
-            children: [
-              Icon(icon, color: dark ? FVColors.darkGrey : Colors.grey),
-              const SizedBox(width: FVSizes.spaceBtwItems),
-              Expanded(
-                child: TextField(
-                  onChanged: (query) => Get.find<PackageController>().search(query),
-                  decoration: InputDecoration(
-                    hintText: text,
-                    border: InputBorder.none,
-                    hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: dark ? FVColors.darkGrey : Colors.grey),
-                  ),
+        child: Row(
+          children: [
+            Icon(icon, color: dark ? FVColors.darkGrey : Colors.white),
+            const SizedBox(width: FVSizes.spaceBtwItems),
+            Expanded(
+              child: TextField(
+                onChanged: (query) => Get.find<PackageController>().search(query),
+                decoration: InputDecoration(
+                  hintText: text,
+                  border: InputBorder.none,
+                  hintStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: dark ? FVColors.darkGrey : Colors.white),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

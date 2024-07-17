@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/screens/event/widgets/calendar_screen.dart';
+import 'package:fvapp/common/widgets/list_tiles/settings_menu_tile.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:fvapp/admin/controllers/rent_detail_controller.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
@@ -96,7 +99,7 @@ class RentDetail extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: rent.status == 'Belum Bayar' ? FVColors.gold : FVColors.grey,
                             ),
-                            child: Text('Belum Lunas', style: TextStyle(color: FVColors.darkGrey)),
+                            child: Text('Belum Lunas', style: TextStyle(color: FVColors.softGrey)),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -110,10 +113,19 @@ class RentDetail extends StatelessWidget {
                             style: ElevatedButton.styleFrom(
                               backgroundColor: rent.status == 'Belum Lunas' ? FVColors.gold : FVColors.grey,
                             ),
-                            child: Text('Lunas', style: TextStyle(color: FVColors.darkGrey),),
+                            child: Text('Lunas', style: TextStyle(color: FVColors.softGrey),),
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: FVSizes.spaceBtwItems),
+                    FVSettingsMenuTile(
+                      icon: Iconsax.calendar,
+                      title: 'Jadwalkan',
+                      subTitle: 'Buat jadwal event',
+                      onTap: () {
+                        Get.to(() => CalendarScreen(rentId: rentId)); // Mengirim rentId ke CalendarScreen
+                      },
                     ),
                   ],
                 ),
@@ -125,11 +137,10 @@ class RentDetail extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () {
-                    controller.deleteRent(rentId);
-                    Navigator.of(context).pop();
+                    _showDeleteConfirmationDialog(context, rentId, controller);
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: FVColors.warning,
+                    backgroundColor: FVColors.error,
                   ),
                   child: Text('Hapus Sewa'),
                 ),
@@ -138,6 +149,34 @@ class RentDetail extends StatelessWidget {
           ],
         );
       }),
+    );
+  }
+
+  void _showDeleteConfirmationDialog(BuildContext context, String rentId, RentDetailController controller) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Konfirmasi Hapus'),
+          content: Text('Apakah Anda yakin ingin menghapus data sewa ini?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () {
+                controller.deleteRent(rentId);
+                Navigator.of(context).pop();
+                Navigator.of(context).pop();
+              },
+              child: Text('Hapus'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

@@ -1,158 +1,90 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:fvapp/admin/screens/categories/widgets/box_category.dart';
+import 'package:fvapp/admin/screens/categories/widgets/form_category.dart';
+import 'package:get/get.dart';
+import 'package:fvapp/admin/controllers/category_controller.dart';
 import 'package:fvapp/utils/constants/colors.dart';
-import 'package:fvapp/utils/popups/loaders.dart';
+import 'package:iconsax/iconsax.dart';
 
-class SettingCategories extends StatelessWidget {
-  final CollectionReference _categoryRef =
-      FirebaseFirestore.instance.collection('categories');
-
-  void _showEditPopup(BuildContext context, String categoryId, String initialValue) {
-    TextEditingController _controller = TextEditingController(text: initialValue);
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Edit Kategori'),
-          content: TextField(
-            controller: _controller,
-            decoration: InputDecoration(hintText: 'Masukkan nama kategori'),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Simpan'),
-              onPressed: () {
-                String newValue = _controller.text;
-                _categoryRef.doc(categoryId).update({'name': newValue}).then((_) {
-                  Navigator.of(context).pop();
-                  FVLoaders.successSnackBar(
-                    title: 'Berhasil',
-                    message: 'Kategori Berhasil Diperbaharui',
-                  );
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showDeleteConfirmation(BuildContext context, String categoryId) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Hapus Kategori'),
-          content: Text('Apakah Anda yakin menghapus kategori ini?'),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Hapus'),
-              onPressed: () {
-                _categoryRef.doc(categoryId).delete().then((_) {
-                  Navigator.of(context).pop();
-                  FVLoaders.successSnackBar(
-                    title: 'Berhasil',
-                    message: 'Kategori Berhasil Dihapus',
-                  );
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _showAddCategoryPopup(BuildContext context) {
-    String newCategoryName = '';
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Tambah Kategori'),
-          content: TextField(
-            decoration: InputDecoration(hintText: 'Masukkan kategori'),
-            onChanged: (value) {
-              newCategoryName = value;
-            },
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Batal'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            TextButton(
-              child: Text('Simpan'),
-              onPressed: () {
-                _categoryRef.add({'name': newCategoryName}).then((_) {
-                  Navigator.of(context).pop();
-                  FVLoaders.successSnackBar(
-                    title: 'Berhasil',
-                    message: 'Kategori Berhasil Ditambahkan',
-                  );
-                });
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
+class CategoryScreen extends StatelessWidget {
+  final CategoryController categoryController = Get.put(CategoryController());
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Categories'),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: StreamBuilder<QuerySnapshot>(
-          stream: _categoryRef.snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            }
-
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            }
-
-            List<DocumentSnapshot> categories = snapshot.data!.docs;
+        padding: const EdgeInsets.all(16.0),
+        child: GetBuilder<CategoryController>(
+          init: categoryController,
+          builder: (controller) {
             return GridView.builder(
-              itemCount: categories.length,
               gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
-                crossAxisSpacing: 8,
-                mainAxisSpacing: 8,
-                childAspectRatio: 0.8,
+                crossAxisSpacing: 16.0,
+                mainAxisSpacing: 16.0,
               ),
+              itemCount: controller.categories.length,
               itemBuilder: (context, index) {
-                String categoryId = categories[index].id;
-                String categoryName = categories[index]['name'];
-                return CategoryBox(
-                  icon: Iconsax.category,
-                  text: categoryName,
-                  onEdit: () => _showEditPopup(context, categoryId, categoryName),
-                  onDelete: () => _showDeleteConfirmation(context, categoryId),
+                var category = controller.categories[index];
+                String? imageUrl = category.imageUrl;
+
+                return GestureDetector(
+                  onTap: () async {
+                    await Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => CategoryFormScreen(
+                          categoryId: category.id,
+                          initialName: category.name,
+                          initialImageUrl: imageUrl,
+                        ),
+                      ),
+                    );
+                    categoryController.fetchCategories();
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(8.0),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: imageUrl != null
+                              ? Image.network(
+                                  imageUrl,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Container(
+                                      color: Colors.grey[300],
+                                      child: const Center(
+                                        child: Text('Gambar tidak tersedia'),
+                                      ),
+                                    );
+                                  },
+                                )
+                              : Container(
+                                  color: Colors.grey[300],
+                                  child: const Center(
+                                    child: Text('Gambar Kategori'),
+                                  ),
+                                ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          category.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
                 );
               },
             );
@@ -160,9 +92,13 @@ class SettingCategories extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddCategoryPopup(context),
-        child: Icon(Iconsax.add),
-        tooltip: 'Tambah Kategori',
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => CategoryFormScreen()),
+          );
+        },
+        child: const Icon(Iconsax.add),
         backgroundColor: FVColors.gold,
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,

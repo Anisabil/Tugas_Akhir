@@ -67,7 +67,7 @@ class FVBottomAddToCart extends StatelessWidget {
               children: [
                 Icon(Iconsax.messages),
                 SizedBox(width: 2),
-                Text('Hubungi Fotografer'),
+                Text('Hubungi Admin'),
               ],
             ),
           ),

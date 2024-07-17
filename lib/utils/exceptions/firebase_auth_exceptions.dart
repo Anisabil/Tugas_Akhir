@@ -28,9 +28,9 @@ class FVFirebaseAuthException implements Exception {
       case 'requires-recent-login':
         return 'Operasi ini sensitif dan memerlukan otentikasi terkini. Silahkan masuk lagi';
       case 'credential-already-in-use':
-        return 'Kredensial ini sudah disambungkan dengan akun pengguna yang berbeda';
+        return 'Data ini sudah disambungkan dengan akun pengguna yang berbeda';
       case 'user-mismatch':
-        return 'Kredensial yang dimasukkan tidak sesuai dengan pengguna yang masuk sebelumnya';
+        return 'Data yang dimasukkan tidak sesuai dengan pengguna yang masuk sebelumnya';
       case 'account-exists-with-different-credential':
         return 'Akun sudah ada dengan email yang sama tetapi kredential masuknya berbeda';
       case 'operations-not-allowed':
@@ -46,7 +46,7 @@ class FVFirebaseAuthException implements Exception {
       case 'user-not-found':
         return 'Tidak ada pengguna yang ditemukan untuk email atau ID yang diberikan';
       case 'invalid-credential':
-        return 'Kredensial yang diberikan salah format atau telah kedaluarsa';
+        return 'Data yang diberikan salah format atau telah kedaluarsa';
       case 'user-token-revoced':
         return 'Pengguna telah dicabut. Silahkan masuk lagi';
       case 'invalid-message-payload':
@@ -64,9 +64,9 @@ class FVFirebaseAuthException implements Exception {
       case 'auth-domain-config-required':
         return 'Konfigurasi domain autentikasi diperlukan untuk tautan verifikasi kode tindakan';
       case 'missing-app-credential':
-        return 'Kredensial aplikasi hilang. Harap berikan kredensial aplikasi yang valid';
+        return 'Data aplikasi hilang. Harap berikan data aplikasi yang valid';
       case 'invalid-app-credential':
-        return 'Kredensial aplikasi tidak valid. Tolong sediakan kredensial aplikasi yang valid';
+        return 'Data aplikasi tidak valid. Tolong sediakan data aplikasi yang valid';
       case 'session-cookie-expired':
         return 'Cookie sesi firebase telah kedaluarsa. Silahkan masuk lagi';
       case 'uid-already-exists':
@@ -80,7 +80,7 @@ class FVFirebaseAuthException implements Exception {
       case 'web-storage-unsupported':
         return 'Penyimpanan web tidak didukung atau dinonaktifkan';
       case 'invalid-aredential':
-        return 'Kredensial yang diberika tidak valid. Silahkan periksa kredensialnya dan coba lagi';
+        return 'Data yang diberika tidak valid. Silahkan periksa datanya dan coba lagi';
       case 'app-not-authorized':
         return 'Aplikasi tidak diizinkan menggunakan autentikasi Firebase dengan kunci API yang disediakan';
       case 'keychain-error':

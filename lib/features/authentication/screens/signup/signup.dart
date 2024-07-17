@@ -31,11 +31,11 @@ class SignupScreen extends StatelessWidget {
               const SizedBox(height: FVSizes.spaceBtwSection),
 
               // Divider
-              FVFormDivider(dividerText: FVText.orSignUpWith.capitalize!),
-              const SizedBox(height: FVSizes.spaceBtwSection),
+              // FVFormDivider(dividerText: FVText.orSignUpWith.capitalize!),
+              // const SizedBox(height: FVSizes.spaceBtwSection),
 
               // Social Buttons
-              const FVSocialButtons(),
+              // const FVSocialButtons(),
             ],
           ),
         ),

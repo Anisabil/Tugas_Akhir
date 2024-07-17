@@ -2,17 +2,18 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
 import 'package:fvapp/features/studio/screens/invoice/invoice.dart';
-import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:intl/intl.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
 import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
+import 'package:iconsax/iconsax.dart';
+import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -26,7 +27,6 @@ class OrderDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Load rent detail when widget builds
     WidgetsBinding.instance!.addPostFrameCallback((_) {
       controller.loadRentDetail(rentId);
     });
@@ -59,13 +59,11 @@ class OrderDetail extends StatelessWidget {
                     try {
                       Uint8List pdfData = await InvoicePdf().generateInvoicePDF(rent);
 
-                      // Simpan file PDF ke penyimpanan lokal
                       final output = await getExternalStorageDirectory();
                       final fileName = "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
                       final file = File("${output!.path}/$fileName");
                       await file.writeAsBytes(pdfData);
 
-                      // Buka file PDF menggunakan aplikasi default pada perangkat
                       await OpenFile.open(file.path);
                     } catch (e) {
                       Get.snackbar(
@@ -136,7 +134,46 @@ class OrderDetail extends StatelessWidget {
                           downPayment: rent.downPayment,
                           remainingPayment: rent.remainingPayment,
                         ),
-                        SizedBox(height: FVSizes.spaceBtwItems),
+                        SizedBox(height: FVSizes.spaceBtwSection),
+                        GestureDetector(
+                          onTap: () {
+                            if (rent.status == 'Belum Bayar') {
+                              Get.snackbar(
+                                'Belum ada pembayaran',
+                                'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: Colors.red,
+                                colorText: Colors.white,
+                              );
+                            } else {
+                              // Pastikan untuk mengirim biodataId jika sudah ada biodata
+                              Get.to(() => BiodataScreen(
+                                    biodataId: rent.biodataId,
+                                    userId: rent.userId,
+                                    rentId: rent.id,
+                                  ));
+                            }
+                          },
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Isi Form Biodata',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                  color: rent.status == 'Belum Bayar' ? Colors.grey : Colors.black,
+                                ),
+                              ),
+                              Icon(
+                                Icons.arrow_forward_ios,
+                                size: 16,
+                                color: rent.status == 'Belum Bayar' ? Colors.grey : Colors.black,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: FVSizes.spaceBtwSection),
                         if (rent.qrCodeData != null && rent.qrCodeData!.isNotEmpty)
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,

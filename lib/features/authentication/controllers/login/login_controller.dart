@@ -72,7 +72,7 @@ void onInit() {
       AuthenticationRepository.instance.screenRedirect();
     } catch (e) {
       FVFullScreenLoader.stopLoading();
-      FVLoaders.errorSnackBar(title: 'Cepat!', message: e.toString());
+      FVLoaders.errorSnackBar(title: 'Gagal!', message: e.toString());
     }
   }
 

@@ -1,5 +1,4 @@
 import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Rent {
@@ -18,6 +17,7 @@ class Rent {
   String userName;
   String email;
   Uint8List? qrCodeData;
+  String? biodataId;
 
   Rent({
     required this.id,
@@ -35,10 +35,11 @@ class Rent {
     required this.userName,
     required this.email,
     this.qrCodeData,
+    this.biodataId,
   });
 
-  factory Rent.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
+  factory Rent.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     return Rent(
       id: doc.id,
       userId: data['userId'],
@@ -55,6 +56,26 @@ class Rent {
       userName: data['userName'],
       email: data['email'],
       qrCodeData: data['qrCodeData'] != null ? Uint8List.fromList(List<int>.from(data['qrCodeData'])) : null,
+    );
+  }
+
+  factory Rent.fromJson(Map<String, dynamic> json) {
+    return Rent(
+      id: json['id'],
+      userId: json['userId'],
+      packageId: json['packageId'],
+      packageName: json['packageName'],
+      totalPrice: (json['totalPrice'] as num).toDouble(),
+      downPayment: (json['downPayment'] as num).toDouble(),
+      remainingPayment: (json['remainingPayment'] as num).toDouble(),
+      date: DateTime.parse(json['date']),
+      theme: json['theme'],
+      paymentMethod: json['paymentMethod'],
+      description: json['description'],
+      status: json['status'],
+      userName: json['userName'],
+      email: json['email'],
+      qrCodeData: json['qrCodeData'] != null ? Uint8List.fromList(List<int>.from(json['qrCodeData'])) : null,
     );
   }
 
