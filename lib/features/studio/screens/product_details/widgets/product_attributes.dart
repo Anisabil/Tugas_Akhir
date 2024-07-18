@@ -10,8 +10,9 @@ import 'package:fvapp/utils/helpers/helper_function.dart';
 
 class FVProductAttributes extends StatelessWidget {
   final double price;
+  final String packageName;
 
-  const FVProductAttributes({super.key, required this.price});
+  const FVProductAttributes({super.key, required this.price, required this.packageName});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class FVProductAttributes extends StatelessWidget {
               Row(
                 children: [
                   const FVSectionHeading(
-                    title: 'Memo',
+                    title: 'Note',
                     showActionButton: false,
                   ),
                   const SizedBox(
@@ -38,6 +39,20 @@ class FVProductAttributes extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      // Description
+                      Row(
+                        children: [
+                          const FVProductTitleText(
+                            title: 'Paket : ',
+                            smallSize: true,
+                          ),
+                          Text(
+                            packageName,
+                            style: Theme.of(context).textTheme.titleMedium,
+                          )
+                        ],
+                      ),
+
                       Row(
                         children: [
                           const FVProductTitleText(
@@ -46,20 +61,6 @@ class FVProductAttributes extends StatelessWidget {
                           FVProductPriceText(price: price)
                         ],
                       ),
-
-                      // Description
-                      Row(
-                        children: [
-                          const FVProductTitleText(
-                            title: 'Tema : ',
-                            smallSize: true,
-                          ),
-                          Text(
-                            'Indor & Outdor',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          )
-                        ],
-                      )
                     ],
                   ),
                 ],
@@ -75,7 +76,6 @@ class FVProductAttributes extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: FVSizes.spaceBtwItems),
       ],
     );
   }

@@ -26,7 +26,7 @@ class OrderDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance!.addPostFrameCallback((_) {
       controller.loadRentDetail(rentId);
     });
 
@@ -57,11 +57,11 @@ class OrderDetail extends StatelessWidget {
                       Uint8List pdfData =
                           await InvoicePdf().generateInvoicePDF(rent);
 
-                      final output = await getExternalStorageDirectory();
+                      final directory = await getExternalStorageDirectory();
                       final fileName =
                           "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
-                      final file = File("${output!.path}/$fileName");
-                      await file.writeAsBytes(pdfData);
+                      final filePath = "${directory!.path}/$fileName";
+                      final file = await File(filePath).writeAsBytes(pdfData);
 
                       await OpenFile.open(file.path);
                     } catch (e) {

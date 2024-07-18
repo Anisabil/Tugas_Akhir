@@ -63,42 +63,6 @@ class ProductDetail extends StatelessWidget {
                     price: price,
                     categoryName: categoryName,
                   ),
-                  SizedBox(height: FVSizes.spaceBtwSection),
-
-                  // Attributes
-                  FVProductAttributes(price: price),
-                  SizedBox(height: FVSizes.spaceBtwSection),
-
-                  // Description
-                  FVSectionHeading(
-                    title: 'Deskripsi',
-                    showActionButton: false,
-                  ),
-                  SizedBox(height: FVSizes.spaceBtwItems),
-                  ReadMoreText(
-                    description,
-                    trimLines: 2,
-                    trimMode: TrimMode.Line,
-                    trimCollapsedText: 'Lebih banyak',
-                    trimExpandedText: 'Lebih sedikit',
-                    moreStyle: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                    lessStyle: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w800,
-                    ),
-                  ),
-                  Divider(),
-                  SizedBox(height: FVSizes.spaceBtwSection),
-
-                  // Cinematic videos
-                  FVSectionHeading(
-                    title: 'Video Cinematic',
-                    showActionButton: false,
-                  ),
-                  SizedBox(height: FVSizes.spaceBtwItems),
 
                   // Displaying videos based on videoUrls
                   if (videoUrls.isNotEmpty)
@@ -132,6 +96,37 @@ class ProductDetail extends StatelessWidget {
                         ),
                       );
                     }).toList(),
+
+                  SizedBox(height: FVSizes.spaceBtwSection),
+
+                  // Attributes
+                  FVProductAttributes(price: price, packageName: packageName,),
+                  SizedBox(height: FVSizes.spaceBtwSection),
+
+                  // Description
+                  FVSectionHeading(
+                    title: 'Deskripsi',
+                    showActionButton: false,
+                  ),
+                  SizedBox(height: FVSizes.spaceBtwItems),
+                  ReadMoreText(
+                    description,
+                    trimLines: 2,
+                    trimMode: TrimMode.Line,
+                    trimCollapsedText: 'Lebih banyak',
+                    trimExpandedText: 'Lebih sedikit',
+                    moreStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                    lessStyle: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                  Divider(),
+                  SizedBox(height: FVSizes.spaceBtwSection),
+
                 ],
               ),
             ),

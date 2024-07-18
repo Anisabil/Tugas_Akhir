@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/admin/controllers/promo_controller.dart';
@@ -21,6 +22,9 @@ import 'admin/controllers/package_controller.dart';
 Future<void> main() async {
   // Widgets Binding
   final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Flutter Downloader
+  await FlutterDownloader.initialize(debug: true); // ubah menjadi false pada produksi
 
   // GetX local storage
   await GetStorage.init();

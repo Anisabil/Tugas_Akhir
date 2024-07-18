@@ -8,8 +8,12 @@ import 'package:get/get.dart';
 class PackageController extends GetxController {
   final CollectionReference packagesCollection =
       FirebaseFirestore.instance.collection('packages');
-var packages = <Package>[].obs;
+
+  var packages = <Package>[].obs;
   var categories = <Category>[].obs;
+  var filteredPackages = <Package>[].obs;
+  var packageNames = <String>[].obs;
+
   final PackageService _packageService = PackageService();
   final CategoryService _categoryService = CategoryService();
 
@@ -20,10 +24,11 @@ var packages = <Package>[].obs;
     fetchCategories();
   }
 
-  void fetchPackages() async {
+  Future<void> fetchPackages() async {
     try {
       QuerySnapshot snapshot = await packagesCollection.get();
       packages.assignAll(snapshot.docs.map((doc) => Package.fromFirestore(doc)).toList());
+      filteredPackages.assignAll(packages);
     } catch (e) {
       print('Error fetching packages: $e');
     }
@@ -34,6 +39,16 @@ var packages = <Package>[].obs;
       categories.value = await _categoryService.getCategories();
     } catch (e) {
       print("Error fetching categories: $e");
+    }
+  }
+
+  void filterPackagesByName(String name) {
+    if (name.isEmpty) {
+      filteredPackages.assignAll(packages);
+    } else {
+      filteredPackages.assignAll(
+        packages.where((package) => package.name == name).toList(),
+      );
     }
   }
 

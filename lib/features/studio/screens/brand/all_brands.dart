@@ -29,7 +29,7 @@ class AllBrandsScreen extends StatelessWidget {
                   mainAxisExtent: 80,
                   itemBuilder: (context, index) => FVBrandCard(
                       showBorder: true,
-                      onTap: () => Get.to(() => const BrandProducts())))
+                      onTap: () {}))
             ],
           ),
         ),

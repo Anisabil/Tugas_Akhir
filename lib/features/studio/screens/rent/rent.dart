@@ -62,7 +62,7 @@ class RentScreen extends StatelessWidget {
                       // Featured Brands
                       FVSectionHeading(
                         title: 'Paket Unggulan',
-                        onPressed: () => Get.to(() => const AllBrandsScreen()),
+                        onPressed: () {},
                       ),
                       const SizedBox(height: FVSizes.spaceBtwItems / 2),
 
