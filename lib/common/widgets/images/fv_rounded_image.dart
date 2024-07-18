@@ -11,7 +11,7 @@ class FVRoundedImage extends StatelessWidget {
     this.applyImageRadius = true,
     this.border,
     this.backgroundColor,
-    this.fit = BoxFit.contain,
+    this.fit = BoxFit.cover,  // Menggunakan BoxFit.cover untuk menyesuaikan ukuran gambar
     this.padding,
     this.isNetworkImage = false,
     this.onPressed,
@@ -43,14 +43,16 @@ class FVRoundedImage extends StatelessWidget {
           borderRadius: BorderRadius.circular(borderRadius),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(
-              applyImageRadius ? borderRadius : 0.0),
+          borderRadius: BorderRadius.circular(applyImageRadius ? borderRadius : 0.0),
           child: isNetworkImage
               ? Image.network(
                   imageUrl,
                   width: width,
                   height: height,
                   fit: fit,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.error);
+                  },
                 )
               : Image.asset(
                   imageUrl,

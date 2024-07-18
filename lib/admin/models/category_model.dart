@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class Category {
   final String id;
   final String name;
-  final String imageUrl; // Tambahkan atribut imageUrl
+  final String imageUrl;
 
   Category({required this.id, required this.name, required this.imageUrl});
 
@@ -11,7 +11,7 @@ class Category {
     return {
       'id': id,
       'name': name,
-      'imageUrl': imageUrl, // Tambahkan atribut imageUrl ke map
+      'imageUrl': imageUrl,
     };
   }
 
@@ -19,7 +19,7 @@ class Category {
     return Category(
       id: map['id'],
       name: map['name'],
-      imageUrl: map['imageUrl'], // Tambahkan atribut imageUrl dari map
+      imageUrl: map['imageUrl'],
     );
   }
 
@@ -28,7 +28,7 @@ class Category {
     return Category(
       id: snapshot.id,
       name: data['name'],
-      imageUrl: data['imageUrl'], // Tambahkan atribut imageUrl dari snapshot
+      imageUrl: data['imageUrl'],
     );
   }
 
@@ -36,7 +36,7 @@ class Category {
     return Category(
       id: json['id'] ?? '',
       name: json['name'] ?? '',
-      imageUrl: json['imageUrl'] ?? '', // Tambahkan atribut imageUrl dari json
+      imageUrl: json['imageUrl'] ?? '',
     );
   }
 
@@ -44,7 +44,7 @@ class Category {
     return {
       'id': id,
       'name': name,
-      'imageUrl': imageUrl, // Tambahkan atribut imageUrl ke json
+      'imageUrl': imageUrl,
     };
   }
 }

@@ -20,31 +20,26 @@ class MessageInput extends StatefulWidget {
 class _MessageInputState extends State<MessageInput> {
   final TextEditingController _messageController = TextEditingController();
   final ImagePicker _picker = ImagePicker();
+final FirebaseAuth _auth = FirebaseAuth.instance;
 
   void _sendMessage(String messageText, {String? fileUrl, String? fileName, String? imageUrl}) async {
     if (messageText.isEmpty && fileUrl == null && imageUrl == null) {
       return;
     }
 
-    // Debugging: print message details
-    print('Sending message: $messageText, fileUrl: $fileUrl, fileName: $fileName, imageUrl: $imageUrl');
-
     CollectionReference messages = FirebaseFirestore.instance
         .collection('rooms')
         .doc(widget.roomId)
-        .collection('messages'); // Menggunakan koleksi 'messages' di bawah dokumen 'roomId'
+        .collection('messages');
 
     await messages.add({
-      'senderId': widget.currentUserId,
+      'senderId': _auth.currentUser!.uid,
       'text': messageText,
-      'fileUrl': fileUrl ?? '', // URL file diunggah
-      'fileName': fileName ?? '', // Nama file
-      'imageUrl': imageUrl ?? '', // URL gambar diunggah
-      'timestamp': FieldValue.serverTimestamp(),
+      'fileUrl': fileUrl ?? '',
+      'fileName': fileName ?? '',
+      'imageUrl': imageUrl ?? '',
+      'timestamp': FieldValue.serverTimestamp(), // Gunakan FieldValue.serverTimestamp() untuk timestamp
     });
-
-    // Debugging: confirm message sent
-    print('Message sent.');
 
     _messageController.clear();
   }

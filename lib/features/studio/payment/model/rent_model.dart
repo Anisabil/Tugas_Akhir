@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Rent {
@@ -16,7 +15,6 @@ class Rent {
   String status;
   String userName;
   String email;
-  Uint8List? qrCodeData;
   String? biodataId;
 
   Rent({
@@ -34,7 +32,6 @@ class Rent {
     required this.status,
     required this.userName,
     required this.email,
-    this.qrCodeData,
     this.biodataId,
   });
 
@@ -55,7 +52,6 @@ class Rent {
       status: data['status'],
       userName: data['userName'],
       email: data['email'],
-      qrCodeData: data['qrCodeData'] != null ? Uint8List.fromList(List<int>.from(data['qrCodeData'])) : null,
     );
   }
 
@@ -75,7 +71,6 @@ class Rent {
       status: json['status'],
       userName: json['userName'],
       email: json['email'],
-      qrCodeData: json['qrCodeData'] != null ? Uint8List.fromList(List<int>.from(json['qrCodeData'])) : null,
     );
   }
 
@@ -94,7 +89,6 @@ class Rent {
       'status': status,
       'userName': userName,
       'email': email,
-      'qrCodeData': qrCodeData != null ? qrCodeData!.toList() : null,
     };
   }
 }

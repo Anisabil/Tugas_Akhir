@@ -1,127 +1,120 @@
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:get/get.dart';
-import 'package:fvapp/admin/screens/chat/room_chat.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fvapp/features/studio/chat/chat.dart';
 class AdminChatListScreen extends StatelessWidget {
+  const AdminChatListScreen({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    final currentUserId = currentUser?.uid;
+    final user = FirebaseAuth.instance.currentUser;
 
-    // Debugging: print currentUserId
-    print('Current user ID: $currentUserId');
+    if (user == null) {
+      return Scaffold(
+        body: Center(
+          child: Text('Anda harus login untuk mengakses fitur ini.'),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Daftar Chat'),
+        title: Text('Daftar Chat Klien'),
       ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('rooms').snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: CircularProgressIndicator(),
+            );
           }
 
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
           }
 
           if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return Center(child: Text('Tidak ada pesan'));
+            return Center(
+              child: Text('Tidak ada chat yang ditemukan.'),
+            );
           }
 
-          var chatRooms = snapshot.data!.docs;
+          List<DocumentSnapshot> rooms = snapshot.data!.docs;
+          print('Rooms found: ${rooms.length}'); // Tambahkan log untuk memeriksa jumlah room yang ditemukan
 
-          // Filter hanya chat room yang melibatkan admin
-          var adminChatRooms = chatRooms.where((room) {
-            var userIds = room.id.split('_');
-            // Debugging: print userIds
-            print('userIds in room ${room.id}: $userIds');
-            return userIds.contains(currentUserId) && userIds.any((id) => id != currentUserId && id == 'client');
-          }).toList();
+          List<DocumentSnapshot> filteredRooms = [];
+          for (var room in rooms) {
+            List<dynamic> userIds = room['userIds'];
+            print('Room ID: ${room.id}, User IDs: $userIds'); // Tambahkan log untuk memeriksa User IDs
 
-          // Debugging: print adminChatRooms
-          print('Admin chat rooms: ${adminChatRooms.map((room) => room.id).toList()}');
+            // Memeriksa apakah userIds berisi ID user lain
+            if (userIds.contains(user.uid)) {
+              filteredRooms.add(room);
+            }
+          }
 
-          if (adminChatRooms.isEmpty) {
-            return Center(child: Text('Tidak ada pesan'));
+          if (filteredRooms.isEmpty) {
+            return Center(
+              child: Text('Tidak ada chat yang ditemukan.'),
+            );
           }
 
           return ListView.builder(
-            itemCount: adminChatRooms.length,
+            itemCount: filteredRooms.length,
             itemBuilder: (context, index) {
-              var room = adminChatRooms[index];
-              var roomId = room.id;
+              DocumentSnapshot room = filteredRooms[index];
+              List<dynamic> userIds = room['userIds'];
 
-              // Debugging: print roomId
-              print('Room ID: $roomId');
+              String otherUserId = userIds.firstWhere((id) => id != user.uid, orElse: () => '');
+              print('Other User ID: $otherUserId'); // Tambahkan log untuk memeriksa otherUserId
 
-              return FutureBuilder<QuerySnapshot>(
-                future: room.reference.collection('messages').orderBy('timestamp', descending: true).limit(1).get(),
-                builder: (context, messagesSnapshot) {
-                  if (messagesSnapshot.connectionState == ConnectionState.waiting) {
+              if (otherUserId.isEmpty) {
+                return ListTile(
+                  title: Text('User lain tidak ditemukan dalam room ini.'),
+                );
+              }
+
+              return FutureBuilder<DocumentSnapshot>(
+                future: FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
+                builder: (context, userSnapshot) {
+                  if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return ListTile(
                       title: Text('Loading...'),
                     );
                   }
 
-                  if (messagesSnapshot.hasError) {
+                  if (userSnapshot.hasError) {
                     return ListTile(
-                      title: Text('Error: ${messagesSnapshot.error}'),
+                      title: Text('Error: ${userSnapshot.error}'),
                     );
                   }
 
-                  if (!messagesSnapshot.hasData || messagesSnapshot.data!.docs.isEmpty) {
+                  if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
                     return ListTile(
-                      title: Text('No messages'),
+                      title: Text('User tidak ditemukan'),
                     );
                   }
 
-                  var lastMessage = messagesSnapshot.data!.docs.first.data() as Map<String, dynamic>;
-                  var userIds = roomId.split('_');
-                  var otherUserId = userIds.firstWhere((id) => id != currentUserId && id != 'admin', orElse: () => '');
+                  var userData = userSnapshot.data!.data() as Map<String, dynamic>;
+                  String userName = userData['userName'];
+                  String profilePicture = userData['profilePicture'] ?? '';
 
-                  // Debugging: print otherUserId
-                  print('otherUserId: $otherUserId');
+                  print('User Data: $userData'); // Tambahkan log untuk memeriksa data pengguna
 
-                  return FutureBuilder<DocumentSnapshot>(
-                    future: FirebaseFirestore.instance.collection('Users').doc(otherUserId).get(),
-                    builder: (context, userSnapshot) {
-                      if (userSnapshot.connectionState == ConnectionState.waiting) {
-                        return ListTile(
-                          title: Text('Loading...'),
-                        );
-                      }
-
-                      if (userSnapshot.hasError) {
-                        return ListTile(
-                          title: Text('Error: ${userSnapshot.error}'),
-                        );
-                      }
-
-                      if (!userSnapshot.hasData || !userSnapshot.data!.exists) {
-                        // Debugging: print error message
-                        print('User data not found for userId: $otherUserId');
-                        return ListTile(
-                          title: Text('Unknown User'),
-                        );
-                      }
-
-                      var userData = userSnapshot.data!.data() as Map<String, dynamic>;
-                      var userRole = userData['role'];
-
-                      // Debugging: print userData and userRole
-                      print('userData: $userData');
-                      print('userRole: $userRole');
-
-                      return ListTile(
-                        title: Text('${userData['userName']} (${userRole})'),
-                        subtitle: Text('${lastMessage['text'] ?? 'No message'}'),
-                        onTap: () {
-                          Get.to(() => AdminChatScreen(roomId: roomId));
-                        },
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundImage: NetworkImage(profilePicture),
+                    ),
+                    title: Text(userName),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ChatScreen(receiverId: otherUserId),
+                        ),
                       );
                     },
                   );

@@ -7,6 +7,7 @@ import 'package:fvapp/features/studio/chat/chat.dart';
 import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
 import 'package:fvapp/features/studio/screens/home/home.dart';
 import 'package:fvapp/features/studio/screens/order/widgets/order_detail.dart';
+import 'package:fvapp/navigation_menu.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/utils/constants/text_strings.dart';
 import 'package:fvapp/utils/helpers/helper_function.dart';
@@ -69,7 +70,7 @@ class SuccessCheckoutScreen extends StatelessWidget {
                         children: [
                           Icon(Iconsax.document_text),
                           SizedBox(height: 5),
-                          Text('QR Code'),
+                          Text('Rincian'),
                         ],
                       ),
                     ),
@@ -119,7 +120,7 @@ class SuccessCheckoutScreen extends StatelessWidget {
         child: SizedBox(
           width: double.infinity,
           child: OutlinedButton(
-            onPressed: () => Get.to(() => HomeScreen(package: package)), // Navigasi ke HomeScreen dengan package
+            onPressed: () => Get.to(() => NavigationMenu()),
             child: const Text(FVText.fvContinue),
           ),
         ),

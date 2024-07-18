@@ -33,7 +33,7 @@ class RentFormScreen extends StatelessWidget {
       'selectedDay': selectedDay,
       'selectedPackageImageUrl': package.imageUrls.isNotEmpty ? package.imageUrls[0] : '',
       'selectedPackageName': package.name,
-      'selectedPackageCategory': package.categoryId, // Assuming categoryId is the category
+      'selectedPackageCategory': package.categoryName, // Assuming categoryId is the category
       'price': package.price,
     };
 

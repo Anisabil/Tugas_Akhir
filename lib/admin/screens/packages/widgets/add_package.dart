@@ -264,7 +264,7 @@ void _savePackage() async {
                                 return Stack(
                                   children: [
                                     AspectRatio(
-                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 6 / 9,
+                                      aspectRatio: _chewieControllers[index].aspectRatio ?? 2 / 7,
                                       child: Chewie(controller: _chewieControllers[index]),
                                     ),
                                     Positioned(

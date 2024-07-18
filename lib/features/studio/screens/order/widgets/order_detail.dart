@@ -1,7 +1,7 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:get/get.dart';
 import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
@@ -16,7 +16,6 @@ import 'package:iconsax/iconsax.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetail extends StatelessWidget {
   final String rentId;
@@ -27,7 +26,7 @@ class OrderDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       controller.loadRentDetail(rentId);
     });
 
@@ -43,35 +42,32 @@ class OrderDetail extends StatelessWidget {
                 return IconButton(
                   icon: Icon(Iconsax.document_download, color: Colors.grey),
                   onPressed: () {
-                    Get.snackbar(
-                      'Belum ada pembayaran',
-                      'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar',
-                      snackPosition: SnackPosition.BOTTOM,
-                      backgroundColor: Colors.red,
-                      colorText: Colors.white,
+                    FVLoaders.errorSnackBar(
+                      title: 'Belum ada pembayaran',
+                      message: 'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar'
                     );
                   },
                 );
-              } else if (rent.status == 'Belum Lunas' || rent.status == 'Lunas') {
+              } else if (rent.status == 'Belum Lunas' ||
+                  rent.status == 'Lunas') {
                 return IconButton(
                   icon: Icon(Iconsax.document_download),
                   onPressed: () async {
                     try {
-                      Uint8List pdfData = await InvoicePdf().generateInvoicePDF(rent);
+                      Uint8List pdfData =
+                          await InvoicePdf().generateInvoicePDF(rent);
 
                       final output = await getExternalStorageDirectory();
-                      final fileName = "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
+                      final fileName =
+                          "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
                       final file = File("${output!.path}/$fileName");
                       await file.writeAsBytes(pdfData);
 
                       await OpenFile.open(file.path);
                     } catch (e) {
-                      Get.snackbar(
-                        'Error',
-                        'Gagal memuat invoice: $e',
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.red,
-                        colorText: Colors.white,
+                      FVLoaders.errorSnackBar(
+                        title: 'Error',
+                        message: 'Gagal memuat Invoice'
                       );
                     }
                   },
@@ -121,7 +117,8 @@ class OrderDetail extends StatelessWidget {
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Paket: ${rent.packageName}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                        Text(
+                            'Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Tema: ${rent.theme}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
@@ -135,15 +132,25 @@ class OrderDetail extends StatelessWidget {
                           remainingPayment: rent.remainingPayment,
                         ),
                         SizedBox(height: FVSizes.spaceBtwSection),
+                        Text('Pembayaran bisa melalui:'),
+                        SizedBox(height: FVSizes.spaceBtwItems),
+                        Text('Rekening BCA'),
+                        SizedBox(height: 5),
+                        Text(
+                          '4372512036',
+                          style: TextStyle(
+                            fontSize: FVSizes.lg,
+                          ),
+                        ),
+                        SizedBox(height: 5),
+                        Text('A/N HAMDAN RAMDANI'),
+                        SizedBox(height: FVSizes.spaceBtwSection),
                         GestureDetector(
                           onTap: () {
                             if (rent.status == 'Belum Bayar') {
-                              Get.snackbar(
-                                'Belum ada pembayaran',
-                                'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar',
-                                snackPosition: SnackPosition.BOTTOM,
-                                backgroundColor: Colors.red,
-                                colorText: Colors.white,
+                              FVLoaders.errorSnackBar(
+                                title: 'Belum ada pembayaran',
+                                message: 'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar'
                               );
                             } else {
                               // Pastikan untuk mengirim biodataId jika sudah ada biodata
@@ -162,34 +169,21 @@ class OrderDetail extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
-                                  color: rent.status == 'Belum Bayar' ? Colors.grey : Colors.black,
+                                  color: rent.status == 'Belum Bayar'
+                                      ? Colors.grey
+                                      : Colors.black,
                                 ),
                               ),
                               Icon(
                                 Icons.arrow_forward_ios,
                                 size: 16,
-                                color: rent.status == 'Belum Bayar' ? Colors.grey : Colors.black,
+                                color: rent.status == 'Belum Bayar'
+                                    ? Colors.grey
+                                    : Colors.black,
                               ),
                             ],
                           ),
                         ),
-                        SizedBox(height: FVSizes.spaceBtwSection),
-                        if (rent.qrCodeData != null && rent.qrCodeData!.isNotEmpty)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('QR Code Pembayaran:'),
-                              SizedBox(height: FVSizes.spaceBtwItems),
-                              Image.memory(rent.qrCodeData!),
-                              SizedBox(height: FVSizes.spaceBtwItems),
-                              ElevatedButton(
-                                onPressed: () {
-                                  _launchQRISPayment(rent.qrCodeData!);
-                                },
-                                child: Text('Bayar Menggunakan QRIS'),
-                              ),
-                            ],
-                          ),
                       ],
                     ),
                   ),
@@ -205,7 +199,8 @@ class OrderDetail extends StatelessWidget {
                             builder: (BuildContext context) {
                               return AlertDialog(
                                 title: Text('Konfirmasi Hapus'),
-                                content: Text('Apakah Anda yakin ingin menghapus data sewa ini?'),
+                                content: Text(
+                                    'Apakah Anda yakin ingin menghapus data sewa ini?'),
                                 actions: [
                                   TextButton(
                                     onPressed: () {
@@ -240,15 +235,5 @@ class OrderDetail extends StatelessWidget {
         );
       }),
     );
-  }
-
-  void _launchQRISPayment(Uint8List qrCodeData) async {
-    String qrCodeBase64 = base64Encode(qrCodeData);
-    String qrisUrl = 'qris://payment?data=$qrCodeBase64';
-    if (await canLaunch(qrisUrl)) {
-      await launch(qrisUrl);
-    } else {
-      await launch('https://example.com/payment?data=$qrCodeBase64');
-    }
   }
 }

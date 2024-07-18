@@ -190,9 +190,6 @@ class CheckoutScreen extends StatelessWidget {
               // Simpan data sewa
               await rentController.addRent(rent);
 
-              // Generate QR Code untuk pembayaran
-              final qrCodeData = await rentController.generateQRCodeForPayment(rent);
-
               // Tampilkan pesan sukses
               FVFullScreenLoader.stopLoading();
               Get.to(() => SuccessCheckoutScreen(

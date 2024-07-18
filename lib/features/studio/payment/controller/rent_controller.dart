@@ -54,8 +54,6 @@ class RentController extends GetxController {
       await initializeRentsCollection(); // Pastikan _rentsCollection sudah diinisialisasi
 
       if (_rentsCollection != null) {
-        Uint8List qrCodeData = await generateQRCodeForPayment(rent); // Generate QR code
-        rent.qrCodeData = qrCodeData; // Save QR code data to the rent object
         await _rentsCollection.add(rent.toMap());
         print('Rent added successfully');
       } else {
@@ -127,33 +125,6 @@ class RentController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  Future<Uint8List> generateQRCodeForPayment(Rent rent) async {
-    final String qrData = "Total Pembayaran: ${rent.totalPrice}\n" +
-                          "Down Payment: ${rent.downPayment}\n" +
-                          "Sisa Pembayaran: ${rent.remainingPayment}";
-
-    final qrCode = QrPainter(
-      data: qrData,
-      version: QrVersions.auto,
-      gapless: false,
-    );
-
-    final picRecorder = ui.PictureRecorder();
-    final canvas = Canvas(picRecorder);
-    final size = const Size(200, 200);
-
-    final rect = Offset.zero & size;
-    final paint = Paint()..color = FVColors.white;
-
-    canvas.drawRect(rect, paint);
-    qrCode.paint(canvas, size);
-
-    final img = await picRecorder.endRecording().toImage(size.width.toInt(), size.height.toInt());
-    final byteData = await img.toByteData(format: ui.ImageByteFormat.png);
-
-    return byteData!.buffer.asUint8List();
   }
 
   Future<void> deleteRent(String rentId) async {

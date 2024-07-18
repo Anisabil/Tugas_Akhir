@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
 import 'package:fvapp/features/studio/chat/model/chat_model.dart';
 import 'package:fvapp/features/studio/chat/screen/message_input.dart';
 import 'package:fvapp/utils/constants/colors.dart';
@@ -49,13 +48,13 @@ class MessageList extends StatelessWidget {
   const MessageList({Key? key, required this.roomId, required this.currentUserId}) : super(key: key);
 
   String formatTimestamp(Timestamp timestamp) {
-    var date = timestamp.toDate();
+    var date = timestamp.toDate(); // Konversi Timestamp ke DateTime
     return DateFormat('HH:mm').format(date);
   }
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+    return StreamBuilder<QuerySnapshot>(
       stream: FirebaseFirestore.instance
           .collection('rooms')
           .doc(roomId)

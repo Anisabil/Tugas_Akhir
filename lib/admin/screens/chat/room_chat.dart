@@ -44,11 +44,14 @@ class AdminMessageList extends StatelessWidget {
   final String roomId;
   final String currentUserId;
 
-  const AdminMessageList({Key? key, required this.roomId, required this.currentUserId}) : super(key: key);
+  const AdminMessageList({
+    Key? key,
+    required this.roomId,
+    required this.currentUserId,
+  }) : super(key: key);
 
   String formatTimestamp(Timestamp timestamp) {
-    var date = timestamp.toDate();
-    return DateFormat('HH:mm').format(date);
+    return DateFormat('HH:mm').format(timestamp.toDate()); // Hanya gunakan timestamp
   }
 
   @override
@@ -58,7 +61,7 @@ class AdminMessageList extends StatelessWidget {
           .collection('rooms')
           .doc(roomId)
           .collection('messages')
-          .orderBy('timestamp', descending: false) // Sesuaikan dengan field timestamp Anda
+          .orderBy('timestamp', descending: false)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -73,27 +76,29 @@ class AdminMessageList extends StatelessWidget {
           );
         }
 
-        if (snapshot.data == null || snapshot.data!.docs.isEmpty) {
+        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return Center(
             child: Text('Tidak ada pesan'),
           );
         }
 
-        List<Message> messages = snapshot.data!.docs.map((doc) => Message.fromFirestore(doc)).toList();
+        List<Message> messages = snapshot.data!.docs
+            .map((doc) => Message.fromFirestore(doc))
+            .toList();
 
-        // Sort messages by timestamp in ascending order (oldest first)
         messages.sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
         return ListView.builder(
           itemCount: messages.length,
           itemBuilder: (context, index) {
             final message = messages[index];
-            bool isAdmin = message.senderId == currentUserId; // Assuming `senderId` is a field in Message model
-            bool hasImage = message.imageUrl.isNotEmpty; // Check if message has imageUrl
-            bool hasFile = message.fileUrl.isNotEmpty; // Check if message has fileUrl
+            bool isAdmin = message.senderId == currentUserId;
+            bool hasImage = message.imageUrl.isNotEmpty;
+            bool hasFile = message.fileUrl.isNotEmpty;
 
             return Align(
-              alignment: isAdmin ? Alignment.centerRight : Alignment.centerLeft,
+              alignment:
+                  isAdmin ? Alignment.centerRight : Alignment.centerLeft,
               child: GestureDetector(
                 onTap: () {
                   if (hasImage) {
@@ -102,55 +107,63 @@ class AdminMessageList extends StatelessWidget {
                       builder: (context) => Dialog(
                         child: Image.network(
                           message.imageUrl,
-                          fit: BoxFit.contain, // Adjust image fit as needed
+                          fit: BoxFit.contain,
                         ),
                       ),
                     );
                   } else if (hasFile) {
-                    // Open file URL
                     _launchURL(message.fileUrl);
                   }
                 },
                 child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 10, horizontal: 14),
+                  padding:
+                      EdgeInsets.symmetric(vertical: 10, horizontal: 14),
                   margin: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
                   decoration: BoxDecoration(
-                    color: isAdmin ? FVColors.gold : FVColors.grey,
+                    color:
+                        isAdmin ? Colors.blueAccent : Colors.grey,
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment:
+                        CrossAxisAlignment.start,
                     children: [
-                      if (message.text.isNotEmpty) // Show text message if available
+                      if (message.text.isNotEmpty)
                         Text(
                           message.text,
-                          style: TextStyle(color: Colors.black),
+                          style: TextStyle(
+                              color: Colors.white),
                         ),
-                      if (hasImage) // Show image if available
+                      if (hasImage)
                         Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
+                          padding:
+                              EdgeInsets.symmetric(vertical: 5),
                           child: Image.network(
                             message.imageUrl,
-                            height: 150, // Adjust size as needed
+                            height: 150,
                             width: 150,
                             fit: BoxFit.cover,
                           ),
                         ),
-                      if (hasFile) // Show file if available
+                      if (hasFile)
                         Padding(
-                          padding: EdgeInsets.symmetric(vertical: 5),
+                          padding:
+                              EdgeInsets.symmetric(vertical: 5),
                           child: Container(
-                            constraints: BoxConstraints(maxWidth: 200),
+                            constraints:
+                                BoxConstraints(maxWidth: 200),
                             child: ElevatedButton.icon(
                               onPressed: () {
                                 _launchURL(message.fileUrl);
                               },
-                              icon: Icon(Iconsax.attach_circle),
+                              icon: Icon(Icons.attach_file),
                               label: Flexible(
                                 child: Text(
                                   message.fileName,
-                                  style: TextStyle(color: Colors.black),
-                                  overflow: TextOverflow.ellipsis, // Prevent overflow
+                                  style: TextStyle(
+                                      color: Colors.black),
+                                  overflow:
+                                      TextOverflow.ellipsis,
                                 ),
                               ),
                             ),
@@ -159,7 +172,9 @@ class AdminMessageList extends StatelessWidget {
                       SizedBox(height: 5),
                       Text(
                         formatTimestamp(message.timestamp),
-                        style: TextStyle(color: Colors.black.withOpacity(0.6), fontSize: 12),
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.white70),
                       ),
                     ],
                   ),
