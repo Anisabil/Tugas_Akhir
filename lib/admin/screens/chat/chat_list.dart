@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fvapp/features/studio/chat/chat.dart';
+
 class AdminChatListScreen extends StatelessWidget {
   const AdminChatListScreen({Key? key}) : super(key: key);
 
@@ -78,7 +79,7 @@ class AdminChatListScreen extends StatelessWidget {
               }
 
               return FutureBuilder<DocumentSnapshot>(
-                future: FirebaseFirestore.instance.collection('users').doc(otherUserId).get(),
+                future: FirebaseFirestore.instance.collection('Users').doc(otherUserId).get(),
                 builder: (context, userSnapshot) {
                   if (userSnapshot.connectionState == ConnectionState.waiting) {
                     return ListTile(

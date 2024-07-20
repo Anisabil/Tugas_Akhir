@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fvapp/features/studio/chat/model/chat_model.dart';
+import 'package:fvapp/admin/models/chat_model.dart';
 import 'package:fvapp/features/studio/chat/screen/message_input.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:iconsax/iconsax.dart';

@@ -6,9 +6,9 @@ xmlns:tools="http://schemas.android.com/tools">
 <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 <uses-permission android:name="android.permission.CAMERA"/>
     <application
-        android:label="fvapp"
+        android:label="krvisualstory"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher"
+        android:icon="@mipmap/launcher_icon"
         android:requestLegacyExternalStorage="true"
         tools:replace="android:label">
         <activity

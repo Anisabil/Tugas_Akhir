@@ -28,4 +28,15 @@ class Message {
       fileName: data['fileName'] ?? '',
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'text': text,
+      'senderId': senderId,
+      'timestamp': timestamp,
+      'imageUrl': imageUrl,
+      'fileUrl': fileUrl,
+      'fileName': fileName,
+    };
+  }
 }
