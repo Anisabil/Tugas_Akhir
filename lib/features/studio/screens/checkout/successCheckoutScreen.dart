@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
+import 'package:fvapp/admin/service/chat_service.dart';
 import 'package:fvapp/common/styles/spacing_styles.dart';
 import 'package:fvapp/features/personalization/models/user_model.dart';
 import 'package:fvapp/features/studio/chat/chat.dart';
@@ -18,7 +19,7 @@ class SuccessCheckoutScreen extends StatelessWidget {
   final String image, title, subTitle, rentId;
   final Package package; // Tambahkan package
 
-  const SuccessCheckoutScreen({
+  SuccessCheckoutScreen({
     required this.image,
     required this.title,
     required this.subTitle,
@@ -26,6 +27,8 @@ class SuccessCheckoutScreen extends StatelessWidget {
     required this.package, // Tambahkan package
     Key? key,
   }) : super(key: key);
+
+  final ChatService _chatService = Get.find<ChatService>(); 
 
   @override
   Widget build(BuildContext context) {
@@ -79,25 +82,26 @@ class SuccessCheckoutScreen extends StatelessWidget {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        try {
-                          UserModel userModel = await getCurrentUser();
-                          if (userModel.role == 'admin' ||
-                              userModel.role == 'client') {
-                            Get.to(() => ChatScreen(
-                                receiverId:
-                                    'admin')); // Gunakan 'admin' sebagai ID fotografer
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                      'Anda tidak memiliki akses ke fitur ini.')),
-                            );
-                          }
-                        } catch (e) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: ${e.toString()}')),
-                          );
-                        }
+                          try {
+              UserModel userModel = await getCurrentUser();
+              if (userModel.role == 'admin' || userModel.role == 'client') {
+                // Mendapatkan atau membuat chat room ID
+                String chatRoomId = await _getOrCreateChatRoomId(userModel.role, 'admin'); // Ganti 'admin' dengan ID admin yang sesuai
+
+                Get.to(() => ChatScreen(
+                  roomId: chatRoomId,
+                  currentUserId: userModel.id,
+                ));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
+                );
+              }
+            } catch (e) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Error: ${e.toString()}')),
+              );
+            }
                       },
                       child: const Column(
                         mainAxisSize: MainAxisSize.min,
@@ -127,4 +131,16 @@ class SuccessCheckoutScreen extends StatelessWidget {
       ),
     );
   }
+  Future<String> _getOrCreateChatRoomId(String userRole, String adminId) async {
+      // Dapatkan ID pengguna saat ini
+      String userId = (await getCurrentUser()).id;
+
+      // Jika pengguna adalah client, buat atau dapatkan chat room ID dengan admin
+      if (userRole == 'client') {
+        return await _chatService.getOrCreateChatRoomId(adminId);
+      }
+
+      // Untuk admin, Anda mungkin ingin menangani logika lain atau menggunakan ID admin lain
+      return await _chatService.getOrCreateChatRoomId(userId); // Ganti dengan ID admin jika ada
+    }
 }

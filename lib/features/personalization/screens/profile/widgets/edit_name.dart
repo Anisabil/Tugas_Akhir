@@ -43,19 +43,19 @@ class _EditNameDialogState extends State<EditNameDialog> {
         children: [
           TextField(
             controller: _firstNameController,
-            decoration: InputDecoration(labelText: 'First Name'),
+            decoration: InputDecoration(labelText: 'Nama Depan'),
           ),
           const SizedBox(height: FVSizes.spaceBtwItems),
           TextField(
             controller: _lastNameController,
-            decoration: InputDecoration(labelText: 'Last Name'),
+            decoration: InputDecoration(labelText: 'Nama Belakang'),
           ),
         ],
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
+          child: Text('Batal'),
         ),
         ElevatedButton(
           onPressed: () {
@@ -65,7 +65,7 @@ class _EditNameDialogState extends State<EditNameDialog> {
             );
             Navigator.of(context).pop();
           },
-          child: Text('Save'),
+          child: Text('Simpan'),
         ),
       ],
     );

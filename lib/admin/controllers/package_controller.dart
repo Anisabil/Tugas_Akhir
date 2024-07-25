@@ -72,7 +72,7 @@ class PackageController extends GetxController {
       var result = fetchedPackages.where((package) =>
           package.name.toLowerCase().contains(query.toLowerCase()) ||
           package.price.toString().toLowerCase().contains(query.toLowerCase()) ||
-          package.categoryId.toLowerCase().contains(query.toLowerCase()));
+          package.categoryName.toLowerCase().contains(query.toLowerCase()));
       packages.assignAll(result.toList());
     }
   }

@@ -19,7 +19,8 @@ import '../../../utils/popups/loaders.dart';
 
 class UserController extends GetxController {
   static UserController get instance => Get.find();
-  CollectionReference<Map<String, dynamic>> usersCollection = FirebaseFirestore.instance.collection('users');
+  CollectionReference<Map<String, dynamic>> usersCollection =
+      FirebaseFirestore.instance.collection('users');
 
   final profileLoading = false.obs;
   Rx<UserModel> user = UserModel.empty().obs;
@@ -169,10 +170,10 @@ class UserController extends GetxController {
                 side: const BorderSide(color: Colors.red)),
             child: const Padding(
                 padding: EdgeInsets.symmetric(horizontal: FVSizes.lg),
-                child: Text('Delete'))),
+                child: Text('Hapus'))),
         cancel: OutlinedButton(
             onPressed: () => Navigator.of(Get.overlayContext!).pop(),
-            child: const Text('Cancel')));
+            child: const Text('Batal')));
   }
 
   // Delete User Account
@@ -199,7 +200,7 @@ class UserController extends GetxController {
       }
     } catch (e) {
       FVFullScreenLoader.stopLoading();
-      FVLoaders.warningSnackBar(title: 'Oh Tidak!', message: e.toString());
+      FVLoaders.warningSnackBar(title: 'Gagal!', message: e.toString());
     }
   }
 

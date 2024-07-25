@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import 'features/personalization/screens/settings/settings.dart';
 import 'features/studio/screens/home/home.dart';
-import 'features/studio/screens/rent/rent.dart';
 import 'features/studio/screens/order/order.dart';
 import 'admin/models/package_model.dart';
 

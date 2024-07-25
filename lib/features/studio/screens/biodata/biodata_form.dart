@@ -192,11 +192,14 @@ class _BiodataScreenState extends State<BiodataScreen> {
             ),
             const SizedBox(height: 32),
             Center(
-              child: ElevatedButton(
-                onPressed: _saveBiodata,
-                child: Text(widget.biodataId != null
-                    ? 'Simpan Perubahan'
-                    : 'Simpan Biodata'),
+              child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: _saveBiodata,
+                  child: Text(widget.biodataId != null
+                      ? 'Simpan Perubahan'
+                      : 'Simpan Biodata'),
+                ),
               ),
             ),
           ],

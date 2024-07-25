@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/features/personalization/screens/profile/widgets/edit_birthdate.dart';
 import 'package:fvapp/features/personalization/screens/profile/widgets/edit_gender.dart';
+import 'package:fvapp/features/personalization/screens/profile/widgets/edit_instagramName.dart';
 import 'package:fvapp/features/personalization/screens/profile/widgets/edit_name.dart';
 import 'package:fvapp/features/personalization/screens/profile/widgets/edit_phone.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
@@ -11,7 +12,6 @@ import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
 import 'package:fvapp/features/personalization/screens/profile/widgets/profile_menu.dart';
-import 'package:iconsax/iconsax.dart';
 
 import '../../../../common/widgets/images/fv_circular_image.dart';
 
@@ -181,6 +181,26 @@ class ProfileScreen extends StatelessWidget {
                             onSave: (birthdate) async {
                               final updatedUser = controller.user.value.copyWith(
                                 birthdate: birthdate,
+                              );
+                              await controller.updateUserData(updatedUser);
+                            },
+                          );
+                        },
+                      );
+                    },
+              ),
+              FVProfileMenu(
+                title: 'Instagram',
+                value: controller.user.value.instagramName,
+                    onPressed: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) {
+                          return EditInstagramNameDialog(
+                            initialInstagramName: controller.user.value.instagramName,
+                            onSave: (instagramName) async {
+                              final updatedUser = controller.user.value.copyWith(
+                                instagramName: instagramName,
                               );
                               await controller.updateUserData(updatedUser);
                             },

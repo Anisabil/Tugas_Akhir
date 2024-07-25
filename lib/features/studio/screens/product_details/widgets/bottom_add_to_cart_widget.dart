@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/models/package_model.dart';
+import 'package:fvapp/admin/service/chat_service.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:fvapp/features/personalization/models/user_model.dart';
@@ -15,10 +16,14 @@ class FVBottomAddToCart extends StatelessWidget {
   final Package package;
   final String packageId;
 
-  const FVBottomAddToCart({
+
+  FVBottomAddToCart({
     Key? key,
     required this.package, required this.packageId,
   }) : super(key: key);
+
+  
+  final ChatService _chatService = Get.find<ChatService>(); 
 
   @override
   Widget build(BuildContext context) {
@@ -37,40 +42,44 @@ class FVBottomAddToCart extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           ElevatedButton(
-            onPressed: () async {
-              try {
-                UserModel userModel = await getCurrentUser();
-                if (userModel.role == 'admin' || userModel.role == 'client') {
-                  Get.to(() => ChatScreen(
-                      receiverId:
-                          'admin')); // Gunakan 'admin' sebagai ID fotografer
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                        content:
-                            Text('Anda tidak memiliki akses ke fitur ini.')),
-                  );
-                }
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Error: ${e.toString()}')),
-                );
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.all(FVSizes.md),
-              backgroundColor: FVColors.black,
-              side: const BorderSide(color: FVColors.black),
-            ),
-            child: const Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Iconsax.messages),
-                SizedBox(width: 2),
-                Text('Hubungi Admin'),
-              ],
-            ),
-          ),
+  onPressed: () async {
+    try {
+      UserModel userModel = await getCurrentUser();
+      if (userModel.role == 'admin' || userModel.role == 'client') {
+        String chatRoomId = await _getOrCreateChatRoomId(userModel.role, 'admin'); // Ganti 'admin' dengan ID admin yang sesuai
+        
+        // Kirim data paket ke chat
+        await _chatService.sendPackageDetailsToChat(chatRoomId, userModel.id, package);
+
+        Get.to(() => ChatScreen(
+          roomId: chatRoomId,
+          currentUserId: userModel.id,
+        ));
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${e.toString()}')),
+      );
+    }
+  },
+  style: ElevatedButton.styleFrom(
+    padding: const EdgeInsets.all(FVSizes.md),
+    backgroundColor: FVColors.black,
+    side: const BorderSide(color: FVColors.black),
+  ),
+  child: const Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Iconsax.messages),
+      SizedBox(width: 2),
+      Text('Hubungi Admin'),
+    ],
+  ),
+),
           ElevatedButton(
             onPressed: () {
               Get.to(() => EventScreen(
@@ -96,6 +105,19 @@ class FVBottomAddToCart extends StatelessWidget {
       ),
     );
   }
+  
+  Future<String> _getOrCreateChatRoomId(String userRole, String adminId) async {
+      // Dapatkan ID pengguna saat ini
+      String userId = (await getCurrentUser()).id;
+
+      // Jika pengguna adalah client, buat atau dapatkan chat room ID dengan admin
+      if (userRole == 'client') {
+        return await _chatService.getOrCreateChatRoomId(adminId);
+      }
+
+      // Untuk admin, Anda mungkin ingin menangani logika lain atau menggunakan ID admin lain
+      return await _chatService.getOrCreateChatRoomId(userId); // Ganti dengan ID admin jika ada
+    }
 }
 
 Future<UserModel> getCurrentUser() async {

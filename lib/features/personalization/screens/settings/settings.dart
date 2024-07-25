@@ -14,7 +14,7 @@ import '../../../../common/widgets/list_tiles/settings_menu_tile.dart';
 import '../../../../common/widgets/list_tiles/user_profile_tile.dart';
 import '../../../../utils/constants/text_strings.dart';
 import '../../../../utils/helpers/helper_function.dart';
-import '../address/address.dart';
+import '../../../../admin/screens/bank/bank.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

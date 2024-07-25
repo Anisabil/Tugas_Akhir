@@ -29,22 +29,22 @@ class _EditGenderDialogState extends State<EditGenderDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit Gender'),
+      title: Text('Edit Jenis Kelamin'),
       content: TextField(
         controller: _genderController,
-        decoration: InputDecoration(labelText: 'Gender'),
+        decoration: InputDecoration(labelText: 'Jenis Kelamin'),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
+          child: Text('Batal'),
         ),
         ElevatedButton(
           onPressed: () {
             widget.onSave(_genderController.text.trim());
             Navigator.of(context).pop();
           },
-          child: Text('Save'),
+          child: Text('Simpan'),
         ),
       ],
     );

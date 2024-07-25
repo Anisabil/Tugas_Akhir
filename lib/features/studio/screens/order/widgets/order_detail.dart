@@ -1,7 +1,10 @@
-import 'dart:typed_data';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:fvapp/utils/popups/loaders.dart';
+import 'package:flutter/services.dart'; // Tambahkan ini untuk menggunakan Clipboard
+import 'package:fvapp/admin/controllers/bank_controller.dart';
+import 'package:fvapp/admin/models/bank_model.dart';
+import 'package:fvapp/utils/popups/loaders.dart'; // Pastikan file ini sudah ada
 import 'package:get/get.dart';
 import 'package:fvapp/features/studio/screens/biodata/biodata_form.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
@@ -22,12 +25,13 @@ class OrderDetail extends StatelessWidget {
 
   OrderDetail({Key? key, required this.rentId}) : super(key: key);
 
-  final RentController controller = Get.put(RentController());
+  final RentController rentController = Get.put(RentController());
+  final BankController bankController = Get.find(); // Mengambil instance BankController yang sudah ada
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance!.addPostFrameCallback((_) {
-      controller.loadRentDetail(rentId);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      rentController.loadRentDetail(rentId);
     });
 
     return Scaffold(
@@ -36,8 +40,8 @@ class OrderDetail extends StatelessWidget {
         title: Text('Detail Sewa'),
         actions: [
           Obx(() {
-            if (controller.rent.value != null) {
-              Rent rent = controller.rent.value!;
+            if (rentController.rent.value != null) {
+              Rent rent = rentController.rent.value!;
               if (rent.status == 'Belum Bayar') {
                 return IconButton(
                   icon: Icon(Iconsax.document_download, color: Colors.grey),
@@ -48,18 +52,15 @@ class OrderDetail extends StatelessWidget {
                     );
                   },
                 );
-              } else if (rent.status == 'Belum Lunas' ||
-                  rent.status == 'Lunas') {
+              } else if (rent.status == 'Belum Lunas' || rent.status == 'Lunas') {
                 return IconButton(
                   icon: Icon(Iconsax.document_download),
                   onPressed: () async {
                     try {
-                      Uint8List pdfData =
-                          await InvoicePdf().generateInvoicePDF(rent);
+                      Uint8List pdfData = await InvoicePdf().generateInvoicePDF(rent);
 
                       final directory = await getExternalStorageDirectory();
-                      final fileName =
-                          "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
+                      final fileName = "${rent.id}_${DateTime.now().millisecondsSinceEpoch}.pdf";
                       final filePath = "${directory!.path}/$fileName";
                       final file = await File(filePath).writeAsBytes(pdfData);
 
@@ -82,15 +83,15 @@ class OrderDetail extends StatelessWidget {
         ],
       ),
       body: Obx(() {
-        if (controller.isLoading.value) {
+        if (rentController.isLoading.value) {
           return Center(child: CircularProgressIndicator());
         }
 
-        if (controller.rent.value == null) {
+        if (rentController.rent.value == null) {
           return Center(child: Text('Tidak ada detail sewa yang tersedia'));
         }
 
-        Rent rent = controller.rent.value!;
+        Rent rent = rentController.rent.value!;
         final dark = Theme.of(context).brightness == Brightness.dark;
 
         return SingleChildScrollView(
@@ -117,8 +118,7 @@ class OrderDetail extends StatelessWidget {
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Paket: ${rent.packageName}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
-                        Text(
-                            'Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Tema: ${rent.theme}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
@@ -134,16 +134,36 @@ class OrderDetail extends StatelessWidget {
                         SizedBox(height: FVSizes.spaceBtwSection),
                         Text('Pembayaran bisa melalui:'),
                         SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Rekening BCA'),
-                        SizedBox(height: 5),
-                        Text(
-                          '4372512036',
-                          style: TextStyle(
-                            fontSize: FVSizes.lg,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Text('A/N HAMDAN RAMDANI'),
+                        Obx(() {
+                          Bank? bank = bankController.selectedBank.value;
+                          return bank != null
+                              ? Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text('Rekening ${bank.bankName}'),
+                                    SizedBox(height: FVSizes.spaceBtwItems / 2),
+                                    GestureDetector(
+                                      onTap: () {
+                                        Clipboard.setData(ClipboardData(text: bank.accountNumber));
+                                        FVLoaders.successSnackBar(
+                                          title: 'Berhasil',
+                                          message: 'Nomor rekening berhasil disalin' 
+                                        );
+                                      },
+                                      child: Text(
+                                        '${bank.accountNumber}',
+                                        style: TextStyle(
+                                          fontSize: 20,
+                                          decoration: TextDecoration.underline,
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: FVSizes.spaceBtwItems / 2),
+                                    Text('A/N ${bank.accountName}'),
+                                  ],
+                                )
+                              : Text('Pilih metode pembayaran');
+                        }),
                         SizedBox(height: FVSizes.spaceBtwSection),
                         GestureDetector(
                           onTap: () {
@@ -153,7 +173,6 @@ class OrderDetail extends StatelessWidget {
                                 message: 'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar'
                               );
                             } else {
-                              // Pastikan untuk mengirim biodataId jika sudah ada biodata
                               Get.to(() => BiodataScreen(
                                     biodataId: rent.biodataId,
                                     userId: rent.userId,
@@ -210,7 +229,7 @@ class OrderDetail extends StatelessWidget {
                                   ),
                                   TextButton(
                                     onPressed: () {
-                                      controller.deleteRent(rentId);
+                                      rentController.deleteRent(rentId);
                                       Navigator.of(context).pop();
                                       Navigator.of(context).pop();
                                     },

@@ -4,9 +4,7 @@ import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/features/personalization/controllers/user_controller.dart';
 import 'package:fvapp/features/personalization/models/user_model.dart';
 import 'package:get/get.dart';
-import 'package:chewie/chewie.dart';
-import 'package:iconsax/iconsax.dart';
-import 'package:video_player/video_player.dart';
+import 'package:iconsax/iconsax.dart'; // Pastikan package iconsax sudah ditambahkan pada pubspec.yaml
 
 class AboutApp extends StatelessWidget {
   const AboutApp({Key? key}) : super(key: key);
@@ -54,6 +52,20 @@ class AboutApp extends StatelessWidget {
                         ),
                       ),
                       Text(admin.role),
+                      SizedBox(height: 20),
+                      // Tambahan informasi kontak admin
+                      CustomListTile(
+                        icon: Iconsax.mobile,
+                        title: 'Hubungi: ${admin.phoneNumber}',
+                      ),
+                      CustomListTile(
+                        icon: Icons.email,
+                        title: 'Email: ${admin.email}',
+                      ),
+                      CustomListTile(
+                        icon: Iconsax.instagram,
+                        title: 'Instagram: ${admin.instagramName}',
+                      ),
                     ],
                   );
                 } else {
@@ -101,44 +113,6 @@ class AboutApp extends StatelessWidget {
                 separatorBuilder: (context, index) => SizedBox(width: 5),
                 itemCount: _packageController.packages.length,
               ),
-            ),
-            SizedBox(height: 35),
-            // CustomListTile Video Paket
-            Column(
-              children: _packageController.packages.map((package) {
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Card(
-                    elevation: 4,
-                    shadowColor: Colors.black12,
-                    child: ListTile(
-                      leading: Icon(Iconsax.video),
-                      title: Text(package.name),
-                      trailing: const Icon(Icons.chevron_right),
-                      onTap: () {
-                        String videoUrl = package.videoUrls.isNotEmpty ? package.videoUrls[0] : '';
-                        VideoPlayerController videoPlayerController = VideoPlayerController.network(videoUrl);
-                        ChewieController chewieController = ChewieController(
-                          videoPlayerController: videoPlayerController,
-                          autoPlay: false,
-                          looping: false,
-                          allowMuting: true,
-                          allowedScreenSleep: false,
-                          allowPlaybackSpeedChanging: false,
-                          autoInitialize: true,
-                          aspectRatio: 8 / 9,
-                        );
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Chewie(controller: chewieController),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                );
-              }).toList(),
             ),
             SizedBox(height: 35),
             // Container untuk tahapan sewa

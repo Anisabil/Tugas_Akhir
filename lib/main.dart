@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_downloader/flutter_downloader.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
+import 'package:fvapp/admin/controllers/bank_controller.dart';
 import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/admin/controllers/promo_controller.dart';
 import 'package:fvapp/admin/controllers/rent_detail_controller.dart';
+import 'package:fvapp/admin/service/chat_service.dart';
 import 'package:fvapp/features/personalization/controllers/user_controller.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
 import 'package:fvapp/features/studio/screens/event/controller/event_controller.dart';
@@ -22,9 +23,6 @@ import 'admin/controllers/package_controller.dart';
 Future<void> main() async {
   // Widgets Binding
   final WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-
-  // Inisialisasi Flutter Downloader
-  await FlutterDownloader.initialize(debug: true); // ubah menjadi false pada produksi
 
   // GetX local storage
   await GetStorage.init();
@@ -48,6 +46,8 @@ Future<void> main() async {
   Get.put(RentController());
   Get.put(RentDetailController());
   Get.put(PromoController());
+  Get.put(BankController());
+  Get.put(ChatService());
 
   print('RentController initialized successfully');
 

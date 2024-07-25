@@ -52,7 +52,7 @@ class ReAuthLoginForm extends StatelessWidget {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () => controller.reAuthenticateEmailAndPasswordUser(),
-                  child: const Text('Verify'),
+                  child: const Text('Verifikasi'),
                 ),
               ),
             ],

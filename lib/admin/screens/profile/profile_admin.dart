@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/screens/bank/bank.dart';
 import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/primary_header_container.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
@@ -62,6 +63,13 @@ class ProfileAdmin extends StatelessWidget {
                   ),
                   const SizedBox(
                     height: FVSizes.spaceBtwItems,
+                  ),
+
+                  FVSettingsMenuTile(
+                    icon: Iconsax.bank,
+                    title: 'Akun Bank',
+                    subTitle: 'Daftarkan rekening bank',
+                    onTap: () => Get.to(() => BankAccountScreen()),
                   ),
                   
                   const FVSettingsMenuTile(

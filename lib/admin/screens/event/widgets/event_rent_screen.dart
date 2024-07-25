@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/admin/models/event_model.dart';
+import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:get/get.dart';
 
 class EventRentScreen extends StatelessWidget {
@@ -9,7 +10,7 @@ class EventRentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Event List')),
+      appBar: AppBar(title: Text('Daftar Event')),
       body: Obx(
         () => ListView.builder(
           itemCount: _eventController.events.length,
@@ -22,7 +23,7 @@ class EventRentScreen extends StatelessWidget {
                 icon: Icon(Icons.delete),
                 onPressed: () {
                   _eventController.deleteEvent(event.eventId);
-                  Get.snackbar('Success', 'Event deleted successfully');
+                  FVLoaders.successSnackBar(title: 'Berhasil!', message: 'Jadwal berhasil dihapus');
                 },
               ),
             );

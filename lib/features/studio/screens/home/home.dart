@@ -4,6 +4,7 @@ import 'package:fvapp/admin/controllers/promo_controller.dart';
 import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/admin/models/promo_model.dart';
 import 'package:fvapp/admin/screens/rent_order/rent_order.dart';
+import 'package:fvapp/admin/service/chat_service.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/search_container.dart';
 import 'package:fvapp/common/widgets/layouts/grid_layout.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
@@ -14,7 +15,6 @@ import 'package:fvapp/features/studio/screens/home/widgets/home_appbar.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/home_categories.dart';
 import 'package:fvapp/features/studio/screens/home/widgets/promo_slide.dart';
 import 'package:fvapp/utils/constants/colors.dart';
-import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
@@ -27,8 +27,9 @@ class HomeScreen extends StatelessWidget {
 
   HomeScreen({required this.package});
 
-  final PackageController _packageController = Get.find(); // Gunakan Get.find() untuk mengambil instance PackageController
+  final PackageController _packageController = Get.find();
   final PromoController _promoController = Get.put(PromoController());
+  final ChatService _chatService = Get.find<ChatService>(); // Mengambil instance ChatService
 
   @override
   Widget build(BuildContext context) {
@@ -41,27 +42,18 @@ class HomeScreen extends StatelessWidget {
                 children: [
                   FVHomeAppBar(),
                   SizedBox(height: FVSizes.spaceBtwItems),
-
-                  // Search bar
-                  FVSearchContainer(
-                    text: 'Cari Paket',
-                  ),
+                  FVSearchContainer(text: 'Cari Paket'),
                   SizedBox(height: FVSizes.spaceBtwItems),
-
-                  // Categories
                   Padding(
                     padding: EdgeInsets.only(left: FVSizes.defaultSpace),
                     child: Column(
                       children: [
-                        // Heading
                         FVSectionHeading(
                           title: 'Kategori',
                           showActionButton: false,
                           textColor: FVColors.white,
                         ),
                         SizedBox(height: FVSizes.spaceBtwItems),
-
-                        // Categories
                         FVHomeCategories(packages: _packageController.packages),
                       ],
                     ),
@@ -70,8 +62,6 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Body
             Padding(
               padding: const EdgeInsets.all(FVSizes.defaultSpace),
               child: Column(
@@ -82,39 +72,30 @@ class HomeScreen extends StatelessWidget {
                       if (snapshot.hasError) {
                         return Center(child: Text('Error: ${snapshot.error}'));
                       }
-
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return Center(child: CircularProgressIndicator());
                       }
-
                       List<PromoImage> promoImages = snapshot.data ?? [];
-
                       if (promoImages.isEmpty) {
                         return Center(child: Text('No promo images available.'));
                       }
-
                       return FVPromoSlide(
                         banners: promoImages.map((image) => image.imageUrl).toList(),
                       );
                     },
                   ),
                   const SizedBox(height: FVSizes.spaceBtwSection),
-
-                  // Heading
                   FVSectionHeading(
                     title: 'Paket Tersedia',
                     onPressed: () => Get.to(() => AllProducts()),
                   ),
                   const SizedBox(height: FVSizes.spaceBtwItems),
-
-                  // Popular Products
                   Obx(
                     () => _packageController.packages.isEmpty
                         ? const CircularProgressIndicator()
                         : FVGridLayout(
                             itemCount: _packageController.packages.length,
-                            itemBuilder: (_, index) =>
-                                FVProductCardVertical(
+                            itemBuilder: (_, index) => FVProductCardVertical(
                               package: _packageController.packages[index],
                             ),
                           ),
@@ -130,8 +111,13 @@ class HomeScreen extends StatelessWidget {
           try {
             UserModel userModel = await getCurrentUser();
             if (userModel.role == 'admin' || userModel.role == 'client') {
+              // Mendapatkan atau membuat chat room ID
+              String chatRoomId = await _getOrCreateChatRoomId(userModel.role, 'admin'); // Ganti 'admin' dengan ID admin yang sesuai
+
               Get.to(() => ChatScreen(
-                  receiverId: 'admin')); // Gunakan 'admin' sebagai ID fotografer
+                roomId: chatRoomId,
+                currentUserId: userModel.id,
+              ));
             } else {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
@@ -148,5 +134,18 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
+  }
+
+  Future<String> _getOrCreateChatRoomId(String userRole, String adminId) async {
+    // Dapatkan ID pengguna saat ini
+    String userId = (await getCurrentUser()).id;
+
+    // Jika pengguna adalah client, buat atau dapatkan chat room ID dengan admin
+    if (userRole == 'client') {
+      return await _chatService.getOrCreateChatRoomId(adminId);
+    }
+
+    // Untuk admin, Anda mungkin ingin menangani logika lain atau menggunakan ID admin lain
+    return await _chatService.getOrCreateChatRoomId(userId); // Ganti dengan ID admin jika ada
   }
 }

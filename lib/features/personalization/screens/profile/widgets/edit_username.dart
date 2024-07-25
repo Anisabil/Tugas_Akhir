@@ -32,22 +32,22 @@ class _EditUsernameDialogState extends State<EditUsernameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Edit Username'),
+      title: Text('Edit Nama Pengguna'),
       content: TextField(
         controller: _usernameController,
-        decoration: InputDecoration(labelText: 'Username'),
+        decoration: InputDecoration(labelText: 'Nama Pengguna'),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: Text('Cancel'),
+          child: Text('Batal'),
         ),
         ElevatedButton(
           onPressed: () {
             widget.onSave(_usernameController.text.trim());
             Navigator.of(context).pop();
           },
-          child: Text('Save'),
+          child: Text('Simpan'),
         ),
       ],
     );

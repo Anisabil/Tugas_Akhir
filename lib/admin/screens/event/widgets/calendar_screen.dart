@@ -112,7 +112,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -134,7 +134,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   );
                 }
               },
-              child: Text('Add'),
+              child: Text('Simpan'),
             ),
           ],
         );
@@ -226,7 +226,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calendar'),
+        title: Text('Kalender'),
       ),
       body: Column(
         children: [
@@ -264,7 +264,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   .where((event) => isSameDay(event.date, _selectedDay))
                   .toList();
               if (events.isEmpty) {
-                return Center(child: Text('No events for selected day.'));
+                return Center(child: Text('TIdak ada jadwal pada tanggal yang dipilih'));
               }
               return ListView.builder(
                 itemCount: events.length,
@@ -276,7 +276,10 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     onTap: () => _editEvent(event),
                     trailing: IconButton(
                       icon: Icon(Icons.delete),
-                      onPressed: () => _deleteEvent(event.eventId),
+                      onPressed: () {
+                        _eventController.deleteEvent(event.eventId);
+                        FVLoaders.successSnackBar(title: 'Berhasil!', message: 'Jadwal berhasil dihapus');
+                      },
                     ),
                   );
                 },
@@ -286,6 +289,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        backgroundColor: FVColors.gold,
         onPressed: _showAddEventDialog,
         child: Icon(Icons.add),
       ),

@@ -12,6 +12,7 @@ class UserModel {
   final String role;
   String gender;
   String birthdate;
+  String instagramName;
 
   UserModel({
     required this.id,
@@ -24,6 +25,7 @@ class UserModel {
     required this.role,
     this.gender = '',
     this.birthdate = '',
+    this.instagramName = '',
   });
 
   // Helper function to get the full name
@@ -58,6 +60,7 @@ class UserModel {
         role: 'client',
         gender: '',
         birthdate: '',
+        instagramName: '',
       );
 
   // Convert model to JSON structure for storing data in Firebase Realtime Database
@@ -72,10 +75,12 @@ class UserModel {
       'role': role,
       'gender': gender,
       'birthDate': birthdate,
+      'instagramName': instagramName,
     };
   }
 
-  factory UserModel.fromSnapshot(DocumentSnapshot<Map<String, dynamic>> document) {
+  factory UserModel.fromSnapshot(
+      DocumentSnapshot<Map<String, dynamic>> document) {
     if (document.data() != null) {
       final data = document.data()!;
       return UserModel(
@@ -89,6 +94,7 @@ class UserModel {
         role: data['role'] ?? 'client',
         gender: data['gender'] ?? '',
         birthdate: data['birthDate'] ?? '',
+        instagramName: data['instagramName'] ?? '',
       );
     } else {
       // Handle case when data is null
@@ -105,6 +111,7 @@ class UserModel {
     String? profilePicture,
     String? gender,
     String? birthdate,
+    String? instagramName,
   }) {
     return UserModel(
       id: this.id,
@@ -117,6 +124,7 @@ class UserModel {
       role: this.role,
       gender: gender ?? this.gender,
       birthdate: birthdate ?? this.birthdate,
+      instagramName: instagramName ?? this.instagramName,
     );
   }
 }
