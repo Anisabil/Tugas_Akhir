@@ -2,7 +2,7 @@ class FVText {
   // on Boarding Title
   static const String onBoardingTitle1 = "Selamat Datang di KR Visual Story";
   static const String onBoardingTitle2 = "Cari Layanan yang Tepat untuk Anda";
-  static const String onBoardingTitle3 = "Booking dengan Mudah dan Aman";
+  static const String onBoardingTitle3 = "Sewa dengan Mudah dan Aman";
 
   // on Boarding Sub Title
   static const String onBoardingSubTitle1 =

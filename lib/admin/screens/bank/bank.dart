@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/controllers/bank_controller.dart';
 import 'package:fvapp/admin/models/bank_model.dart';
-import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:fvapp/admin/screens/bank/widgets/single_bank.dart';
 import 'package:fvapp/utils/constants/colors.dart';
-import 'package:fvapp/utils/constants/sizes.dart';
 import 'package:get/get.dart';
-import 'package:iconsax/iconsax.dart';
-
 import 'add_bank_account.dart';
 
 class BankAccountScreen extends StatelessWidget {
@@ -35,7 +31,7 @@ class BankAccountScreen extends StatelessWidget {
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          showModalBottomSheet(
+          showDialog(
             context: context,
             builder: (context) {
               return AddBankAccountModal(
@@ -47,6 +43,7 @@ class BankAccountScreen extends StatelessWidget {
           );
         },
         child: Icon(Icons.add),
+        backgroundColor: FVColors.gold,
       ),
     );
   }

@@ -68,9 +68,9 @@ class RentDetail extends StatelessWidget {
                             SizedBox(height: FVSizes.spaceBtwItems),
                             Text('Paket: ${rent.packageName}'),
                             SizedBox(height: FVSizes.spaceBtwItems),
-                            Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                            Text('Kategori: ${rent.categoryName}'),
                             SizedBox(height: FVSizes.spaceBtwItems),
-                            Text('Tema: ${rent.theme}'),
+                            Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
                             SizedBox(height: FVSizes.spaceBtwItems),
                             Text('Metode Pembayaran: ${rent.paymentMethod}'),
                             SizedBox(height: FVSizes.spaceBtwItems),
@@ -124,7 +124,13 @@ class RentDetail extends StatelessWidget {
                       title: 'Jadwalkan',
                       subTitle: 'Buat jadwal event',
                       onTap: () {
-                        Get.to(() => CalendarScreen(rentId: rentId)); // Mengirim rentId ke CalendarScreen
+                        Get.to(() => CalendarScreen(
+                          rentId: rentId,
+                          userName: rent.userName,
+                          packageName: rent.packageName,
+                          categoryName: rent.categoryName,
+                          date: rent.date,
+                        ));
                       },
                     ),
                   ],

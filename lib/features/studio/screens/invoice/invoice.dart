@@ -137,7 +137,6 @@ class InvoicePdf {
       [
         DateFormat('dd MMMM yyyy').format(rent.date),
         'Paket: ${rent.packageName},\n' +
-            'Tema: ${rent.theme},\n' +
             'Metode Pembayaran: ${rent.paymentMethod},\n' +
             'Deskripsi: ${rent.description}',
         rent.totalPrice.toString(),

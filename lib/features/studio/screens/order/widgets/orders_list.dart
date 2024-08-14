@@ -109,11 +109,11 @@ class FVOrderListItems extends StatelessWidget {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      'Sewa',
+                                      'Kategori',
                                       style: Theme.of(context).textTheme.labelMedium,
                                     ),
                                     Text(
-                                      rent.theme,
+                                      rent.categoryName,
                                       style: Theme.of(context).textTheme.titleMedium,
                                     ),
                                   ],

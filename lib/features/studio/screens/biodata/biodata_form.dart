@@ -1,108 +1,102 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:fvapp/utils/popups/loaders.dart';
-import 'package:get/get.dart';
 import 'package:fvapp/features/studio/screens/biodata/widgets/biodata_controller.dart';
 import 'package:fvapp/features/studio/screens/biodata/widgets/biodata_model.dart';
+import 'package:fvapp/utils/popups/loaders.dart';
+import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 
-class BiodataScreen extends StatefulWidget {
-  final String? biodataId; // Tambahkan parameter opsional biodataId
+class CoupleDataScreen extends StatefulWidget {
+  final String? coupleDataId; // Optional parameter for coupleDataId
   final String userId;
   final String rentId;
 
-  const BiodataScreen({
+  const CoupleDataScreen({
     Key? key,
-    this.biodataId,
+    this.coupleDataId,
     required this.userId,
     required this.rentId,
   }) : super(key: key);
 
   @override
-  _BiodataScreenState createState() => _BiodataScreenState();
+  _CoupleDataScreenState createState() => _CoupleDataScreenState();
 }
 
-class _BiodataScreenState extends State<BiodataScreen> {
-  final TextEditingController _priaNamaController = TextEditingController();
-  final TextEditingController _nomorTeleponPriaController =
-      TextEditingController();
-  final TextEditingController _akunInstagramPriaController =
-      TextEditingController();
-  final TextEditingController _alamatPriaController = TextEditingController();
-  final TextEditingController _wanitaNamaController = TextEditingController();
-  final TextEditingController _nomorTeleponWanitaController =
-      TextEditingController();
-  final TextEditingController _akunInstagramWanitaController =
-      TextEditingController();
-  final TextEditingController _alamatWanitaController = TextEditingController();
+class _CoupleDataScreenState extends State<CoupleDataScreen> {
+  final TextEditingController _groomNameController = TextEditingController();
+  final TextEditingController _groomPhoneController = TextEditingController();
+  final TextEditingController _groomInstagramController = TextEditingController();
+  final TextEditingController _groomAddressController = TextEditingController();
+  final TextEditingController _brideNameController = TextEditingController();
+  final TextEditingController _bridePhoneController = TextEditingController();
+  final TextEditingController _brideInstagramController = TextEditingController();
+  final TextEditingController _brideAddressController = TextEditingController();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _eventDescriptionController = TextEditingController();
 
-  final BiodataController _biodataController = Get.put(BiodataController());
+  final CoupleDataController _coupleDataController = Get.put(CoupleDataController());
 
   @override
   void initState() {
     super.initState();
-    if (widget.biodataId != null) {
-      _loadExistingBiodata();
+    if (widget.coupleDataId != null) {
+      _loadExistingCoupleData();
     }
   }
 
-  void _loadExistingBiodata() async {
+  void _loadExistingCoupleData() async {
     try {
-      await _biodataController.loadBiodata(widget.biodataId!);
-      Biodata? existingBiodata = _biodataController.biodata.value;
-      if (existingBiodata != null) {
-        _priaNamaController.text = existingBiodata.priaNama ?? '';
-        _nomorTeleponPriaController.text =
-            existingBiodata.nomorTeleponPria ?? '';
-        _akunInstagramPriaController.text =
-            existingBiodata.akunInstagramPria ?? '';
-        _alamatPriaController.text = existingBiodata.alamatPria ?? '';
-
-        _wanitaNamaController.text = existingBiodata.wanitaNama ?? '';
-        _nomorTeleponWanitaController.text =
-            existingBiodata.nomorTeleponWanita ?? '';
-        _akunInstagramWanitaController.text =
-            existingBiodata.akunInstagramWanita ?? '';
-        _alamatWanitaController.text = existingBiodata.alamatWanita ?? '';
+      await _coupleDataController.loadCoupleData(widget.coupleDataId!);
+      CoupleData? existingCoupleData = _coupleDataController.coupleData.value;
+      if (existingCoupleData != null) {
+        _groomNameController.text = existingCoupleData.groomName ?? '';
+        _groomPhoneController.text = existingCoupleData.groomPhone ?? '';
+        _groomInstagramController.text = existingCoupleData.groomInstagram ?? '';
+        _groomAddressController.text = existingCoupleData.groomAddress ?? '';
+        _brideNameController.text = existingCoupleData.brideName ?? '';
+        _bridePhoneController.text = existingCoupleData.bridePhone ?? '';
+        _brideInstagramController.text = existingCoupleData.brideInstagram ?? '';
+        _brideAddressController.text = existingCoupleData.brideAddress ?? '';
+        _locationController.text = existingCoupleData.location ?? '';
+        _eventDescriptionController.text = existingCoupleData.eventDescription ?? '';
       } else {
-        print('No existing biodata found');
+        print('Data pasangan tidak ditemukan');
       }
     } catch (e) {
-      print("Error loading biodata: $e");
+      print("Error memuat data pasangan: $e");
     }
   }
 
-  void _saveBiodata() async {
+  void _saveCoupleData() async {
     String userId = widget.userId;
     String rentId = widget.rentId;
 
-    Biodata newBiodata = Biodata(
+    CoupleData newCoupleData = CoupleData(
       userId: userId,
       rentId: rentId,
-      priaNama: _priaNamaController.text.trim(),
-      nomorTeleponPria: _nomorTeleponPriaController.text.trim(),
-      akunInstagramPria: _akunInstagramPriaController.text.trim(),
-      alamatPria: _alamatPriaController.text.trim(),
-      wanitaNama: _wanitaNamaController.text.trim(),
-      nomorTeleponWanita: _nomorTeleponWanitaController.text.trim(),
-      akunInstagramWanita: _akunInstagramWanitaController.text.trim(),
-      alamatWanita: _alamatWanitaController.text.trim(),
+      groomName: _groomNameController.text.trim(),
+      groomPhone: _groomPhoneController.text.trim(),
+      groomInstagram: _groomInstagramController.text.trim(),
+      groomAddress: _groomAddressController.text.trim(),
+      brideName: _brideNameController.text.trim(),
+      bridePhone: _bridePhoneController.text.trim(),
+      brideInstagram: _brideInstagramController.text.trim(),
+      brideAddress: _brideAddressController.text.trim(),
+      location: _locationController.text.trim(),
+      eventDescription: _eventDescriptionController.text.trim(),
       createdAt: Timestamp.now(),
     );
 
     try {
-      if (widget.biodataId != null) {
-        await _biodataController.updateBiodata(
-            widget.biodataId!, newBiodata, userId, rentId);
+      if (widget.coupleDataId != null) {
+        await _coupleDataController.updateCoupleData(widget.coupleDataId!, newCoupleData, userId, rentId);
       } else {
-        await _biodataController.saveBiodata(newBiodata, userId, rentId);
+        await _coupleDataController.saveCoupleData(newCoupleData, userId, rentId);
       }
-      FVLoaders.successSnackBar(
-          title: 'Berhasil!', message: 'Biodata pasangan berhasil ditambahkan');
+      FVLoaders.successSnackBar(title: 'Berhasil!', message: 'Data pasangan berhasil disimpan');
       Navigator.pop(context);
     } catch (e) {
-      FVLoaders.errorSnackBar(
-          title: 'Gagal!', message: 'Biodata gagal disimpan');
+      FVLoaders.errorSnackBar(title: 'Gagal!', message: 'Gagal menyimpan data pasangan');
     }
   }
 
@@ -110,7 +104,7 @@ class _BiodataScreenState extends State<BiodataScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Biodata Pasangan'),
+        title: const Text('Data Pasangan'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -118,12 +112,12 @@ class _BiodataScreenState extends State<BiodataScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text(
-              'Biodata Pria',
+              'Detail Pria',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _priaNamaController,
+              controller: _groomNameController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.user),
                 labelText: 'Nama Pria',
@@ -131,23 +125,23 @@ class _BiodataScreenState extends State<BiodataScreen> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _nomorTeleponPriaController,
+              controller: _groomPhoneController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.mobile),
-                labelText: 'Nomor Telepon Pria',
+                labelText: 'Telepon Pria',
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _akunInstagramPriaController,
+              controller: _groomInstagramController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.instagram),
-                labelText: 'Akun Instagram Pria',
+                labelText: 'Instagram Pria',
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _alamatPriaController,
+              controller: _groomAddressController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.building),
                 labelText: 'Alamat Pria',
@@ -155,12 +149,12 @@ class _BiodataScreenState extends State<BiodataScreen> {
             ),
             const SizedBox(height: 32),
             const Text(
-              'Biodata Wanita',
+              'Detail Wanita',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _wanitaNamaController,
+              controller: _brideNameController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.user),
                 labelText: 'Nama Wanita',
@@ -168,39 +162,48 @@ class _BiodataScreenState extends State<BiodataScreen> {
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _nomorTeleponWanitaController,
+              controller: _bridePhoneController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.mobile),
-                labelText: 'Nomor Telepon Wanita',
+                labelText: 'Telepon Wanita',
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _akunInstagramWanitaController,
+              controller: _brideInstagramController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.instagram),
-                labelText: 'Akun Instagram Wanita',
+                labelText: 'Instagram Wanita',
               ),
             ),
             const SizedBox(height: 16),
             TextFormField(
-              controller: _alamatWanitaController,
+              controller: _brideAddressController,
               decoration: const InputDecoration(
                 prefixIcon: Icon(Iconsax.building),
                 labelText: 'Alamat Wanita',
               ),
             ),
             const SizedBox(height: 32),
-            Center(
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _saveBiodata,
-                  child: Text(widget.biodataId != null
-                      ? 'Simpan Perubahan'
-                      : 'Simpan Biodata'),
-                ),
+            TextFormField(
+              controller: _locationController,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Iconsax.map),
+                labelText: 'Lokasi Acara',
               ),
+            ),
+            const SizedBox(height: 16),
+            TextFormField(
+              controller: _eventDescriptionController,
+              decoration: const InputDecoration(
+                prefixIcon: Icon(Iconsax.text),
+                labelText: 'Deskripsi Acara',
+              ),
+            ),
+            const SizedBox(height: 32),
+            ElevatedButton(
+              onPressed: _saveCoupleData,
+              child: Text(widget.coupleDataId != null ? 'Perbarui' : 'Simpan'),
             ),
           ],
         ),

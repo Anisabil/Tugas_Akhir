@@ -5,26 +5,28 @@ class Message {
   final String text;
   final String senderId;
   final String receiverId;
-  final Timestamp timestamp;
+  final Timestamp? timestamp;
   final String imageUrl;
   final String fileUrl;
   final String fileName;
-  final String packageId;
-  final String packageName;
-  final String packageImageUrl;
+  final String? packageId;
+  final String? packageName;
+  final String? categoryName;
+  final String? packageImageUrl;
 
   Message({
     required this.id,
     required this.text,
     required this.senderId,
     required this.receiverId,
-    required this.timestamp,
+    this.timestamp,
     required this.imageUrl,
     required this.fileUrl,
     required this.fileName,
-    required this.packageId,
-    required this.packageName,
-    required this.packageImageUrl,
+    this.packageId,
+    this.packageName,
+    this.categoryName,
+    this.packageImageUrl,
   });
 
   factory Message.fromFirestore(DocumentSnapshot doc) {
@@ -34,7 +36,7 @@ class Message {
       text: data['text'] ?? '',
       senderId: data['senderId'] ?? '',
       receiverId: data['receiverId'] ?? '',
-      timestamp: data['timestamp'] as Timestamp,
+      timestamp: data['timestamp'] as Timestamp?,
       imageUrl: data['imageUrl'] ?? '',
       fileUrl: data['fileUrl'] ?? '',
       fileName: data['fileName'] ?? '',
@@ -47,11 +49,15 @@ class Message {
   Map<String, dynamic> toMap() {
     return {
       'senderId': senderId,
+      'receiverId': receiverId,
       'text': text,
       'timestamp': timestamp,
       'imageUrl': imageUrl,
       'fileUrl': fileUrl,
       'fileName': fileName,
+      'packageId': packageId,
+      'packageName': packageName,
+      'packageImageUrl': packageImageUrl,
     };
   }
 }

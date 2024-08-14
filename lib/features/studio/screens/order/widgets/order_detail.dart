@@ -118,9 +118,9 @@ class OrderDetail extends StatelessWidget {
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Paket: ${rent.packageName}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                        Text('Kategori: ${rent.categoryName}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Tema: ${rent.theme}'),
+                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Metode Pembayaran: ${rent.paymentMethod}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
@@ -173,8 +173,7 @@ class OrderDetail extends StatelessWidget {
                                 message: 'Anda belum melakukan pembayaran, konfirmasi kepada admin jika Anda sudah membayar'
                               );
                             } else {
-                              Get.to(() => BiodataScreen(
-                                    biodataId: rent.biodataId,
+                              Get.to(() => CoupleDataScreen(
                                     userId: rent.userId,
                                     rentId: rent.id,
                                   ));

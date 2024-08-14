@@ -1,29 +1,33 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-class Biodata {
+class CoupleData {
   final String userId;
   final String rentId;
-  final String priaNama;
-  final String nomorTeleponPria;
-  final String akunInstagramPria;
-  final String alamatPria;
-  final String wanitaNama;
-  final String nomorTeleponWanita;
-  final String akunInstagramWanita;
-  final String alamatWanita;
+  final String groomName;
+  final String groomPhone;
+  final String groomInstagram;
+  final String groomAddress;
+  final String brideName;
+  final String bridePhone;
+  final String brideInstagram;
+  final String brideAddress;
+  final String location;
+  final String eventDescription;
   final Timestamp createdAt;
 
-  Biodata({
+  CoupleData({
     required this.userId,
     required this.rentId,
-    required this.priaNama,
-    required this.nomorTeleponPria,
-    required this.akunInstagramPria,
-    required this.alamatPria,
-    required this.wanitaNama,
-    required this.nomorTeleponWanita,
-    required this.akunInstagramWanita,
-    required this.alamatWanita,
+    required this.groomName,
+    required this.groomPhone,
+    required this.groomInstagram,
+    required this.groomAddress,
+    required this.brideName,
+    required this.bridePhone,
+    required this.brideInstagram,
+    required this.brideAddress,
+    required this.location,
+    required this.eventDescription,
     required this.createdAt,
   });
 
@@ -31,30 +35,34 @@ class Biodata {
     return {
       'userId': userId,
       'rentId': rentId,
-      'priaNama': priaNama,
-      'nomorTeleponPria': nomorTeleponPria,
-      'akunInstagramPria': akunInstagramPria,
-      'alamatPria': alamatPria,
-      'wanitaNama': wanitaNama,
-      'nomorTeleponWanita': nomorTeleponWanita,
-      'akunInstagramWanita': akunInstagramWanita,
-      'alamatWanita': alamatWanita,
+      'groomName': groomName,
+      'groomPhone': groomPhone,
+      'groomInstagram': groomInstagram,
+      'groomAddress': groomAddress,
+      'brideName': brideName,
+      'bridePhone': bridePhone,
+      'brideInstagram': brideInstagram,
+      'brideAddress': brideAddress,
+      'location': location,
+      'eventDescription': eventDescription,
       'createdAt': createdAt,
     };
   }
 
-  factory Biodata.fromMap(Map<String, dynamic> map) {
-    return Biodata(
+  factory CoupleData.fromMap(Map<String, dynamic> map) {
+    return CoupleData(
       userId: map['userId'],
       rentId: map['rentId'],
-      priaNama: map['priaNama'],
-      nomorTeleponPria: map['nomorTeleponPria'],
-      akunInstagramPria: map['akunInstagramPria'],
-      alamatPria: map['alamatPria'],
-      wanitaNama: map['wanitaNama'],
-      nomorTeleponWanita: map['nomorTeleponWanita'],
-      akunInstagramWanita: map['akunInstagramWanita'],
-      alamatWanita: map['alamatWanita'],
+      groomName: map['groomName'],
+      groomPhone: map['groomPhone'],
+      groomInstagram: map['groomInstagram'],
+      groomAddress: map['groomAddress'],
+      brideName: map['brideName'],
+      bridePhone: map['bridePhone'],
+      brideInstagram: map['brideInstagram'],
+      brideAddress: map['brideAddress'],
+      location: map['location'],
+      eventDescription: map['eventDescription'],
       createdAt: map['createdAt'],
     );
   }

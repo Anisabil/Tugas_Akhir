@@ -21,7 +21,10 @@ class Events extends StatelessWidget {
               icon: Iconsax.calendar,
               title: 'Kalender',
               subTitle: 'Buat jadwal event sesuai kebutuhan',
-              onTap: () => Get.to(() => CalendarScreen(rentId: rentId,)),
+              onTap: () => Get.to(() => CalendarScreen(rentId: rentId, userName: '',
+                  packageName: '',
+                  categoryName: '',
+                  date: DateTime.now(),)),
             ),
             const SizedBox(height: FVSizes.spaceBtwItems),
 

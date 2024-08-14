@@ -43,7 +43,7 @@ class CategoryController extends GetxController {
     fetchCategories();
   }
 
-  void deleteCategory(String id) async {
+  Future<void> deleteCategory(String id) async {
     await _categoryService.deleteCategory(id);
     fetchCategories();
   }

@@ -28,16 +28,17 @@ class SettingPackages extends StatelessWidget {
           init: packageController,
           builder: (controller) {
             return GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: 2,
                 crossAxisSpacing: 16.0,
                 mainAxisSpacing: 16.0,
+                childAspectRatio: 0.75, // Adjust aspect ratio for larger images
               ),
               itemCount: controller.packages.length,
               itemBuilder: (context, index) {
                 var package = controller.packages[index];
-                String? imageUrl =
-                    package.imageUrls.isNotEmpty ? package.imageUrls[0] : null;
+                String? imageUrl = package.imageUrls.isNotEmpty ? package.imageUrls[0] : null;
+                String categoryName = controller.getCategoryNameById(package.categoryId) ?? 'Kategori tidak tersedia';
 
                 return GestureDetector(
                   onTap: () async {
@@ -61,7 +62,7 @@ class SettingPackages extends StatelessWidget {
                     padding: const EdgeInsets.all(16.0),
                     decoration: BoxDecoration(
                       border: Border.all(color: Colors.grey),
-                      borderRadius: BorderRadius.circular(8.0),
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,6 +73,7 @@ class SettingPackages extends StatelessWidget {
                                   imageUrl,
                                   fit: BoxFit.cover,
                                   width: double.infinity,
+                                  height: double.infinity,
                                   errorBuilder: (context, error, stackTrace) {
                                     return Container(
                                       color: Colors.grey[300],
@@ -89,9 +91,15 @@ class SettingPackages extends StatelessWidget {
                                 ),
                         ),
                         const SizedBox(height: 8),
-                        Text(package.name,
-                            style:
-                                const TextStyle(fontWeight: FontWeight.bold)),
+                        Text(
+                          package.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          categoryName,
+                          style: const TextStyle(color: Colors.grey),
+                        ),
                       ],
                     ),
                   ),

@@ -63,8 +63,7 @@ class RentFormScreen extends StatelessWidget {
         child: ElevatedButton(
           onPressed: () {
             if (formKey.currentState != null && formKey.currentState!.validate()) {
-              if (formData['selectedTema'] == null ||
-                  formData['selectedPembayaran'] == null ||
+              if (formData['selectedPembayaran'] == null ||
                   formData['additionalDescription'] == null) {
                 FVLoaders.errorSnackBar(title: 'Error', message: 'Silakan isi semua form');
               } else {
@@ -123,7 +122,6 @@ class _RentFormState extends State<RentForm> {
   @override
   void initState() {
     super.initState();
-    selectedTema = widget.formData['selectedTema'];
     selectedPembayaran = widget.formData['selectedPembayaran'];
     additionalDescription = widget.formData['additionalDescription'];
   }
@@ -137,26 +135,6 @@ class _RentFormState extends State<RentForm> {
           key: widget.formKey,
           child: Column(
             children: [
-              DropdownButtonFormField<String>(
-                decoration: InputDecoration(
-                  prefixIcon: Icon(Icons.event),
-                  labelText: 'Tema Acara',
-                ),
-                value: selectedTema,
-                onChanged: (newValue) {
-                  setState(() {
-                    selectedTema = newValue;
-                    widget.formData['selectedTema'] = newValue;
-                  });
-                },
-                items: ['Indoor', 'Outdoor'].map((String tema) {
-                  return DropdownMenuItem<String>(
-                    value: tema,
-                    child: Text(tema),
-                  );
-                }).toList(),
-              ),
-              SizedBox(height: 16.0),
               DropdownButtonFormField<String>(
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.payment),

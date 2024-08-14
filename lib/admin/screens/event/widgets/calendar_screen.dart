@@ -10,8 +10,12 @@ import 'package:fvapp/utils/constants/colors.dart';
 
 class CalendarScreen extends StatefulWidget {
   final String rentId;
+  final String userName;
+  final String packageName;
+  final String categoryName;
+  final DateTime? date;
 
-  CalendarScreen({Key? key, required this.rentId}) : super(key: key);
+  CalendarScreen({Key? key, required this.rentId, required this.userName, required this.packageName, required this.categoryName, this.date}) : super(key: key);
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
@@ -24,12 +28,20 @@ class _CalendarScreenState extends State<CalendarScreen> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
   bool _isLoading = true;
+  DateTime _currentDate = DateTime.now();
 
   @override
   void initState() {
     super.initState();
     _eventController.fetchEvents();
     _fetchRents();
+    
+    // Set the selected day and focused day based on the widget.date parameter
+    if (widget.date != null) {
+      _currentDate = widget.date!;
+      _selectedDay = widget.date!;
+      _focusedDay = widget.date!;
+    }
   }
 
   Future<void> _fetchRents() async {
@@ -54,8 +66,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _showAddEventDialog() {
     final _formKey = GlobalKey<FormState>();
-    String eventName = '';
-    String description = '';
+    String eventName = widget.userName; // Mengisi dengan nama klien
+    String description = '${widget.packageName} - ${widget.categoryName}'; // Mengisi dengan deskripsi
 
     if (_selectedDay.isBefore(DateTime.now())) {
       FVLoaders.errorSnackBar(
@@ -77,7 +89,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Tambah Jadwal'),
+          title: Text('Tambah Event'),
           content: SingleChildScrollView(
             child: Form(
               key: _formKey,
@@ -85,7 +97,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TextFormField(
-                    decoration: InputDecoration(labelText: 'Nama Jadwal'),
+                    initialValue: eventName,
+                    decoration: InputDecoration(labelText: 'Nama Event'),
                     onSaved: (value) => eventName = value ?? '',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -96,6 +109,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   ),
                   SizedBox(height: 16),
                   TextFormField(
+                    initialValue: description,
                     decoration: InputDecoration(labelText: 'Deskripsi'),
                     onSaved: (value) => description = value ?? '',
                     validator: (value) {
@@ -161,11 +175,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                 children: [
                   TextFormField(
                     initialValue: eventName,
-                    decoration: InputDecoration(labelText: 'Event Name'),
+                    decoration: InputDecoration(labelText: 'Nama Event'),
                     onSaved: (value) => eventName = value ?? '',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter an event name';
+                        return 'Silakan masukkan nama acara';
                       }
                       return null;
                     },
@@ -173,11 +187,11 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   SizedBox(height: 16),
                   TextFormField(
                     initialValue: description,
-                    decoration: InputDecoration(labelText: 'Description'),
+                    decoration: InputDecoration(labelText: 'Deskripsi'),
                     onSaved: (value) => description = value ?? '',
                     validator: (value) {
                       if (value == null || value.isEmpty) {
-                        return 'Please enter a description';
+                        return 'Silakan masukkan deskripsi acara';
                       }
                       return null;
                     },
@@ -189,7 +203,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
-              child: Text('Cancel'),
+              child: Text('Batal'),
             ),
             ElevatedButton(
               onPressed: () {
@@ -205,12 +219,12 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   _eventController.editEvent(updatedEvent);
                   Navigator.of(context).pop();
                   FVLoaders.successSnackBar(
-                    title: 'Success',
-                    message: 'Event updated successfully',
+                    title: 'Berhasil!',
+                    message: 'Event berhasil diperbarui',
                   );
                 }
               },
-              child: Text('Update'),
+              child: Text('Edit'),
             ),
           ],
         );
@@ -220,6 +234,9 @@ class _CalendarScreenState extends State<CalendarScreen> {
 
   void _deleteEvent(String eventId) {
     _eventController.deleteEvent(eventId);
+    FVLoaders.successSnackBar(
+        title: 'Berhasil!',
+        message: 'Jadwal berhasil dihapus');
   }
 
   @override
@@ -243,6 +260,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
               });
             },
             eventLoader: _getEventsForDay,
+            enabledDayPredicate: (day) => !day.isBefore(DateTime.now()), // Disable past dates
             calendarStyle: CalendarStyle(
               todayDecoration: BoxDecoration(
                 color: FVColors.gold,
@@ -264,7 +282,8 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   .where((event) => isSameDay(event.date, _selectedDay))
                   .toList();
               if (events.isEmpty) {
-                return Center(child: Text('TIdak ada jadwal pada tanggal yang dipilih'));
+                return Center(
+                    child: Text('Tidak ada jadwal pada tanggal yang dipilih'));
               }
               return ListView.builder(
                 itemCount: events.length,
@@ -277,8 +296,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
                     trailing: IconButton(
                       icon: Icon(Icons.delete),
                       onPressed: () {
-                        _eventController.deleteEvent(event.eventId);
-                        FVLoaders.successSnackBar(title: 'Berhasil!', message: 'Jadwal berhasil dihapus');
+                        _deleteEvent(event.eventId);
                       },
                     ),
                   );

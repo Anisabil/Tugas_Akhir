@@ -61,59 +61,44 @@ class SuccessCheckoutScreen extends StatelessWidget {
               const SizedBox(height: FVSizes.spaceBtwSection),
 
               // Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Get.to(() => OrderDetail(rentId: rentId));
-                      },
-                      child: const Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Iconsax.document_text),
-                          SizedBox(height: 5),
-                          Text('Rincian'),
-                        ],
-                      ),
-                    ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
+                child: ElevatedButton(
+                  onPressed: () async {
+                    try {
+                      UserModel userModel = await getCurrentUser();
+                      if (userModel.role == 'admin' || userModel.role == 'client') {
+                        // Mendapatkan atau membuat chat room ID
+                        String chatRoomId = await _getOrCreateChatRoomId(userModel.role, 'admin'); // Ganti 'admin' dengan ID admin yang sesuai
+                        
+                        Get.to(() => ChatScreen(
+                          roomId: chatRoomId,
+                          currentUserId: userModel.id,
+                        ));
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
+                        );
+                      }
+                    } catch (e) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Error: ${e.toString()}')),
+                      );
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Iconsax.messages),
+                      SizedBox(width: 10),
+                      Text(FVText.fvCall),
+                    ],
                   ),
-                  const SizedBox(width: FVSizes.spaceBtwInputFields),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                          try {
-              UserModel userModel = await getCurrentUser();
-              if (userModel.role == 'admin' || userModel.role == 'client') {
-                // Mendapatkan atau membuat chat room ID
-                String chatRoomId = await _getOrCreateChatRoomId(userModel.role, 'admin'); // Ganti 'admin' dengan ID admin yang sesuai
-
-                Get.to(() => ChatScreen(
-                  roomId: chatRoomId,
-                  currentUserId: userModel.id,
-                ));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Anda tidak memiliki akses ke fitur ini.')),
-                );
-              }
-            } catch (e) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Error: ${e.toString()}')),
-              );
-            }
-                      },
-                      child: const Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Iconsax.messages),
-                          SizedBox(height: 5),
-                          Text(FVText.fvCall),
-                        ],
-                      ),
-                    ),
+                  style: ElevatedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 50), // Lebar penuh dengan tinggi 50
+                    padding: const EdgeInsets.symmetric(vertical: 16), // Padding vertikal
                   ),
-                ],
+                ),
               ),
             ],
           ),

@@ -8,11 +8,11 @@ class PromoController extends ChangeNotifier {
 
   List<PromoImage> get images => _images;
 
-  Future<void> addImage(PromoImage image) async {
+  Future<String> addImage(PromoImage image) async {
     try {
-      await _promoService.addImage(image);
-      _images.add(image);
-      notifyListeners();
+      // Mendapatkan ID dari `PromoService`
+      String newId = await _promoService.addImage(image);
+      return newId;
     } catch (e) {
       print('Error adding image: $e');
       rethrow;

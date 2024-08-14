@@ -2,43 +2,24 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fvapp/features/studio/screens/biodata/widgets/biodata_model.dart';
 import 'package:get/get.dart';
 
-class BiodataController extends GetxController {
-  var biodata = Rx<Biodata?>(null);
+class CoupleDataController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final Rx<CoupleData?> _coupleData = Rx<CoupleData?>(null);
 
-  Future<void> loadBiodata(String biodataId) async {
-    try {
-      DocumentSnapshot doc = await _firestore.collection('biodata').doc(biodataId).get();
-      if (doc.exists) {
-        biodata.value = Biodata.fromMap(doc.data() as Map<String, dynamic>);
-      }
-    } catch (e) {
-      print("Error loading biodata: $e");
-    }
+  Rx<CoupleData?> get coupleData => _coupleData;
+
+  Future<void> saveCoupleData(CoupleData coupleData, String userId, String rentId) async {
+    await _firestore.collection('couple_data').add(coupleData.toMap());
   }
 
-  Future<void> saveBiodata(Biodata biodata, String userId, String rentId, {String? biodataId}) async {
-    try {
-      if (biodataId != null) {
-        await _firestore.collection('biodata').doc(biodataId).set(biodata.toMap());
-      } else {
-        await _firestore.collection('biodata').add(biodata.toMap());
-      }
-    } catch (e) {
-      print("Error saving biodata: $e");
-    }
+  Future<void> updateCoupleData(String coupleDataId, CoupleData coupleData, String userId, String rentId) async {
+    await _firestore.collection('couple_data').doc(coupleDataId).update(coupleData.toMap());
   }
 
-  Future<void> updateBiodata(String biodataId, Biodata updatedBiodata, String userId, String rentId) async {
-    try {
-      Map<String, dynamic> updatedBiodataMap = updatedBiodata.toMap();
-      updatedBiodataMap['userId'] = userId;
-      updatedBiodataMap['rentId'] = rentId;
-
-      await _firestore.collection('biodata').doc(biodataId).update(updatedBiodataMap);
-      print('Biodata updated successfully');
-    } catch (e) {
-      print('Error updating biodata: $e');
+  Future<void> loadCoupleData(String coupleDataId) async {
+    DocumentSnapshot doc = await _firestore.collection('couple_data').doc(coupleDataId).get();
+    if (doc.exists) {
+      _coupleData.value = CoupleData.fromMap(doc.data() as Map<String, dynamic>);
     }
   }
 }

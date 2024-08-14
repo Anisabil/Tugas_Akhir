@@ -106,8 +106,6 @@ class CheckoutScreen extends StatelessWidget {
                     const SizedBox(height: FVSizes.spaceBtwItems),
                     Text('Tanggal Sewa: $formattedSelectedDay'),
                     const SizedBox(height: FVSizes.spaceBtwItems),
-                    Text('Tema Acara: ${formData['selectedTema'] ?? ''}'),
-                    const SizedBox(height: FVSizes.spaceBtwItems),
                     Text('Pembayaran: ${formData['selectedPembayaran'] ?? ''}',
                         style: Theme.of(context).textTheme.bodyMedium),
                     const SizedBox(height: FVSizes.spaceBtwItems),
@@ -158,6 +156,7 @@ class CheckoutScreen extends StatelessWidget {
               // Tambahkan packageId dan packageName ke formData
               formData['packageId'] = package.id;
               formData['packageName'] = package.name;
+              formData['categoryName'] = package.categoryName;
               formData['userName'] = user.userName;
               formData['clientEmail'] = user.email;
 
@@ -176,11 +175,11 @@ class CheckoutScreen extends StatelessWidget {
                 userName: formData['userName'] as String,
                 packageId: formData['packageId'] as String,
                 packageName: formData['packageName'] as String,
+                categoryName: formData['categoryName'] as String,
                 totalPrice: formData['price'] as double,
                 downPayment: formData['downPayment'] as double? ?? 0.0,
                 remainingPayment: formData['remainingPayment'] as double? ?? 0.0,
                 date: formData['selectedDay'] as DateTime? ?? DateTime.now(),
-                theme: formData['selectedTema'] as String? ?? '',
                 paymentMethod: formData['selectedPembayaran'] as String? ?? '',
                 description: formData['additionalDescription'] as String? ?? '',
                 status: 'Belum Bayar',

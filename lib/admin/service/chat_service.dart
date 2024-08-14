@@ -46,22 +46,26 @@ class ChatService {
       'fileUrl': fileUrl ?? '',
       'fileName': fileName ?? '',
       'imageUrl': imageUrl ?? '',
-      'timestamp': FieldValue.serverTimestamp(),
+      'timestamp': FieldValue.serverTimestamp(), // Pastikan ini ada
+      'isRead': false, // Menambahkan flag untuk status baca
     });
   }
 
   Future<void> sendPackageDetailsToChat(String chatRoomId, String userId, Package package) async {
-    // Menyimpan detail paket ke Firestore sebagai pesan
-    await FirebaseFirestore.instance.collection('rooms').doc(chatRoomId).collection('messages').add({
-      'senderId': userId,
-      'text': 'Paket yang Anda pilih:',
-      'packageId': package.id,
-      'packageName': package.name,
-      'packageImageUrl': package.imageUrls.isNotEmpty ? package.imageUrls[0] : '',
-      'timestamp': FieldValue.serverTimestamp(),
-    });
-  }
+  await _firestore.collection('rooms').doc(chatRoomId).collection('messages').add({
+    'senderId': userId,
+    'text': 'Tanya paket ini:',
+    'packageId': package.id,
+    'packageName': package.name,
+    'packageImageUrl': package.imageUrls.isNotEmpty ? package.imageUrls[0] : '',
+    'categoryName': package.categoryName, // Pastikan ini disesuaikan dengan data yang Anda miliki
+    'timestamp': FieldValue.serverTimestamp(),
+    'isRead': false,
+  });
+}
 
+
+  /// Mengambil data pengguna
   Future<DocumentSnapshot> getUserData(String userId) async {
     try {
       var userDoc = await _firestore.collection('Users').doc(userId).get();
@@ -73,5 +77,33 @@ class ChatService {
     } catch (e) {
       throw Exception('Error fetching user data: $e');
     }
+  }
+
+  /// Mengambil jumlah pesan baru untuk pengguna
+  Future<int> getNewMessagesCount(String roomId) async {
+    String userId = _auth.currentUser!.uid;
+
+    // Mengambil pesan yang belum dibaca
+    QuerySnapshot messagesSnapshot = await _firestore
+        .collection('rooms')
+        .doc(roomId)
+        .collection('messages')
+        .where('isRead', isEqualTo: false)
+        .where('senderId', isNotEqualTo: userId)
+        .get();
+
+    return messagesSnapshot.size;
+  }
+
+  /// Mengatur status baca pesan
+  Future<void> markMessagesAsRead(String roomId) async {
+    String userId = _auth.currentUser!.uid;
+
+    // Mengupdate status baca pesan
+    await _firestore.collection('rooms').doc(roomId).collection('messages').where('senderId', isNotEqualTo: userId).where('isRead', isEqualTo: false).get().then((snapshot) {
+      for (DocumentSnapshot doc in snapshot.docs) {
+        doc.reference.update({'isRead': true});
+      }
+    });
   }
 }

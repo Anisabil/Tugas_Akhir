@@ -71,14 +71,7 @@ class ProfileAdmin extends StatelessWidget {
                     subTitle: 'Daftarkan rekening bank',
                     onTap: () => Get.to(() => BankAccountScreen()),
                   ),
-                  
-                  const FVSettingsMenuTile(
-                    icon: Iconsax.notification,
-                    title: 'Notifikasi',
-                    subTitle: 'Atur segala jenis pesan notifikasi',
-                  ),
 
-                  
                   const SizedBox(height: FVSizes.spaceBtwSection * 8),
 
                   // Button Logout

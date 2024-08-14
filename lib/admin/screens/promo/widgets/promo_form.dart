@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
+import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:fvapp/admin/controllers/promo_controller.dart';
 import 'package:fvapp/admin/models/promo_model.dart';
@@ -49,55 +51,102 @@ class _PromoFormState extends State<PromoForm> {
     });
   }
 
-  void _savePromo() async {
-    if (_imageFiles.isEmpty && !isEdit) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please add at least one image!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return;
-    }
-
-    try {
-      List<String> imageUrls = [];
-      if (_imageFiles.isNotEmpty) {
-        imageUrls = await _uploadFiles(_imageFiles, 'promos');
-      }
-
-      PromoImage promo;
-      if (isEdit) {
-        promo = PromoImage(
-          id: widget.promoImage!.id,
-          imageUrl: imageUrls.isEmpty ? widget.promoImage!.imageUrl : imageUrls.first,
+  void _showDeleteConfirmationDialog() async {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Konfirmasi Hapus'),
+          content: const Text('Apakah Anda yakin ingin menghapus promo ini?'),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Batal'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Hapus'),
+              onPressed: () async {
+                Navigator.of(context).pop(); // Tutup dialog
+                _deletePromo(); // Panggil fungsi hapus promo
+              },
+            ),
+          ],
         );
-        await promoController.updateImage(promo);
-      } else {
-        promo = PromoImage(
-          id: '', // Assuming you do not need to provide ID explicitly
-          imageUrl: imageUrls.first,
-        );
-        await promoController.addImage(promo);
+      },
+    );
+  }
+
+  void _deletePromo() async {
+    if (widget.promoImage != null) {
+      try {
+        await promoController.deleteImage(widget.promoImage!.id);
+        FVLoaders.successSnackBar(title: 'Berhasil!', message: 'Promo berhasil dihapus');
+        Navigator.pop(context); // Navigate back after successful deletion
+      } catch (e) {
+        FVLoaders.errorSnackBar(title: 'Gagal!', message: 'Promo gagal dihapus');
       }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Promo ${isEdit ? 'updated' : 'added'} successfully!'),
-          duration: Duration(seconds: 2),
-        ),
-      );
-
-      Navigator.pop(context); // Navigate back after successful addition or update
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to ${isEdit ? 'update' : 'add'} promo: $e'),
-          duration: Duration(seconds: 2),
-        ),
-      );
     }
   }
+
+  void _savePromo() async {
+  if (_imageFiles.isEmpty && !isEdit) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Please add at least one image!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+    return;
+  }
+
+  try {
+    List<String> imageUrls = [];
+    if (_imageFiles.isNotEmpty) {
+      imageUrls = await _uploadFiles(_imageFiles, 'promos');
+    }
+
+    PromoImage promo;
+    if (isEdit) {
+      promo = PromoImage(
+        id: widget.promoImage!.id,
+        imageUrl: imageUrls.isEmpty ? widget.promoImage!.imageUrl : imageUrls.first,
+      );
+      await promoController.updateImage(promo);
+    } else {
+      // Generate a unique ID for the new promo
+      String newId = await promoController.addImage(
+        PromoImage(
+          id: '', // ID kosong saat pertama kali menambahkan
+          imageUrl: imageUrls.first,
+        ),
+      );
+      promo = PromoImage(
+        id: newId, // Menggunakan ID baru yang dihasilkan oleh Firestore
+        imageUrl: imageUrls.first,
+      );
+      await promoController.updateImage(promo);
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Promo ${isEdit ? 'updated' : 'added'} successfully!'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+
+    Navigator.pop(context); // Navigate back after successful addition or update
+  } catch (e) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Failed to ${isEdit ? 'update' : 'add'} promo: $e'),
+        duration: const Duration(seconds: 2),
+      ),
+    );
+  }
+}
+
 
   Future<List<String>> _uploadFiles(List<File> files, String folder) async {
     List<String> urls = [];
@@ -118,33 +167,11 @@ class _PromoFormState extends State<PromoForm> {
     return urls;
   }
 
-  void _deletePromo() async {
-    if (widget.promoImage != null) {
-      try {
-        await promoController.deleteImage(widget.promoImage!.id);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Promo deleted successfully!'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-        Navigator.pop(context);
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to delete promo: $e'),
-            duration: Duration(seconds: 2),
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? 'Edit Promo Image' : 'Add Promo Image'),
+        title: Text(isEdit ? 'Edit Gambar Promo' : 'Tambah Promo'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -189,7 +216,8 @@ class _PromoFormState extends State<PromoForm> {
                             Positioned(
                               right: 0,
                               child: IconButton(
-                                icon: const Icon(Icons.cancel, color: Colors.red),
+                                icon:
+                                    const Icon(Icons.cancel, color: FVColors.gold),
                                 onPressed: () => _removeImage(index),
                               ),
                             ),
@@ -213,7 +241,7 @@ class _PromoFormState extends State<PromoForm> {
                 if (isEdit)
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: _deletePromo,
+                      onPressed: _showDeleteConfirmationDialog,
                       child: const Text('Hapus Promo'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,

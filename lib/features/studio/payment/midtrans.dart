@@ -22,7 +22,7 @@ Future<String> initiateMidtransPaymentProcess(Rent rent) async {
           "id": rent.packageId,
           "price": rent.totalPrice,
           "quantity": 1,
-          "name": rent.theme
+          "name": rent.packageName
         }
       ],
       "enabled_payments": ["bank_transfer"],

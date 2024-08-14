@@ -91,7 +91,8 @@ class RentalList extends StatefulWidget {
 }
 
 class _RentalListState extends State<RentalList> {
-  final RentController _rentController = Get.find<RentController>(); // Gunakan Get.find untuk mendapatkan instance yang sudah diinisialisasi
+  final RentController _rentController = Get.find<RentController>(); 
+  
 
   late Future<List<Rent>> _rentsFuture;
 

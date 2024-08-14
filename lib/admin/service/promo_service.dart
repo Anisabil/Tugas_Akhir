@@ -5,14 +5,17 @@ class PromoService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
   final String _collectionName = 'promos';
 
-  Future<void> addImage(PromoImage image) async {
-    try {
-      await _db.collection(_collectionName).add(image.toMap());
-    } catch (e) {
-      print('Error adding image: $e');
-      rethrow;
-    }
+  Future<String> addImage(PromoImage image) async {
+  try {
+    // Menambahkan dokumen baru dan mendapatkan referensinya
+    DocumentReference docRef = await _db.collection(_collectionName).add(image.toMap());
+    return docRef.id; // Mengembalikan ID dokumen yang baru dibuat
+  } catch (e) {
+    print('Error adding image: $e');
+    rethrow;
   }
+}
+
 
   Stream<List<PromoImage>> getImages() {
     return _db.collection(_collectionName).snapshots().map((snapshot) {

@@ -5,11 +5,11 @@ class Rent {
   String userId;
   String packageId;
   String packageName;
+  String categoryName;
   double totalPrice;
   double downPayment;
   double remainingPayment;
   DateTime date;
-  String theme;
   String paymentMethod;
   String description;
   String status;
@@ -22,11 +22,11 @@ class Rent {
     required this.userId,
     required this.packageId,
     required this.packageName,
+    required this.categoryName,
     required this.totalPrice,
     required this.downPayment,
     required this.remainingPayment,
     required this.date,
-    required this.theme,
     required this.paymentMethod,
     required this.description,
     required this.status,
@@ -42,11 +42,11 @@ class Rent {
       userId: data['userId'],
       packageId: data['packageId'],
       packageName: data['packageName'],
+      categoryName: data['categoryName'],
       totalPrice: data['totalPrice'],
       downPayment: data['downPayment'],
       remainingPayment: data['remainingPayment'],
       date: (data['date'] as Timestamp).toDate(),
-      theme: data['theme'],
       paymentMethod: data['paymentMethod'],
       description: data['description'],
       status: data['status'],
@@ -61,11 +61,11 @@ class Rent {
       userId: json['userId'],
       packageId: json['packageId'],
       packageName: json['packageName'],
+      categoryName: json['categoryName'],
       totalPrice: (json['totalPrice'] as num).toDouble(),
       downPayment: (json['downPayment'] as num).toDouble(),
       remainingPayment: (json['remainingPayment'] as num).toDouble(),
       date: DateTime.parse(json['date']),
-      theme: json['theme'],
       paymentMethod: json['paymentMethod'],
       description: json['description'],
       status: json['status'],
@@ -79,11 +79,11 @@ class Rent {
       'userId': userId,
       'packageId': packageId,
       'packageName': packageName,
+      'categoryName': categoryName,
       'totalPrice': totalPrice,
       'downPayment': downPayment,
       'remainingPayment': remainingPayment,
       'date': Timestamp.fromDate(date),
-      'theme': theme,
       'paymentMethod': paymentMethod,
       'description': description,
       'status': status,

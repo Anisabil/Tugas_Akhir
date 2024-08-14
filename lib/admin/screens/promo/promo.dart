@@ -11,7 +11,7 @@ class PromoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Promo Images'),
+        title: Text('Gambar Promo'),
       ),
       body: StreamBuilder<List<PromoImage>>(
         stream: PromoService().getImages(),
@@ -80,7 +80,7 @@ class PromoScreen extends StatelessWidget {
             MaterialPageRoute(builder: (context) => PromoForm()), // Pastikan PromoForm terdapat di bawah Provider<PromoController>
           );
         },
-        tooltip: 'Add Promo',
+        tooltip: 'Tambah Promo',
         child: Icon(Icons.add, color: FVColors.white,),
       ),
     );
