@@ -1,27 +1,20 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/models/event_model.dart';
+import 'package:fvapp/admin/service/event_service.dart';
 import 'package:fvapp/common/widgets/appbar/appbar.dart';
 import 'package:get/get.dart';
 
 import 'package:fvapp/admin/models/package_model.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
-import 'package:fvapp/common/widgets/products/cart/cart_item.dart';
 import 'package:fvapp/common/widgets/texts/section_heading.dart';
 import 'package:fvapp/features/personalization/controllers/user_controller.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
-import 'package:fvapp/features/studio/payment/midtrans.dart';
 import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/features/studio/screens/cart/widgets/cart_items.dart';
 import 'package:fvapp/features/studio/screens/checkout/SuccessCheckoutScreen.dart';
-import 'package:fvapp/features/studio/screens/checkout/webview.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_address_section.dart';
 import 'package:fvapp/features/studio/screens/checkout/widgets/billing_amount_section.dart';
-import 'package:fvapp/features/studio/screens/checkout/widgets/billing_payment_section.dart';
-import 'package:fvapp/features/studio/screens/checkout/widgets/generate_qr_code.dart';
 import 'package:fvapp/features/studio/screens/multi_step_form/multi_step_form.dart';
-import 'package:fvapp/features/studio/screens/order/widgets/order_detail.dart';
-import 'package:fvapp/navigation_menu.dart';
 import 'package:fvapp/utils/constants/colors.dart';
 import 'package:fvapp/utils/constants/image_strings.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
@@ -30,7 +23,6 @@ import 'package:fvapp/utils/popups/full_screen_loader.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:intl/intl.dart';
 import 'package:readmore/readmore.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class CheckoutScreen extends StatelessWidget {
   final Map<String, dynamic> formData;
@@ -38,12 +30,33 @@ class CheckoutScreen extends StatelessWidget {
   final int currentStep;
   final RentController rentController = Get.find<RentController>();
   final UserController userController = Get.put(UserController());
+  final EventService eventService;
 
   CheckoutScreen({
     required this.formData,
     required this.onPrevious,
-    this.currentStep = 2,
+    this.currentStep = 2, required this.eventService,
   });
+
+  Future<void> _addDateToCalendar(DateTime selectedDay, String rentId) async {
+    try {
+      final Event newEvent = Event(
+        eventId: DateTime.now().millisecondsSinceEpoch.toString(),
+        eventName: formData['userName'] as String,
+        description: '${formData['packageName']} - ${formData['categoryName']}',
+        date: selectedDay,
+        status: 'Pending',
+        rentId: rentId,
+      );
+      await eventService.addEvent(newEvent);
+    } catch (e) {
+      print('Error adding date to calendar: $e');
+      FVLoaders.errorSnackBar(
+        title: 'Error',
+        message: 'Gagal menambahkan tanggal ke kalender',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,34 +154,22 @@ class CheckoutScreen extends StatelessWidget {
             FVFullScreenLoader.openLoadingDialog('Sedang Di Proses...', FVImages.loadingIlustration);
 
             try {
-              // Ambil data pengguna
               final user = await userController.getUserData();
               if (user == null) {
                 throw Exception('Failed to get user data');
               }
 
-              // Ambil package dari formData
               final Package? package = formData['package'] as Package?;
               if (package == null || package.id.isEmpty || package.name.isEmpty) {
                 throw Exception('Package ID or name is invalid');
               }
 
-              // Tambahkan packageId dan packageName ke formData
               formData['packageId'] = package.id;
               formData['packageName'] = package.name;
               formData['categoryName'] = package.categoryName;
               formData['userName'] = user.userName;
               formData['clientEmail'] = user.email;
 
-              // Debug print untuk formData
-              print('FormData: $formData');
-
-              // Periksa validitas data
-              if (formData['packageId'] == null || formData['price'] == null) {
-                throw Exception('Form data is incomplete');
-              }
-
-              // Generate QR code data
               final rent = Rent(
                 id: DateTime.now().millisecondsSinceEpoch.toString(),
                 userId: user.id,
@@ -183,23 +184,24 @@ class CheckoutScreen extends StatelessWidget {
                 paymentMethod: formData['selectedPembayaran'] as String? ?? '',
                 description: formData['additionalDescription'] as String? ?? '',
                 status: 'Belum Bayar',
-                email: user.email,
+                email: user.email, 
               );
 
-              // Simpan data sewa
               await rentController.addRent(rent);
 
-              // Tampilkan pesan sukses
+              // Tambahkan tanggal ke jadwal admin setelah `rent.id` disimpan
+              await _addDateToCalendar(formData['selectedDay'] as DateTime, rent.id);
+
               FVFullScreenLoader.stopLoading();
               Get.to(() => SuccessCheckoutScreen(
                 rentId: rent.id,
                 package: package,
                 image: FVImages.successIlustration,
                 title: 'Pemesanan Berhasil',
-                subTitle: 'Terima kasih telah melakukan pemesanan. Anda dapat melihat QR Code pembayaran di riwayat sewa.',
+                subTitle: 'Terima kasih telah melakukan pemesanan. Anda dapat menghubungi admin untuk mendiskusikan acara lebih lanjut.',
               ));
             } catch (error) {
-              print('Error: $error'); // Log error untuk debugging
+              print('Error: $error'); 
               FVFullScreenLoader.stopLoading();
               FVLoaders.errorSnackBar(
                 title: 'Error!',
@@ -207,7 +209,7 @@ class CheckoutScreen extends StatelessWidget {
               );
             }
           },
-          child: Text('Lanjutkan Pembayaran'),
+          child: Text('Lanjutkan'),
         ),
       ),
     );

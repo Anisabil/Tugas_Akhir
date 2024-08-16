@@ -7,6 +7,7 @@ class EventFormController extends GetxController {
 
   void setSelectedDay(DateTime day) {
     selectedDay = day;
+    print('Selected day updated: $selectedDay');
     update();
   }
 

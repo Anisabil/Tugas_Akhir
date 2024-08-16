@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
 import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
@@ -7,6 +8,8 @@ class RentDetailController extends GetxController {
   var rent = Rxn<Rent>();
   final RentController _rentController = Get.put(RentController());
   var isLoading = true.obs;
+
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   Future<void> loadRentDetail(String rentId) async {
     try {
@@ -28,25 +31,28 @@ class RentDetailController extends GetxController {
   }
 
   void setStatus(String newStatus) async {
-  if (rent.value != null) {
-    try {
-      print('Updating status for rentId: ${rent.value!.id} to $newStatus');
-      await _rentController.updateRentStatus(rent.value!.id, newStatus);
-      rent.value!.status = newStatus;
+    if (rent.value != null) {
+      try {
+        print('Updating status for rentId: ${rent.value!.id} to $newStatus');
+        await _rentController.updateRentStatus(rent.value!.id, newStatus);
+        rent.value!.status = newStatus;
 
-      final snackBar = FVLoaders.successSnackBar(
-        title: 'Berhasil',
-        message: 'Status diubah menjadi $newStatus',
-      );
+        final snackBar = FVLoaders.successSnackBar(
+          title: 'Berhasil',
+          message: 'Status diubah menjadi $newStatus',
+        );
 
-      if (snackBar != null) {
-        Get.showSnackbar(snackBar);
-      }
+        if (snackBar != null) {
+          Get.showSnackbar(snackBar);
+        }
 
         // Refresh rent detail
         loadRentDetail(rent.value!.id);
       } catch (e) {
-        Get.snackbar('Error', 'Gagal memperbarui status: $e');
+        FVLoaders.errorSnackBar(
+          title: 'Gagal!',
+          message: 'Gagal memperbaharui status $e',
+        );
       }
     }
   }
@@ -55,10 +61,16 @@ class RentDetailController extends GetxController {
     try {
       isLoading(true);
       await _rentController.deleteRent(rentId);
-      Get.snackbar('Berhasil', 'Data sewa berhasil dihapus');
+      FVLoaders.successSnackBar(
+        title: 'Berhasil',
+        message: 'Data sewa berhasil dihapus',
+      );
     } catch (e) {
       print('Error deleting rent: $e');
-      Get.snackbar('Error', 'Gagal menghapus data sewa');
+      FVLoaders.errorSnackBar(
+        title: 'Gagal!',
+        message: 'Data sewa gagal dihapus',
+      );
     } finally {
       isLoading(false);
     }

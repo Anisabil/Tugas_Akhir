@@ -1,11 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Event {
-  String eventId;
+  final String eventId;
   String eventName;
   DateTime date;
   String description;
-  String rentId;
+  final String rentId;
+  final String status;
 
   Event({
     required this.eventId,
@@ -13,45 +14,46 @@ class Event {
     required this.date,
     required this.description,
     required this.rentId,
+    this.status = 'pending',
   });
 
-  factory Event.fromJson(Map<String, dynamic> json) {
+  Event copyWith({
+    String? eventId,
+    String? eventName,
+    DateTime? date,
+    String? description,
+    String? rentId,
+    String? status,
+  }) {
     return Event(
-      eventId: json['eventId'],
-      eventName: json['eventName'],
-      date: (json['date'] as Timestamp).toDate(),
-      description: json['description'],
-      rentId: json['rentId'],
+      eventId: eventId ?? this.eventId,
+      eventName: eventName ?? this.eventName,
+      date: date ?? this.date,
+      description: description ?? this.description,
+      rentId: rentId ?? this.rentId,
+      status: status ?? this.status,
     );
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'eventId': eventId,
-      'eventName': eventName,
-      'date': Timestamp.fromDate(date),
-      'description': description,
-      'rentId': rentId,
-    };
-  }
-
   factory Event.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    final data = doc.data() as Map<String, dynamic>;
     return Event(
       eventId: doc.id,
       eventName: data['eventName'] ?? '',
-      date: (data['date'] as Timestamp).toDate(),
+      date: (data['date'] is Timestamp ? (data['date'] as Timestamp).toDate() : DateTime.now()), // Konversi Timestamp
       description: data['description'] ?? '',
       rentId: data['rentId'] ?? '',
+      status: data['status'] ?? 'pending',
     );
   }
 
   Map<String, dynamic> toFirestore() {
     return {
       'eventName': eventName,
-      'date': Timestamp.fromDate(date),
+      'date': Timestamp.fromDate(date), // Konversi DateTime ke Timestamp
       'description': description,
       'rentId': rentId,
+      'status': status,
     };
   }
 }

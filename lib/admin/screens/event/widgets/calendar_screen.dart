@@ -6,7 +6,7 @@ import 'package:fvapp/admin/models/event_model.dart';
 import 'package:fvapp/features/studio/payment/model/rent_model.dart';
 import 'package:fvapp/utils/popups/loaders.dart';
 import 'package:fvapp/admin/service/event_service.dart';
-import 'package:fvapp/utils/constants/colors.dart';
+import 'package:fvapp/utils/constants/colors.dart'; // Import file warna
 
 class CalendarScreen extends StatefulWidget {
   final String rentId;
@@ -14,8 +14,17 @@ class CalendarScreen extends StatefulWidget {
   final String packageName;
   final String categoryName;
   final DateTime? date;
+  final String viewMode;
 
-  CalendarScreen({Key? key, required this.rentId, required this.userName, required this.packageName, required this.categoryName, this.date}) : super(key: key);
+  CalendarScreen({
+    Key? key,
+    required this.rentId,
+    required this.userName,
+    required this.packageName,
+    required this.categoryName,
+    this.date,
+    this.viewMode = 'edit',
+  }) : super(key: key);
 
   @override
   _CalendarScreenState createState() => _CalendarScreenState();
@@ -35,8 +44,7 @@ class _CalendarScreenState extends State<CalendarScreen> {
     super.initState();
     _eventController.fetchEvents();
     _fetchRents();
-    
-    // Set the selected day and focused day based on the widget.date parameter
+
     if (widget.date != null) {
       _currentDate = widget.date!;
       _selectedDay = widget.date!;
@@ -64,65 +72,17 @@ class _CalendarScreenState extends State<CalendarScreen> {
         .toList();
   }
 
-  void _showAddEventDialog() {
-    final _formKey = GlobalKey<FormState>();
-    String eventName = widget.userName; // Mengisi dengan nama klien
-    String description = '${widget.packageName} - ${widget.categoryName}'; // Mengisi dengan deskripsi
-
-    if (_selectedDay.isBefore(DateTime.now())) {
-      FVLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Tidak dapat membuat jadwal pada tanggal yang sudah berlalu',
-      );
-      return;
-    }
-
-    if (_getEventsForDay(_selectedDay).isNotEmpty) {
-      FVLoaders.errorSnackBar(
-        title: 'Error',
-        message: 'Hanya dapat membuat satu jadwal dalam satu tanggal',
-      );
-      return;
-    }
-
+  void _showConfirmationDialog({
+    required String title,
+    required String message,
+    required VoidCallback onConfirm,
+  }) {
     showDialog(
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text('Tambah Event'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    initialValue: eventName,
-                    decoration: InputDecoration(labelText: 'Nama Event'),
-                    onSaved: (value) => eventName = value ?? '',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Silakan masukkan nama acara';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    initialValue: description,
-                    decoration: InputDecoration(labelText: 'Deskripsi'),
-                    onSaved: (value) => description = value ?? '',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Silakan masukkan deskripsi acara';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
+          title: Text(title),
+          content: Text(message),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -130,23 +90,86 @@ class _CalendarScreenState extends State<CalendarScreen> {
             ),
             ElevatedButton(
               onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  final eventId = DateTime.now().millisecondsSinceEpoch.toString();
-                  final newEvent = Event(
-                    eventId: eventId,
-                    eventName: eventName,
-                    date: _selectedDay,
-                    description: description,
-                    rentId: widget.rentId, // Use rentId from widget
-                  );
-                  _eventController.addEvent(newEvent);
-                  Navigator.of(context).pop();
-                  FVLoaders.successSnackBar(
-                    title: 'Success',
-                    message: 'Event added successfully',
-                  );
-                }
+                Navigator.of(context).pop();
+                onConfirm();
+              },
+              child: Text('Konfirmasi'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _approveEvent(Event event) {
+  _showConfirmationDialog(
+    title: 'Konfirmasi Persetujuan',
+    message: 'Apakah Anda yakin ingin menyetujui event ini?',
+    onConfirm: () async {
+      Event updatedEvent = event.copyWith(status: 'approved');
+      await _eventController.editEvent(updatedEvent);
+      FVLoaders.successSnackBar(
+        title: 'Approved',
+        message: 'Event berhasil di-approve',
+      );
+    },
+  );
+}
+
+void _rejectEvent(Event event) {
+  _showConfirmationDialog(
+    title: 'Konfirmasi Penolakan',
+    message: 'Apakah Anda yakin ingin menolak event ini?',
+    onConfirm: () async {
+      Event updatedEvent = event.copyWith(status: 'rejected');
+      await _eventController.editEvent(updatedEvent);
+      FVLoaders.errorSnackBar(
+        title: 'Rejected',
+        message: 'Event ditolak',
+      );
+    },
+  );
+}
+
+void _editEvent(Event event) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String updatedEventName = event.eventName;
+        String updatedDescription = event.description;
+
+        return AlertDialog(
+          title: Text('Edit Event'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                onChanged: (value) => updatedEventName = value,
+                decoration: InputDecoration(labelText: 'Nama Event'),
+                controller: TextEditingController(text: event.eventName),
+              ),
+              TextField(
+                onChanged: (value) => updatedDescription = value,
+                decoration: InputDecoration(labelText: 'Deskripsi'),
+                controller: TextEditingController(text: event.description),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Batal'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                event.eventName = updatedEventName;
+                event.description = updatedDescription;
+                await _eventController.editEvent(event);
+                Navigator.of(context).pop();
+                FVLoaders.successSnackBar(
+                  title: 'Berhasil',
+                  message: 'Event berhasil diupdate',
+                );
               },
               child: Text('Simpan'),
             ),
@@ -156,88 +179,80 @@ class _CalendarScreenState extends State<CalendarScreen> {
     );
   }
 
-  void _editEvent(Event event) {
-    final _formKey = GlobalKey<FormState>();
-    String eventName = event.eventName;
-    String description = event.description;
-    String selectedRentId = event.rentId;
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('Edit Event'),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextFormField(
-                    initialValue: eventName,
-                    decoration: InputDecoration(labelText: 'Nama Event'),
-                    onSaved: (value) => eventName = value ?? '',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Silakan masukkan nama acara';
-                      }
-                      return null;
-                    },
-                  ),
-                  SizedBox(height: 16),
-                  TextFormField(
-                    initialValue: description,
-                    decoration: InputDecoration(labelText: 'Deskripsi'),
-                    onSaved: (value) => description = value ?? '',
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Silakan masukkan deskripsi acara';
-                      }
-                      return null;
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Batal'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
-                  final updatedEvent = Event(
-                    eventId: event.eventId,
-                    eventName: eventName,
-                    date: event.date,
-                    description: description,
-                    rentId: selectedRentId,
-                  );
-                  _eventController.editEvent(updatedEvent);
-                  Navigator.of(context).pop();
-                  FVLoaders.successSnackBar(
-                    title: 'Berhasil!',
-                    message: 'Event berhasil diperbarui',
-                  );
-                }
-              },
-              child: Text('Edit'),
-            ),
-          ],
+  void _deleteEvent(String eventId) {
+    _showConfirmationDialog(
+      title: 'Konfirmasi Penghapusan',
+      message: 'Apakah Anda yakin ingin menghapus event ini?',
+      onConfirm: () async {
+        await _eventController.deleteEvent(eventId);
+        FVLoaders.successSnackBar(
+          title: 'Deleted',
+          message: 'Event berhasil dihapus',
         );
       },
     );
   }
 
-  void _deleteEvent(String eventId) {
-    _eventController.deleteEvent(eventId);
-    FVLoaders.successSnackBar(
-        title: 'Berhasil!',
-        message: 'Jadwal berhasil dihapus');
-  }
+void _showAddEventDialog() {
+  showDialog(
+    context: context,
+    builder: (context) {
+      String newEventName = '';
+      String newDescription = '';
+      DateTime selectedDate = _eventController.selectedDay.value;
+
+      return AlertDialog(
+        title: Text('Tambah Event'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              onChanged: (value) => newEventName = value,
+              decoration: InputDecoration(labelText: 'Nama Event'),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              onChanged: (value) => newDescription = value,
+              decoration: InputDecoration(labelText: 'Deskripsi'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Batal'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              if (newEventName.isNotEmpty && newDescription.isNotEmpty) {
+                Event newEvent = Event(
+                  eventId: DateTime.now().millisecondsSinceEpoch.toString(),
+                  eventName: newEventName,
+                  description: newDescription,
+                  date: selectedDate,
+                  rentId: '', // Sesuaikan rentId sesuai kebutuhan Anda
+                );
+                await _eventController.addEvent(newEvent); // Panggil controller untuk add
+                Navigator.of(context).pop();
+                FVLoaders.successSnackBar(
+                  title: 'Berhasil',
+                  message: 'Event berhasil ditambahkan',
+                );
+              } else {
+                FVLoaders.errorSnackBar(
+                  title: 'Gagal',
+                  message: 'Nama event dan deskripsi tidak boleh kosong',
+                );
+              }
+            },
+            child: Text('Simpan'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -253,38 +268,48 @@ class _CalendarScreenState extends State<CalendarScreen> {
             focusedDay: _focusedDay,
             calendarFormat: _calendarFormat,
             selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-            onDaySelected: (selectedDay, focusedDay) {
+            onDaySelected: widget.viewMode == 'viewOnly'
+                ? null
+                : (selectedDay, focusedDay) {
+                    setState(() {
+                      _selectedDay = selectedDay;
+                      _focusedDay = focusedDay;
+                    });
+                  },
+            eventLoader: _getEventsForDay,
+            onFormatChanged: (format) {
               setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
+                _calendarFormat = format;
               });
             },
-            eventLoader: _getEventsForDay,
-            enabledDayPredicate: (day) => !day.isBefore(DateTime.now()), // Disable past dates
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+            },
             calendarStyle: CalendarStyle(
-              todayDecoration: BoxDecoration(
-                color: FVColors.gold,
-                shape: BoxShape.circle,
-              ),
-              selectedDecoration: BoxDecoration(
-                color: FVColors.gold,
-                shape: BoxShape.circle,
-              ),
-              markerDecoration: BoxDecoration(
-                color: FVColors.gold,
-                shape: BoxShape.circle,
-              ),
-            ),
+  todayDecoration: BoxDecoration(
+    color: widget.viewMode == 'viewOnly' ? Colors.transparent : FVColors.gold,
+    shape: BoxShape.circle,
+  ),
+  selectedDecoration: BoxDecoration(
+    color: FVColors.gold ,
+    shape: BoxShape.circle,
+  ),
+  markerDecoration: BoxDecoration(
+    color: widget.viewMode == 'viewOnly' ? Colors.transparent : FVColors.gold,
+    shape: BoxShape.circle,
+  ),
+  defaultTextStyle: TextStyle(
+    color: widget.viewMode == 'viewOnly' ? Colors.grey : Colors.black,
+  ),
+  weekendTextStyle: TextStyle(
+    color: widget.viewMode == 'viewOnly' ? Colors.grey : Colors.black,
+  ),
+),
+
           ),
           Expanded(
             child: Obx(() {
-              var events = _eventController.events
-                  .where((event) => isSameDay(event.date, _selectedDay))
-                  .toList();
-              if (events.isEmpty) {
-                return Center(
-                    child: Text('Tidak ada jadwal pada tanggal yang dipilih'));
-              }
+              final events = _getEventsForDay(_selectedDay);
               return ListView.builder(
                 itemCount: events.length,
                 itemBuilder: (context, index) {
@@ -292,13 +317,33 @@ class _CalendarScreenState extends State<CalendarScreen> {
                   return ListTile(
                     title: Text(event.eventName),
                     subtitle: Text(event.description),
-                    onTap: () => _editEvent(event),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete),
-                      onPressed: () {
-                        _deleteEvent(event.eventId);
-                      },
-                    ),
+                    trailing: widget.viewMode == 'viewOnly'
+                        ? Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.check_circle, color: FVColors.gold),
+                                onPressed: () => _approveEvent(event),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.cancel, color: Colors.red),
+                                onPressed: () => _rejectEvent(event),
+                              ),
+                            ],
+                          )
+                        : Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.edit),
+                                onPressed: () => _editEvent(event),
+                              ),
+                              IconButton(
+                                icon: Icon(Icons.delete),
+                                onPressed: () => _deleteEvent(event.eventId),
+                              ),
+                            ],
+                          ),
                   );
                 },
               );
@@ -306,11 +351,13 @@ class _CalendarScreenState extends State<CalendarScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: FVColors.gold,
-        onPressed: _showAddEventDialog,
-        child: Icon(Icons.add),
-      ),
+      floatingActionButton: widget.viewMode == 'viewOnly'
+          ? null
+          : FloatingActionButton(
+              onPressed: _showAddEventDialog,
+              backgroundColor: FVColors.gold,
+              child: Icon(Icons.add),
+            ),
     );
   }
 }

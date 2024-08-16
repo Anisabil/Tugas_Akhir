@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart'; // Tambahkan ini untuk menggunakan Clipboard
 import 'package:fvapp/admin/controllers/bank_controller.dart';
+import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/admin/models/bank_model.dart';
 import 'package:fvapp/utils/popups/loaders.dart'; // Pastikan file ini sudah ada
 import 'package:get/get.dart';
@@ -26,7 +27,8 @@ class OrderDetail extends StatelessWidget {
   OrderDetail({Key? key, required this.rentId}) : super(key: key);
 
   final RentController rentController = Get.put(RentController());
-  final BankController bankController = Get.find(); // Mengambil instance BankController yang sudah ada
+  final BankController bankController = Get.find();
+  final EventController event = Get.find<EventController>();
 
   @override
   Widget build(BuildContext context) {
@@ -120,7 +122,23 @@ class OrderDetail extends StatelessWidget {
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Kategori: ${rent.categoryName}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
-                        Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                        Row(
+                          children: [
+                            Text(
+                              'Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                              SizedBox(width: 10),
+                              Obx(() {
+                                final status = event.getEventStatus(rent.date);
+                                return Text(
+                                  '${status ?? 'None'}',
+                                  style: TextStyle(
+                                  color: _getStatusColor(status ?? 'None'),
+                                  fontWeight: FontWeight.normal,
+                                  fontSize: 10),
+                                );
+                              }),
+                          ],
+                        ),
                         SizedBox(height: FVSizes.spaceBtwItems),
                         Text('Metode Pembayaran: ${rent.paymentMethod}'),
                         SizedBox(height: FVSizes.spaceBtwItems),
@@ -162,7 +180,7 @@ class OrderDetail extends StatelessWidget {
                                     Text('A/N ${bank.accountName}'),
                                   ],
                                 )
-                              : Text('Pilih metode pembayaran');
+                              : Text('Nomor rekening admin');
                         }),
                         SizedBox(height: FVSizes.spaceBtwSection),
                         GestureDetector(
@@ -253,5 +271,16 @@ class OrderDetail extends StatelessWidget {
         );
       }),
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'approved':
+        return FVColors.success;
+      case 'rejected':
+        return FVColors.error;
+      default:
+        return FVColors.darkGrey;
+    }
   }
 }

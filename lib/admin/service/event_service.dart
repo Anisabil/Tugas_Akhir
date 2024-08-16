@@ -7,18 +7,16 @@ class EventService {
   final CollectionReference _eventsRef = FirebaseFirestore.instance.collection('events');
   final CollectionReference _rentsRef = FirebaseFirestore.instance.collection('rents');
   final events = <Event>[].obs;
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
 
   Future<List<Event>> fetchEvents() async {
-    List<Event> events = [];
     try {
-      QuerySnapshot snapshot = await _eventsRef.get();
-      for (var doc in snapshot.docs) {
-        events.add(Event.fromFirestore(doc));
-      }
+      final querySnapshot = await FirebaseFirestore.instance.collection('events').get();
+      return querySnapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
     } catch (e) {
       print('Error fetching events: $e');
+      return [];
     }
-    return events;
   }
 
   Future<List<Rent>> fetchRents() async {
@@ -39,7 +37,7 @@ class EventService {
 
   Future<void> addEvent(Event event) async {
     try {
-      await _eventsRef.add(event.toFirestore());
+      await FirebaseFirestore.instance.collection('events').doc(event.eventId).set(event.toFirestore());
     } catch (e) {
       print('Error adding event: $e');
     }
@@ -59,5 +57,9 @@ class EventService {
     } catch (e) {
       print('Error deleting event: $e');
     }
+  }
+
+  Future<void> updateEventStatus(String eventId, String status) async {
+    await _eventsRef.doc(eventId).update({'status': status});
   }
 }

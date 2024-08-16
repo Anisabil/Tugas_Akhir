@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:fvapp/admin/models/package_model.dart';
+import 'package:fvapp/admin/service/event_service.dart';
 import 'package:fvapp/features/studio/screens/checkout/checkout.dart';
 import 'package:fvapp/features/studio/screens/multi_step_form/multi_step_form.dart';
 import 'package:fvapp/utils/constants/sizes.dart';
@@ -26,6 +27,7 @@ class RentFormScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final EventService eventService = EventService();
     GlobalKey<FormState> formKey = GlobalKey<FormState>();
     Map<String, dynamic> formData = {
       'package': package,
@@ -82,7 +84,7 @@ class RentFormScreen extends StatelessWidget {
                   onPrevious: () {
                     Navigator.of(context).pop();
                   },
-                  currentStep: 3,
+                  currentStep: 3, eventService: eventService,
                 ));
               }
             }

@@ -34,24 +34,26 @@ class EventBottomNavigationBar extends StatelessWidget {
         builder: (controller) {
           return ElevatedButton(
             // Jika selectedDay null atau hari tersebut adalah hari event, tombol tidak dapat ditekan
-            onPressed: controller.selectedDay == null || eventFormController.isEventDay(controller.selectedDay!)
-                ? () {
-                    FVLoaders.errorSnackBar(
-                      title: 'Error',
-                      message: 'Silakan pilih tanggal terlebih dahulu atau pilih tanggal lain',
-                    );
-                  }
-                : () {
-                    formData['selectedDay'] = controller.selectedDay!;
-                    formData['packageId'] = package.id; // Simpan ID paket, bukan objek paket
-                    print('FormData: $formData');
-                    Get.to(() => RentFormScreen(
-                      onNext: onNext,
-                      onFormSubmit: onFormSubmit,
-                      package: package,
-                      selectedDay: controller.selectedDay!, // Pass selected day to the next screen
-                    ));
-                  },
+            onPressed: () {
+  print('Button pressed. Selected day: ${controller.selectedDay}');
+  if (controller.selectedDay == null || eventFormController.isEventDay(controller.selectedDay!)) {
+    FVLoaders.errorSnackBar(
+      title: 'Error',
+      message: 'Silakan pilih tanggal terlebih dahulu atau pilih tanggal lain',
+    );
+  } else {
+    formData['selectedDay'] = controller.selectedDay!;
+    formData['packageId'] = package.id;
+    print('FormData: $formData');
+    Get.to(() => RentFormScreen(
+      onNext: onNext,
+      onFormSubmit: onFormSubmit,
+      package: package,
+      selectedDay: controller.selectedDay!,
+    ));
+  }
+},
+
             child: const Text('Selanjutnya', style: TextStyle(color: FVColors.grey),),
             style: ElevatedButton.styleFrom(
               backgroundColor: controller.selectedDay == null || eventFormController.isEventDay(controller.selectedDay!)

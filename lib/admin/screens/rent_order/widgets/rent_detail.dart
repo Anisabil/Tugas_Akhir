@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/admin/screens/event/widgets/calendar_screen.dart';
 import 'package:fvapp/common/widgets/list_tiles/settings_menu_tile.dart';
 import 'package:iconsax/iconsax.dart';
@@ -18,6 +19,7 @@ class RentDetail extends StatelessWidget {
   RentDetail({Key? key, required this.rentId}) : super(key: key);
 
   final RentDetailController controller = Get.put(RentDetailController());
+  final EventController event = Get.find<EventController>();
 
   @override
   Widget build(BuildContext context) {
@@ -26,9 +28,7 @@ class RentDetail extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(),
-        title: Text(
-          'Detail Sewa',
-        ),
+        title: Text('Detail Sewa'),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
@@ -70,7 +70,25 @@ class RentDetail extends StatelessWidget {
                             SizedBox(height: FVSizes.spaceBtwItems),
                             Text('Kategori: ${rent.categoryName}'),
                             SizedBox(height: FVSizes.spaceBtwItems),
-                            Text('Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+
+                            // Row with Date and Approval Status
+                            Row(
+                              children: [
+                                Text(
+                                    'Tanggal: ${DateFormat('dd MMMM yyyy').format(rent.date)}'),
+                                SizedBox(width: 10),
+                                Obx(() {
+                                  final status = event.getEventStatus(rent.date);
+                                  return Text(
+                                    '${status ?? 'None'}',
+                                    style: TextStyle(
+                                        color: _getStatusColor(status ?? 'None'),
+                                        fontWeight: FontWeight.normal,
+                                        fontSize: 10),
+                                  );
+                                }),
+                              ],
+                            ),
                             SizedBox(height: FVSizes.spaceBtwItems),
                             Text('Metode Pembayaran: ${rent.paymentMethod}'),
                             SizedBox(height: FVSizes.spaceBtwItems),
@@ -97,9 +115,12 @@ class RentDetail extends StatelessWidget {
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: rent.status == 'Belum Bayar' ? FVColors.gold : FVColors.grey,
+                              backgroundColor: rent.status == 'Belum Bayar'
+                                  ? FVColors.gold
+                                  : FVColors.grey,
                             ),
-                            child: Text('Belum Lunas', style: TextStyle(color: FVColors.softGrey)),
+                            child: Text('Belum Lunas',
+                                style: TextStyle(color: FVColors.softGrey)),
                           ),
                         ),
                         SizedBox(width: 10),
@@ -111,9 +132,12 @@ class RentDetail extends StatelessWidget {
                                   }
                                 : null,
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: rent.status == 'Belum Lunas' ? FVColors.gold : FVColors.grey,
+                              backgroundColor: rent.status == 'Belum Lunas'
+                                  ? FVColors.gold
+                                  : FVColors.grey,
                             ),
-                            child: Text('Lunas', style: TextStyle(color: FVColors.softGrey),),
+                            child: Text('Lunas',
+                                style: TextStyle(color: FVColors.softGrey)),
                           ),
                         ),
                       ],
@@ -121,16 +145,17 @@ class RentDetail extends StatelessWidget {
                     const SizedBox(height: FVSizes.spaceBtwItems),
                     FVSettingsMenuTile(
                       icon: Iconsax.calendar,
-                      title: 'Jadwalkan',
-                      subTitle: 'Buat jadwal event',
+                      title: 'Kalender',
+                      subTitle: 'Setujui atau Tolak Usulan Tanggal',
                       onTap: () {
                         Get.to(() => CalendarScreen(
-                          rentId: rentId,
-                          userName: rent.userName,
-                          packageName: rent.packageName,
-                          categoryName: rent.categoryName,
-                          date: rent.date,
-                        ));
+                              rentId: rentId,
+                              userName: rent.userName,
+                              packageName: rent.packageName,
+                              categoryName: rent.categoryName,
+                              date: rent.date,
+                              viewMode: 'viewOnly',
+                            ));
                       },
                     ),
                   ],
@@ -158,7 +183,20 @@ class RentDetail extends StatelessWidget {
     );
   }
 
-  void _showDeleteConfirmationDialog(BuildContext context, String rentId, RentDetailController controller) {
+  // Function to get the color based on the status
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'approved':
+        return FVColors.success;
+      case 'rejected':
+        return FVColors.error;
+      default:
+        return FVColors.darkGrey;
+    }
+  }
+
+  void _showDeleteConfirmationDialog(
+      BuildContext context, String rentId, RentDetailController controller) {
     showDialog(
       context: context,
       builder: (BuildContext context) {

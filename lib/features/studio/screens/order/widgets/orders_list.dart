@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:fvapp/common/widgets/custom_shapes/containers/rounded_container.dart';
 import 'package:fvapp/features/studio/screens/order/widgets/order_detail.dart';
 import 'package:fvapp/utils/constants/colors.dart';
@@ -13,6 +14,7 @@ import 'package:intl/intl.dart';
 class FVOrderListItems extends StatelessWidget {
   final String userId;
   final RentController rentController = Get.find<RentController>();
+  final EventController event = Get.find<EventController>();
 
   FVOrderListItems({required this.userId});
 
@@ -50,12 +52,14 @@ class FVOrderListItems extends StatelessWidget {
         return ListView.separated(
           shrinkWrap: true,
           itemCount: rents.length,
-          separatorBuilder: (_, __) => const SizedBox(height: FVSizes.spaceBtwItems),
+          separatorBuilder: (_, __) =>
+              const SizedBox(height: FVSizes.spaceBtwItems),
           itemBuilder: (_, index) {
             final rent = rents[index];
             return GestureDetector(
               onTap: () {
-                Get.to(() => OrderDetail(rentId: rent.id)); // Mengirim rentId ke OrderDetail
+                Get.to(() => OrderDetail(
+                    rentId: rent.id)); // Mengirim rentId ke OrderDetail
               },
               child: FVRoundedContainer(
                 showBorder: true,
@@ -76,21 +80,27 @@ class FVOrderListItems extends StatelessWidget {
                             children: [
                               Text(
                                 rent.status, // Pastikan status ditampilkan di sini
-                                style: Theme.of(context).textTheme.bodyLarge!.apply(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge!
+                                    .apply(
                                       color: getStatusColor(rent.status),
                                       fontWeightDelta: 1,
                                     ),
                               ),
                               Text(
                                 rent.packageName,
-                                style: Theme.of(context).textTheme.headlineSmall,
+                                style:
+                                    Theme.of(context).textTheme.headlineSmall,
                               ),
                             ],
                           ),
                         ),
                         IconButton(
-                          onPressed: () => Get.to(() => OrderDetail(rentId: rent.id)),
-                          icon: const Icon(Iconsax.arrow_right_34, size: FVSizes.iconSm),
+                          onPressed: () =>
+                              Get.to(() => OrderDetail(rentId: rent.id)),
+                          icon: const Icon(Iconsax.arrow_right_34,
+                              size: FVSizes.iconSm),
                         ),
                       ],
                     ),
@@ -108,13 +118,13 @@ class FVOrderListItems extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'Kategori',
-                                      style: Theme.of(context).textTheme.labelMedium,
-                                    ),
+                                    Text('Kategori',
+                                        style: TextStyle(fontSize: 11)),
                                     Text(
                                       rent.categoryName,
-                                      style: Theme.of(context).textTheme.titleMedium,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
                                     ),
                                   ],
                                 ),
@@ -132,13 +142,33 @@ class FVOrderListItems extends StatelessWidget {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      'Tanggal Pilihan',
-                                      style: Theme.of(context).textTheme.labelMedium,
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'Tanggal',
+                                          style: TextStyle(fontSize: 11),
+                                        ),
+                                        SizedBox(width: 5),
+                                        Obx(() {
+                                          final status =
+                                              event.getEventStatus(rent.date);
+                                          return Text(
+                                            '${status ?? 'None'}',
+                                            style: TextStyle(
+                                                color: _getStatusColor(
+                                                    status ?? 'None'),
+                                                fontWeight: FontWeight.normal,
+                                                fontSize: 10),
+                                          );
+                                        }),
+                                      ],
                                     ),
                                     Text(
-                                      DateFormat('dd MMM yyyy').format(rent.date),
-                                      style: Theme.of(context).textTheme.titleMedium,
+                                      DateFormat('dd MMM yyyy')
+                                          .format(rent.date),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleMedium,
                                     ),
                                   ],
                                 ),
@@ -156,5 +186,16 @@ class FVOrderListItems extends StatelessWidget {
         );
       },
     );
+  }
+
+  Color _getStatusColor(String status) {
+    switch (status) {
+      case 'approved':
+        return FVColors.success;
+      case 'rejected':
+        return FVColors.error;
+      default:
+        return FVColors.darkGrey;
+    }
   }
 }

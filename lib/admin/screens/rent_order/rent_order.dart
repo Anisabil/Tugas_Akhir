@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fvapp/admin/controllers/event_controller.dart';
 import 'package:get/get.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:fvapp/features/studio/payment/controller/rent_controller.dart';
@@ -14,6 +15,7 @@ class RentalItem extends StatelessWidget {
   final String rentalName;
   final String packageName;
   final String status;
+  final String dateStatus;
   final VoidCallback onTap;
 
   const RentalItem({
@@ -21,7 +23,7 @@ class RentalItem extends StatelessWidget {
     required this.rentalName,
     required this.packageName,
     required this.status,
-    required this.onTap,
+    required this.onTap, required this.dateStatus,
   }) : super(key: key);
 
   Color getStatusColor(String status) {
@@ -93,7 +95,8 @@ class RentalList extends StatefulWidget {
 class _RentalListState extends State<RentalList> {
   final RentController _rentController = Get.find<RentController>(); 
   
-
+  final EventController event = Get.find<EventController>();
+  
   late Future<List<Rent>> _rentsFuture;
 
   @override
@@ -112,28 +115,29 @@ class _RentalListState extends State<RentalList> {
         future: _rentsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-  return Center(child: CircularProgressIndicator());
-} else if (snapshot.hasError) {
-  return Center(child: Text('Error: ${snapshot.error}'));
-} else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-  return Center(child: Text('No rentals found'));
-} else {
-  List<Rent> rents = snapshot.data!;
-  return ListView.builder(
-    padding: EdgeInsets.zero,
-    itemCount: rents.length,
-    itemBuilder: (context, index) {
-      Rent rent = rents[index];
-      return RentalItem(
-        rentalName: rent.userName,
-        packageName: rent.packageName,
-        status: rent.status,
-        onTap: () => Get.to(() => RentDetail(rentId: rent.id)),
-      );
-    },
-  );
-}
-
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('No rentals found'));
+          } else {
+            List<Rent> rents = snapshot.data!;
+            return ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: rents.length,
+              itemBuilder: (context, index) {
+                Rent rent = rents[index];
+                final status = event.getEventStatus(rent.date);
+                return RentalItem(
+                  rentalName: rent.userName,
+                  packageName: rent.packageName,
+                  status: rent.status,
+                  dateStatus: '${status ?? 'None'}',
+                  onTap: () => Get.to(() => RentDetail(rentId: rent.id)),
+                );
+              },
+            );
+          }
         },
       ),
       floatingActionButton: FloatingActionButton(

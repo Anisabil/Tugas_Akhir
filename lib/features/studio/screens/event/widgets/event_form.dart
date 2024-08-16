@@ -35,6 +35,12 @@ class _EventFormState extends State<EventForm> {
     super.dispose();
   }
 
+  bool _isWithinNextWeek(DateTime day) {
+    final now = DateTime.now();
+    final oneWeekFromNow = now.add(Duration(days: 7));
+    return day.isAfter(now) && day.isBefore(oneWeekFromNow);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -50,28 +56,35 @@ class _EventFormState extends State<EventForm> {
               return isSameDay(_selectedDay, day);
             },
             onDaySelected: (selectedDay, focusedDay) {
-              final isEventDay = eventFormController.isEventDay(selectedDay!);
-              if (isEventDay) {
+              if (_isWithinNextWeek(selectedDay)) {
                 FVLoaders.errorSnackBar(
-                  title: 'Tanggal tidak tersedia',
-                  message: 'Tanggal ini sudah ada jadwal.',
-                );
-              } else if (selectedDay.isBefore(DateTime.now())) {
-                FVLoaders.errorSnackBar(
-                  title: 'Tanggal tidak valid',
-                  message: 'Tidak bisa memilih tanggal yang sudah berlalu',
+                  title: 'Tanggal tidak dapat dipilih',
+                  message: 'Tanggal dapat dipilih maksimal seminggu dari tanggal saat ini.',
                 );
               } else {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay.value = focusedDay;
-                  eventFormController.setSelectedDay(selectedDay!);
-                });
-                FVLoaders.successSnackBar(
-                  title: 'Tanggal dipilih',
-                  message: 'Tanggal yang dipilih adalah $selectedDay',
-                );
-                widget.onNext();
+                final isEventDay = eventFormController.isEventDay(selectedDay!);
+                if (isEventDay) {
+                  FVLoaders.errorSnackBar(
+                    title: 'Tanggal tidak tersedia',
+                    message: 'Tanggal ini sudah ada jadwal.',
+                  );
+                } else if (selectedDay.isBefore(DateTime.now())) {
+                  FVLoaders.errorSnackBar(
+                    title: 'Tanggal tidak valid',
+                    message: 'Tidak bisa memilih tanggal yang sudah berlalu',
+                  );
+                } else {
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay.value = focusedDay;
+                    eventFormController.setSelectedDay(selectedDay!);
+                  });
+                  FVLoaders.successSnackBar(
+                    title: 'Tanggal dipilih',
+                    message: 'Tanggal yang dipilih adalah $selectedDay',
+                  );
+                  widget.onNext();
+                }
               }
             },
             onFormatChanged: (format) {
@@ -81,7 +94,7 @@ class _EventFormState extends State<EventForm> {
                 });
               }
             },
-            calendarStyle: const CalendarStyle(
+            calendarStyle: CalendarStyle(
               selectedDecoration: BoxDecoration(
                 color: FVColors.borderGold,
                 shape: BoxShape.circle,
@@ -90,6 +103,8 @@ class _EventFormState extends State<EventForm> {
                 color: FVColors.buttonCream,
                 shape: BoxShape.circle,
               ),
+              disabledTextStyle: TextStyle(color: Colors.grey), // Menandai tanggal tidak dapat dipilih
+              todayTextStyle: TextStyle(color: Colors.white),
             ),
             availableCalendarFormats: const {
               CalendarFormat.month: 'Month',
@@ -97,8 +112,28 @@ class _EventFormState extends State<EventForm> {
             },
             calendarBuilders: CalendarBuilders(
               defaultBuilder: (context, day, focusedDay) {
+                final isSelectable = !_isWithinNextWeek(day);
+                
+                if (!isSelectable) {
+                  return Container(
+                    margin: const EdgeInsets.all(6.0),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[300], // Warna abu-abu untuk tanggal tidak dapat dipilih
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      '${day.day}',
+                      style: const TextStyle().copyWith(
+                        color: Colors.grey, // Warna teks untuk tanggal tidak dapat dipilih
+                      ),
+                    ),
+                  );
+                }
+
                 final isEventDay = eventController.events.any((event) =>
                     isSameDay(event.date, day));
+                
                 if (isEventDay) {
                   return Container(
                     margin: const EdgeInsets.all(6.0),
